@@ -106,7 +106,6 @@
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // ... (código de configuração do Firebase e outras funções permanecem os mesmos)
         const firebaseConfig = {
           apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
           authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -122,168 +121,16 @@
         const opcoesFixas = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🐔' }];
         let menuDaSemana = [];
         
-        // ... (funções createFallbackMenu, loadAndDisplayMenu, createMenuHTML, e a parte da IA permanecem iguais)
-        function createFallbackMenu() {
-            return [
-                { day: 'Segunda-feira', pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } },
-                { day: 'Terça-feira', pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } },
-                { day: 'Quarta-feira', pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } },
-                { day: 'Quinta-feira', pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } },
-                { day: 'Sexta-feira', pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }
-            ];
-        }
-        async function loadAndDisplayMenu() {
-            try {
-                const docSnap = await getDoc(menuDocRef);
-                if (docSnap.exists() && docSnap.data().menu && docSnap.data().menu.length > 0) {
-                    menuDaSemana = docSnap.data().menu;
-                } else {
-                    console.log("Documento do cardápio não encontrado ou vazio! A usar dados de fallback.");
-                    menuDaSemana = createFallbackMenu();
-                }
-            } catch (error) {
-                console.error("Erro ao carregar o cardápio:", error);
-                menuDaSemana = createFallbackMenu();
-            }
-            createMenuHTML();
-        }
-        function createMenuHTML() {
-            const menuContainer = document.getElementById('menu');
-            if (!menuContainer) return;
-            menuContainer.innerHTML = '';
-            menuDaSemana.forEach(item => {
-                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
-                const allOptions = [{ ...item.pratoPrincipal, type: 'Prato Principal' }, ...(item.opcao && item.opcao.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []), ...opcoesFixas.map(fixa => ({ ...fixa, type: 'Opção Fixa' }))];
-                let dayHTML = `<div class="day-section"><h3 class="text-xl font-bold text-gray-800">${item.day}</h3><div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição do dia: ${item.guarnicao.name} ${item.guarnicao.emoji}</div><div class="space-y-3">`;
-                allOptions.forEach((option) => {
-                    if (option.name) {
-                        dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer"><input type="radio" name="${dayId}" value="${option.name}" class="hidden"><div class="flex items-center"><span class="text-3xl mr-4">${option.emoji}</span><div class="flex-grow"><p class="font-semibold text-gray-800">${option.name}</p><p class="text-sm text-gray-500">${option.type}</p></div><svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg></div></label>`;
-                    }
-                });
-                dayHTML += `</div></div>`;
-                menuContainer.innerHTML += dayHTML;
-            });
-            validateForm();
-        }
-        document.getElementById('imageUpload').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('imagePreview').src = e.target.result;
-                document.getElementById('imagePreview').classList.remove('hidden');
-                document.getElementById('image-processor-container').classList.remove('hidden');
-            }
-            reader.readAsDataURL(file);
-        });
-        document.getElementById('processImageBtn').addEventListener('click', async () => {
-            const loader = document.getElementById('loader');
-            const button = document.getElementById('processImageBtn');
-            const confirmationForm = document.getElementById('confirmation-form');
-            button.disabled = true; button.textContent = 'A analisar...';
-            loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
-            const file = document.getElementById('imageUpload').files[0];
-            const base64ImageData = (await toBase64(file)).split(',')[1];
-            const prompt = "Analise a imagem deste cardápio. Extraia as informações para cada dia da semana (de Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Retorne os dados como um objeto JSON. A estrutura do JSON deve ser um objeto com uma chave 'menu', que contém um array. Cada objeto no array representa um dia e deve conter as chaves 'day', 'pratoPrincipal' (com sub-chaves 'name' e 'emoji'), 'opcao' (com 'name' e 'emoji') e 'guarnicao' (com 'name' e 'emoji'). Se um campo não existir para um dia (ex: sem 'Opção'), o valor de 'name' deve ser uma string vazia. Atribua emojis apropriados para cada prato.";
-            const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: file.type, data: base64ImageData } }] }] };
-            const apiKey = "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) {
-                    const errorBody = await response.json();
-                    console.error("Erro da API:", errorBody);
-                    throw new Error(`Erro da API: ${errorBody.error.message}`);
-                }
-                const result = await response.json();
-                let textResponse = result.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const menuData = JSON.parse(textResponse);
-                displayConfirmationForm(menuData.menu);
-            } catch (error) {
-                console.error("Erro ao analisar a imagem:", error);
-                alert("Ocorreu um erro ao ler a imagem. Verifique o console de desenvolvedor (F12) para mais detalhes.");
-            } finally {
-                button.disabled = false; button.textContent = 'Analisar Cardápio';
-                loader.classList.add('hidden');
-            }
-        });
-        function displayConfirmationForm(menuData) {
-            const container = document.getElementById('confirmation-form');
-            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
-            menuData.forEach((item, index) => {
-                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4"><h4 class="font-bold">${item.day}</h4><div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2"><div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name}" class="w-full border rounded p-1"></div></div></div>`;
-            });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg">Salvar Novo Cardápio</button></div>`;
-            container.classList.remove('hidden');
-            document.getElementById('saveNewMenuBtn').addEventListener('click', () => saveNewMenu(menuData.length));
-        }
-        async function saveNewMenu(itemCount) {
-             const button = document.getElementById('saveNewMenuBtn');
-             button.disabled = true; button.textContent = 'A salvar...';
-             const newMenu = [];
-             for(let i=0; i < itemCount; i++) {
-                newMenu.push({
-                    day: document.querySelector(`#prato-${i}`).closest('.p-4').querySelector('h4').textContent,
-                    pratoPrincipal: { name: document.getElementById(`prato-${i}`).value, emoji: '🍽️' },
-                    opcao: { name: document.getElementById(`opcao-${i}`).value, emoji: '🥣' },
-                    guarnicao: { name: document.getElementById(`guarnicao-${i}`).value, emoji: '🥗' }
-                });
-             }
-             try {
-                await setDoc(menuDocRef, { menu: newMenu });
-                alert('Cardápio atualizado com sucesso!');
-                document.getElementById('confirmation-form').classList.add('hidden');
-                document.getElementById('imagePreview').classList.add('hidden');
-                document.getElementById('image-processor-container').classList.add('hidden');
-                document.getElementById('imageUpload').value = '';
-                await loadAndDisplayMenu();
-             } catch (error) {
-                console.error("Erro ao salvar o cardápio:", error);
-                alert("Ocorreu um erro ao salvar o novo cardápio.");
-             } finally {
-                button.disabled = false; button.textContent = 'Salvar Novo Cardápio';
-             }
-        }
-        const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); });
-        function validateForm() {
-            if(!document.getElementById('employeeName')) return;
-            const employeeName = document.getElementById('employeeName').value.trim();
-            const guidanceSection = document.getElementById('guidanceSection');
-            const guidanceText = document.getElementById('guidanceText');
-            const submitButtonContainer = document.getElementById('submitButtonContainer');
-            const missingDays = menuDaSemana.filter(item => !document.querySelector(`input[name="${item.day.replace(/[^a-zA-Z]/g, "").toLowerCase()}"]:checked`)).map(item => item.day);
-            if (employeeName && missingDays.length === 0) {
-                guidanceSection.classList.add('hidden');
-                submitButtonContainer.classList.remove('hidden');
-            } else {
-                submitButtonContainer.classList.add('hidden');
-                guidanceSection.classList.remove('hidden');
-                let message = !employeeName ? 'Por favor, preencha o seu nome. ' : `Olá, ${employeeName}! `;
-                if (missingDays.length > 0) message += `Falta selecionar o(s) prato(s) para: ${missingDays.join(', ')}.`;
-                guidanceText.textContent = message;
-            }
-        }
-        async function submitOrder() {
-            const employeeName = document.getElementById('employeeName').value.trim();
-            const orderData = { employeeName, timestamp: serverTimestamp() };
-            menuDaSemana.forEach(item => {
-                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
-                orderData[dayId] = document.querySelector(`input[name="${dayId}"]:checked`).value;
-            });
-            try {
-                const button = document.getElementById('submitOrder');
-                button.disabled = true; button.textContent = 'A enviar...';
-                await addDoc(collection(db, "pedidosDaSemana"), orderData);
-                document.getElementById('form-container').classList.add('hidden');
-                const successMessage = document.getElementById('success-message');
-                document.getElementById('success-text').textContent = `Obrigado, ${employeeName}. O seu pedido foi registado.`;
-                successMessage.classList.remove('hidden');
-            } catch (error) {
-                console.error("Erro ao enviar pedido: ", error);
-                alert("Ocorreu um erro ao enviar o seu pedido. Tente novamente.");
-                document.getElementById('submitOrder').disabled = false; document.getElementById('submitOrder').textContent = 'Finalizar e Enviar Pedido';
-            }
-        }
+        // ... (funções createFallbackMenu, loadAndDisplayMenu, etc. permanecem iguais)
+        function createFallbackMenu(){return[{day:'Segunda-feira',pratoPrincipal:{name:'Cardápio não definido',emoji:'🤷'},opcao:{name:'',emoji:''},guarnicao:{name:'A definir',emoji:''}},{day:'Terça-feira',pratoPrincipal:{name:'Cardápio não definido',emoji:'🤷'},opcao:{name:'',emoji:''},guarnicao:{name:'A definir',emoji:''}},{day:'Quarta-feira',pratoPrincipal:{name:'Cardápio não definido',emoji:'🤷'},opcao:{name:'',emoji:''},guarnicao:{name:'A definir',emoji:''}},{day:'Quinta-feira',pratoPrincipal:{name:'Cardápio não definido',emoji:'🤷'},opcao:{name:'',emoji:''},guarnicao:{name:'A definir',emoji:''}},{day:'Sexta-feira',pratoPrincipal:{name:'Cardápio não definido',emoji:'🤷'},opcao:{name:'',emoji:''},guarnicao:{name:'A definir',emoji:''}}]}
+        async function loadAndDisplayMenu(){try{const docSnap=await getDoc(menuDocRef);if(docSnap.exists()&&docSnap.data().menu&&docSnap.data().menu.length>0){menuDaSemana=docSnap.data().menu}else{console.log("Documento do cardápio não encontrado ou vazio! A usar dados de fallback.");menuDaSemana=createFallbackMenu()}}catch(error){console.error("Erro ao carregar o cardápio:",error);menuDaSemana=createFallbackMenu()}createMenuHTML()}
+        function createMenuHTML(){const menuContainer=document.getElementById('menu');if(!menuContainer)return;menuContainer.innerHTML='';menuDaSemana.forEach(item=>{const dayId=item.day.replace(/[^a-zA-Z]/g,"").toLowerCase();const allOptions=[{...item.pratoPrincipal,type:'Prato Principal'},...(item.opcao&&item.opcao.name?[{...item.opcao,type:'Opção do Dia'}]:[]),...opcoesFixas.map(fixa=>({...fixa,type:'Opção Fixa'}))];let dayHTML=`<div class="day-section"><h3 class="text-xl font-bold text-gray-800">${item.day}</h3><div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição do dia: ${item.guarnicao.name} ${item.guarnicao.emoji}</div><div class="space-y-3">`;allOptions.forEach((option)=>{if(option.name){dayHTML+=`<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer"><input type="radio" name="${dayId}" value="${option.name}" class="hidden"><div class="flex items-center"><span class="text-3xl mr-4">${option.emoji}</span><div class="flex-grow"><p class="font-semibold text-gray-800">${option.name}</p><p class="text-sm text-gray-500">${option.type}</p></div><svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg></div></label>`}});dayHTML+=`</div></div>`;menuContainer.innerHTML+=dayHTML});validateForm()}
+        document.getElementById('imageUpload').addEventListener('change',function(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){document.getElementById('imagePreview').src=e.target.result;document.getElementById('imagePreview').classList.remove('hidden');document.getElementById('image-processor-container').classList.remove('hidden')}reader.readAsDataURL(file)});
+        document.getElementById('processImageBtn').addEventListener('click',async()=>{const loader=document.getElementById('loader');const button=document.getElementById('processImageBtn');const confirmationForm=document.getElementById('confirmation-form');button.disabled=true;button.textContent='A analisar...';loader.classList.remove('hidden');confirmationForm.classList.add('hidden');const file=document.getElementById('imageUpload').files[0];const base64ImageData=(await toBase64(file)).split(',')[1];const prompt="Analise a imagem deste cardápio. Extraia as informações para cada dia da semana (de Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Retorne os dados como um objeto JSON. A estrutura do JSON deve ser um objeto com uma chave 'menu', que contém um array. Cada objeto no array representa um dia e deve conter as chaves 'day', 'pratoPrincipal' (com sub-chaves 'name' e 'emoji'), 'opcao' (com 'name' e 'emoji') e 'guarnicao' (com 'name' e 'emoji'). Se um campo não existir para um dia (ex: sem 'Opção'), o valor de 'name' deve ser uma string vazia. Atribua emojis apropriados para cada prato.";const payload={contents:[{parts:[{text:prompt},{inline_data:{mime_type:file.type,data:base64ImageData}}]}]};const apiKey="AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI";const apiUrl=`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;try{const response=await fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok){const errorBody=await response.json();console.error("Erro da API:",errorBody);throw new Error(`Erro da API: ${errorBody.error.message}`)}const result=await response.json();let textResponse=result.candidates[0].content.parts[0].text.replace(/```json/g,'').replace(/```/g,'').trim();const menuData=JSON.parse(textResponse);displayConfirmationForm(menuData.menu)}catch(error){console.error("Erro ao analisar a imagem:",error);alert("Ocorreu um erro ao ler a imagem. Verifique o console de desenvolvedor (F12) para mais detalhes.")}finally{button.disabled=false;button.textContent='Analisar Cardápio';loader.classList.add('hidden')}});
+        function displayConfirmationForm(menuData){const container=document.getElementById('confirmation-form');container.innerHTML='<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';menuData.forEach((item,index)=>{container.innerHTML+=`<div class="p-4 bg-gray-50 rounded-lg mb-4"><h4 class="font-bold">${item.day}</h4><div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2"><div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name}" class="w-full border rounded p-1"></div></div></div>`});container.innerHTML+=`<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg">Salvar Novo Cardápio</button></div>`;container.classList.remove('hidden');document.getElementById('saveNewMenuBtn').addEventListener('click',()=>saveNewMenu(menuData.length))}
+        async function saveNewMenu(itemCount){const button=document.getElementById('saveNewMenuBtn');button.disabled=true;button.textContent='A salvar...';const newMenu=[];for(let i=0;i<itemCount;i++){newMenu.push({day:document.querySelector(`#prato-${i}`).closest('.p-4').querySelector('h4').textContent,pratoPrincipal:{name:document.getElementById(`prato-${i}`).value,emoji:'🍽️'},opcao:{name:document.getElementById(`opcao-${i}`).value,emoji:'🥣'},guarnicao:{name:document.getElementById(`guarnicao-${i}`).value,emoji:'🥗'}})}try{await setDoc(menuDocRef,{menu:newMenu});alert('Cardápio atualizado com sucesso!');document.getElementById('confirmation-form').classList.add('hidden');document.getElementById('imagePreview').classList.add('hidden');document.getElementById('image-processor-container').classList.add('hidden');document.getElementById('imageUpload').value='';await loadAndDisplayMenu()}catch(error){console.error("Erro ao salvar o cardápio:",error);alert("Ocorreu um erro ao salvar o novo cardápio.")}finally{button.disabled=false;button.textContent='Salvar Novo Cardápio'}}
+        const toBase64=file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.readAsDataURL(file);reader.onload=()=>resolve(reader.result);reader.onerror=error=>reject(error)});function validateForm(){if(!document.getElementById('employeeName'))return;const employeeName=document.getElementById('employeeName').value.trim();const guidanceSection=document.getElementById('guidanceSection');const guidanceText=document.getElementById('guidanceText');const submitButtonContainer=document.getElementById('submitButtonContainer');const missingDays=menuDaSemana.filter(item=>!document.querySelector(`input[name="${item.day.replace(/[^a-zA-Z]/g,"").toLowerCase()}"]:checked`)).map(item=>item.day);if(employeeName&&missingDays.length===0){guidanceSection.classList.add('hidden');submitButtonContainer.classList.remove('hidden')}else{submitButtonContainer.classList.add('hidden');guidanceSection.classList.remove('hidden');let message=!employeeName?'Por favor, preencha o seu nome. ': `Olá, ${employeeName}! `;if(missingDays.length>0)message+=`Falta selecionar o(s) prato(s) para: ${missingDays.join(', ')}.`;guidanceText.textContent=message}}
+        async function submitOrder(){const employeeName=document.getElementById('employeeName').value.trim();const orderData={employeeName,timestamp:serverTimestamp()};menuDaSemana.forEach(item=>{const dayId=item.day.replace(/[^a-zA-Z]/g,"").toLowerCase();orderData[dayId]=document.querySelector(`input[name="${dayId}"]:checked`).value});try{const button=document.getElementById('submitOrder');button.disabled=true;button.textContent='A enviar...';await addDoc(collection(db,"pedidosDaSemana"),orderData);document.getElementById('form-container').classList.add('hidden');const successMessage=document.getElementById('success-message');document.getElementById('success-text').textContent=`Obrigado, ${employeeName}. O seu pedido foi registado.`;successMessage.classList.remove('hidden')}catch(error){console.error("Erro ao enviar pedido: ",error);alert("Ocorreu um erro ao enviar o seu pedido. Tente novamente.");document.getElementById('submitOrder').disabled=false;document.getElementById('submitOrder').textContent='Finalizar e Enviar Pedido'}}
         
         // ===== FUNÇÃO DE CARREGAR PEDIDOS (TOTALMENTE MODIFICADA) =====
         function loadAdminOrders() {
@@ -302,7 +149,7 @@
                     const orderData = doc.data();
                     if (orderData.employeeName && !processedEmployees.has(orderData.employeeName)) {
                         processedEmployees.add(orderData.employeeName);
-                        uniqueDocs.push(doc); // Guarda o documento inteiro (com ID)
+                        uniqueDocs.push(doc);
                     }
                 });
 
@@ -322,17 +169,27 @@
                     }
                     tableHTML += `<td class="py-2 px-3 border-b text-sm">${dataFormatada}</td>`;
 
-                    menuDaSemana.forEach(item => {
-                        const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                    // Lógica CORRIGIDA para exibir o tipo do prato
+                    menuDaSemana.forEach(dayMenuItem => {
+                        const dayId = dayMenuItem.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
                         const pratoSelecionado = order[dayId] || 'N/A';
-                        let textoDaCelula = '(Prato,opção)';
-                        if (nomesPratosFixos.includes(pratoSelecionado) || pratoSelecionado === 'N/A') {
-                            textoDaCelula = pratoSelecionado;
+                        let textoDaCelula = '';
+
+                        if (pratoSelecionado === 'N/A') {
+                            textoDaCelula = 'N/A';
+                        } else if (nomesPratosFixos.includes(pratoSelecionado)) {
+                            textoDaCelula = pratoSelecionado; // Mostra o nome do prato fixo
+                        } else if (dayMenuItem.pratoPrincipal.name === pratoSelecionado) {
+                            textoDaCelula = 'Prato Principal'; // Mostra o TIPO
+                        } else if (dayMenuItem.opcao.name === pratoSelecionado) {
+                            textoDaCelula = 'Opção do Dia'; // Mostra o TIPO
+                        } else {
+                            textoDaCelula = pratoSelecionado; // Fallback, caso não encontre
                         }
+                        
                         tableHTML += `<td class="py-2 px-3 border-b">${textoDaCelula}</td>`;
                     });
 
-                    // Célula de Ações com botões de Editar e Excluir
                     tableHTML += `<td class="py-2 px-3 border-b space-x-2">
                         <button data-id="${docId}" class="edit-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button>
                         <button data-id="${docId}" class="delete-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button>
@@ -344,25 +201,18 @@
             });
         }
         
-        // ===== NOVAS FUNÇÕES E EVENTOS PARA EDITAR/EXCLUIR =====
         async function openEditModal(docId) {
             const modal = document.getElementById('edit-modal');
             const form = document.getElementById('edit-order-form');
             const menuOptionsContainer = document.getElementById('edit-menu-options');
-
             try {
                 const orderDocRef = doc(db, "pedidosDaSemana", docId);
                 const orderSnap = await getDoc(orderDocRef);
-                if (!orderSnap.exists()) {
-                    alert("Erro: Pedido não encontrado.");
-                    return;
-                }
+                if (!orderSnap.exists()) { alert("Erro: Pedido não encontrado."); return; }
                 const orderData = orderSnap.data();
-
                 form.querySelector('#edit-order-id').value = docId;
                 form.querySelector('#edit-employeeName').value = orderData.employeeName;
-
-                menuOptionsContainer.innerHTML = ''; // Limpa as opções antigas
+                menuOptionsContainer.innerHTML = '';
                 menuDaSemana.forEach(item => {
                     const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
                     const allOptions = [{ ...item.pratoPrincipal, type: 'Prato Principal' }, ...(item.opcao && item.opcao.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []), ...opcoesFixas.map(fixa => ({ ...fixa, type: 'Opção Fixa' }))];
@@ -376,12 +226,8 @@
                     dayHTML += `</div></div>`;
                     menuOptionsContainer.innerHTML += dayHTML;
                 });
-
                 modal.classList.remove('hidden');
-            } catch(error) {
-                console.error("Erro ao abrir modal de edição:", error);
-                alert("Não foi possível carregar os dados para edição.");
-            }
+            } catch(error) { console.error("Erro ao abrir modal de edição:", error); alert("Não foi possível carregar os dados para edição."); }
         }
 
         async function saveOrderChanges(event) {
@@ -389,24 +235,17 @@
             const form = event.target;
             const docId = form.querySelector('#edit-order-id').value;
             const updatedData = {};
-            
             menuDaSemana.forEach(item => {
                 const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
                 const selectedOption = form.querySelector(`input[name="edit-${dayId}"]:checked`);
-                if (selectedOption) {
-                    updatedData[dayId] = selectedOption.value;
-                }
+                if (selectedOption) { updatedData[dayId] = selectedOption.value; }
             });
-
             try {
                 const orderDocRef = doc(db, "pedidosDaSemana", docId);
                 await updateDoc(orderDocRef, updatedData);
                 alert("Pedido atualizado com sucesso!");
                 document.getElementById('edit-modal').classList.add('hidden');
-            } catch (error) {
-                console.error("Erro ao salvar alterações:", error);
-                alert("Falha ao salvar as alterações do pedido.");
-            }
+            } catch (error) { console.error("Erro ao salvar alterações:", error); alert("Falha ao salvar as alterações do pedido."); }
         }
 
         async function deleteOrder(docId) {
@@ -414,29 +253,16 @@
                 try {
                     await deleteDoc(doc(db, "pedidosDaSemana", docId));
                     alert("Pedido excluído com sucesso.");
-                } catch (error) {
-                    console.error("Erro ao excluir pedido:", error);
-                    alert("Falha ao excluir o pedido.");
-                }
+                } catch (error) { console.error("Erro ao excluir pedido:", error); alert("Falha ao excluir o pedido."); }
             }
         }
         
-        // Listener central para ações na tabela de pedidos
         document.getElementById('ordersTableContainer').addEventListener('click', function(event) {
-            if (event.target.classList.contains('edit-btn')) {
-                const docId = event.target.dataset.id;
-                openEditModal(docId);
-            }
-            if (event.target.classList.contains('delete-btn')) {
-                const docId = event.target.dataset.id;
-                deleteOrder(docId);
-            }
+            if (event.target.classList.contains('edit-btn')) { openEditModal(event.target.dataset.id); }
+            if (event.target.classList.contains('delete-btn')) { deleteOrder(event.target.dataset.id); }
         });
 
-        // Listeners para fechar o modal
-        document.getElementById('cancel-edit').addEventListener('click', () => {
-            document.getElementById('edit-modal').classList.add('hidden');
-        });
+        document.getElementById('cancel-edit').addEventListener('click', () => { document.getElementById('edit-modal').classList.add('hidden'); });
         document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
 
         async function main() {
@@ -467,7 +293,6 @@
         }
 
         main().catch(error => console.error("Falha na inicialização principal:", error));
-
     </script>
 </body>
 </html>
