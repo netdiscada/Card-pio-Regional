@@ -630,7 +630,8 @@
             const file = document.getElementById('imageUpload').files[0]; const base64ImageData = (await toBase64(file)).split(',')[1];
             const prompt = "Analise a imagem deste cardápio. Extraia as informações para cada dia da semana (de Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Retorne os dados como um objeto JSON. A estrutura do JSON deve ser um objeto com uma chave 'menu', que contém um array. Cada objeto no array representa um dia e deve conter as chaves 'day', 'pratoPrincipal' (com sub-chaves 'name' e 'emoji'), 'opcao' (com 'name' e 'emoji') e 'guarnicao' (com 'name' e 'emoji'). Se um campo não existir para um dia (ex: sem 'Opção'), o valor de 'name' deve ser uma string vazia. Atribua emojis apropriados para cada prato.";
             const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: file.type, data: base64ImageData } }] }] };
-            const apiKey = "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI"; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
+            // AQUI ESTÁ A MUDANÇA: Troca de 'gemini-pro-vision' para 'gemini-1.5-flash'
+            const apiKey = "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI"; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) { const errorBody = await response.json(); throw new Error(`Erro da API: ${errorBody.error.message}`); }
