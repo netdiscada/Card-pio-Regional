@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cardápio da Semana 🥗</title>
+    <title>Delícias Urbanas - App de Pedidos</title>
     <!-- Carregando o Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Importando fontes do Google Fonts -->
@@ -11,115 +11,98 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* Aplicando fontes personalizadas e estilos gerais */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8fafc; /* bg-slate-50 */
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .font-brand {
-            font-family: 'Lobster Two', cursive;
-        }
-        /* Estilização customizada para a opção selecionada */
-        .menu-option-card:has(input:checked) {
-            border-color: #2563eb; /* blue-600 */
-            background-color: #eff6ff; /* blue-50 */
-            transform: scale(1.02);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-        /* Mostra o ícone de check quando a opção é selecionada */
-        .menu-option-card:has(input:checked) .checkmark {
-            opacity: 1;
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Animação para a notificação */
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; transform: translateY(20px); }
-            10%, 90% { opacity: 1; transform: translateY(0); }
-        }
-        .toast-animation {
-            animation: fadeInOut 3s ease-in-out forwards;
-        }
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        .font-brand { font-family: 'Lobster Two', cursive; }
+        .menu-option-card:has(input:checked) { border-color: #2563eb; background-color: #eff6ff; transform: scale(1.02); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
+        .menu-option-card:has(input:checked) .checkmark { opacity: 1; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media print { .no-print { display: none !important; } body, .container { margin: 0; padding: 0; box-shadow: none; } }
     </style>
 </head>
 <body class="bg-slate-50">
 
-    <!-- Conteúdo Principal -->
-    <div class="container mx-auto max-w-2xl p-4 sm:p-6 pb-8">
-        
-        <header class="text-center mb-8">
-            <h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1>
-            <p class="mt-2 text-md text-gray-500">Seu cardápio da semana está servido!</p>
-        </header>
+    <!-- Container Principal do App -->
+    <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-8">
 
-        <!-- 1. Nome do Funcionário -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <label for="employeeName" class="block text-lg font-semibold text-gray-800 mb-2">
-                👤 1. Qual seu nome?
-            </label>
-            <input 
-                type="text" 
-                id="employeeName" 
-                placeholder="Digite seu nome aqui" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            >
-        </div>
-
-        <!-- 2. Seção do Cardápio -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">🍲 2. Escolha seus pratos</h2>
-            <div id="menu" class="space-y-8">
-                <!-- O cardápio será inserido aqui pelo JavaScript -->
+        <!-- ===== TELA DO FUNCIONÁRIO (VISÃO PADRÃO) ===== -->
+        <div id="user-view">
+            <header class="text-center mb-8">
+                <h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1>
+                <p class="mt-2 text-md text-gray-500">Seu cardápio da semana está servido!</p>
+            </header>
+            <!-- 1. Nome -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <label for="employeeName" class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Qual seu nome?</label>
+                <input type="text" id="employeeName" placeholder="Digite seu nome aqui" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
             </div>
-        </div>
-
-        <!-- Seção de Aviso Inteligente (ALTERADO) -->
-        <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6 fade-in">
-             <div class="flex">
-                <div class="py-1">
-                    <svg class="fill-current h-6 w-6 text-yellow-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-1-5.05V7h2v5.95h-2zM9 14v-2h2v2H9z"/></svg>
-                </div>
-                <div>
-                    <p id="guidanceText" class="font-semibold">Preencha seu nome e escolha um prato para cada dia da semana.</p>
-                </div>
+            <!-- 2. Cardápio -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">🍲 2. Escolha seus pratos</h2>
+                <div id="menu" class="space-y-8"></div>
             </div>
-        </div>
-        
-        <!-- 3. Área para exibir o resumo e enviar -->
-        <div id="summarySection" class="hidden bg-white rounded-xl shadow-sm p-6 fade-in">
-            <h2 class="text-lg font-semibold text-gray-800">✅ 3. Seu pedido está pronto!</h2>
-            <p class="text-sm text-gray-500 mb-4">Revise seu pedido e clique no botão para enviar via WhatsApp.</p>
-            <textarea id="summaryText" readonly class="w-full h-48 p-4 bg-gray-100 border-none rounded-lg font-mono text-sm"></textarea>
-            
-            <!-- Botão de compartilhamento -->
-            <div class="mt-4 flex justify-end">
-                <button onclick="shareOrder()" class="inline-flex items-center gap-3 bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 shadow-lg shadow-green-500/30">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943s-.182-.15-.38-.25z"/>
-                    </svg>
-                    <span>Enviar Pedido</span>
+            <!-- Seção de Aviso -->
+            <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6 fade-in">
+                <p id="guidanceText" class="font-semibold">Preencha seu nome e escolha um prato para cada dia da semana.</p>
+            </div>
+            <!-- Botão de Envio -->
+            <div id="submitButtonContainer" class="hidden text-center fade-in">
+                <button id="submitOrder" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 shadow-lg">
+                    Finalizar e Enviar Pedido
                 </button>
             </div>
+             <!-- Rodapé para trocar de visão -->
+            <footer class="text-center mt-10">
+                <button id="switchToAdmin" class="text-sm text-gray-500 hover:text-blue-600">Acessar Painel do Administrador</button>
+            </footer>
         </div>
 
+        <!-- ===== TELA DO ADMINISTRADOR (VISÃO OCULTA) ===== -->
+        <div id="admin-view" class="hidden">
+            <header class="text-center border-b pb-6 mb-6">
+                 <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
+                 <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
+            </header>
+             <!-- Botões de Ação do Admin -->
+            <div class="no-print mb-8 flex justify-between items-center">
+                 <button id="switchToUser" class="text-sm text-gray-500 hover:text-blue-600">← Voltar para o Cardápio</button>
+                 <button onclick="window.print()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar como PDF</button>
+            </div>
+            <!-- Tabela de Pedidos -->
+            <section>
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Pedidos Recebidos</h2>
+                 <div id="ordersTableContainer" class="overflow-x-auto">
+                    <!-- Tabela será preenchida pelo JavaScript -->
+                    <p class="text-gray-500">Carregando pedidos...</p>
+                 </div>
+            </section>
+        </div>
     </div>
+    
+    <!-- Módulo do Firebase -->
+    <script type="module">
+        // Importações de funções necessárias do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    <!-- Notificação "Copiado" (Toast) -->
-    <div id="toast" class="hidden fixed bottom-5 right-5 bg-blue-600 text-white py-2 px-5 rounded-full text-sm font-semibold shadow-lg">
-        Pedido copiado!
-    </div>
-
-    <script>
-        // ####################################################################
-        // #              CARDÁPIO DA SEMANA (SEGUNDA A SEXTA)              #
-        // ####################################################################
+        // --- CONFIGURAÇÃO INICIAL ---
+        // Seus dados de conexão pessoal com o Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
+          authDomain: "cardapio-8ddea.firebaseapp.com",
+          projectId: "cardapio-8ddea",
+          storageBucket: "cardapio-8ddea.firebasestorage.app",
+          messagingSenderId: "1019677985212",
+          appId: "1:1019677985212:web:57c7820a62585a867dc3b9"
+        };
+        
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // --- DADOS DO CARDÁPIO ---
         const menuDaSemana = [
             { day: 'Segunda-feira', pratoPrincipal: { name: 'Toscana Acebolada c/ Ovo', emoji: '🍳' }, opcao: { name: 'Escondidinho de Frango', emoji: '🥧' }, guarnicao: { name: 'Farofa', emoji: '✨' } },
             { day: 'Terça-feira', pratoPrincipal: { name: 'Carne Assada', emoji: '🥩' }, opcao: { name: 'Bolinho de Salsicha', emoji: '🥟' }, guarnicao: { name: 'Polenta à Bolonhesa', emoji: '🍝' } },
@@ -127,153 +110,151 @@
             { day: 'Quinta-feira', pratoPrincipal: { name: 'Bife de Copa Lombo Acebolado', emoji: '🥩' }, opcao: { name: 'Moussaka', emoji: '🍆' }, guarnicao: { name: 'Couve Refogada', emoji: '🥬' } },
             { day: 'Sexta-feira', pratoPrincipal: { name: 'Espeto de Frango à Milanesa', emoji: '🍢' }, opcao: { name: 'Calabresa Acebolada', emoji: '🌶️' }, guarnicao: { name: 'Batata Sauté', emoji: '🥔' } }
         ];
-        const opcoesFixas = [
-            { name: 'Omelete', emoji: '🍳' },
-            { name: 'Filé de frango', emoji: '🐔' }
-        ];
-        // ####################################################################
+        const opcoesFixas = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🐔' }];
 
-        // --- Função para criar e exibir o cardápio ---
+        // --- LÓGICA DA APLICAÇÃO ---
+        
+        // Autenticação anônima com o Firebase
+        signInAnonymously(auth).catch((error) => {
+            console.error("Erro na autenticação:", error);
+            document.body.innerHTML = '<p class="text-red-500 text-center p-8">Erro crítico na autenticação com o banco de dados. Tente recarregar a página.</p>';
+        });
+
+        // Função para criar o HTML do cardápio
         function createMenu() {
             const menuContainer = document.getElementById('menu');
+            if (!menuContainer) return;
             menuContainer.innerHTML = '';
-
             menuDaSemana.forEach(item => {
                 const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
-                
-                const allOptions = [
-                    { ...item.pratoPrincipal, type: 'Prato Principal' },
-                    ...(item.opcao ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
-                    ...opcoesFixas.map(fixa => ({ ...fixa, type: 'Opção Fixa' }))
-                ];
-                
-                let dayHTML = `<div class="day-section">
-                                <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
-                                <div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">
-                                    Guarnição do dia: ${item.guarnicao.name} ${item.guarnicao.emoji}
-                                </div>
-                                <div class="space-y-3">`;
-                
+                const allOptions = [{ ...item.pratoPrincipal, type: 'Prato Principal' }, ...(item.opcao ? [{ ...item.opcao, type: 'Opção do Dia' }] : []), ...opcoesFixas.map(fixa => ({ ...fixa, type: 'Opção Fixa' }))];
+                let dayHTML = `<div class="day-section"><h3 class="text-xl font-bold text-gray-800">${item.day}</h3><div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição do dia: ${item.guarnicao.name} ${item.guarnicao.emoji}</div><div class="space-y-3">`;
                 allOptions.forEach((option) => {
-                    dayHTML += `
-                        <label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 transition-all duration-200">
-                            <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
-                            <div class="flex items-center">
-                                <span class="text-3xl mr-4">${option.emoji}</span>
-                                <div class="flex-grow">
-                                    <p class="font-semibold text-gray-800">${option.name}</p>
-                                    <p class="text-sm text-gray-500">${option.type}</p>
-                                </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                        </label>`;
+                    dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 transition-all duration-200"><input type="radio" name="${dayId}" value="${option.name}" class="hidden"><div class="flex items-center"><span class="text-3xl mr-4">${option.emoji}</span><div class="flex-grow"><p class="font-semibold text-gray-800">${option.name}</p><p class="text-sm text-gray-500">${option.type}</p></div><svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></div></label>`;
                 });
-
                 dayHTML += `</div></div>`;
                 menuContainer.innerHTML += dayHTML;
             });
         }
 
-        // --- Função que atualiza o resumo e os avisos em tempo real ---
-        function updateSummaryAndVisibility() {
+        // Função para validar o formulário e controlar a visibilidade dos elementos
+        function validateForm() {
             const employeeName = document.getElementById('employeeName').value.trim();
             const guidanceSection = document.getElementById('guidanceSection');
             const guidanceText = document.getElementById('guidanceText');
-            const summarySection = document.getElementById('summarySection');
-            const summaryText = document.getElementById('summaryText');
+            const submitButtonContainer = document.getElementById('submitButtonContainer');
 
-            // Validação
-            const isNameFilled = employeeName !== '';
-            const missingDays = [];
-            menuDaSemana.forEach(item => {
-                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
-                if (!document.querySelector(`input[name="${dayId}"]:checked`)) {
-                    missingDays.push(item.day);
-                }
-            });
+            const missingDays = menuDaSemana.filter(item => !document.querySelector(`input[name="${item.day.replace(/[^a-zA-Z]/g, "").toLowerCase()}"]:checked`)).map(item => item.day);
             const allDaysSelected = missingDays.length === 0;
 
-            // Lógica de exibição
-            if (isNameFilled && allDaysSelected) {
-                // SUCESSO: Tudo preenchido
+            if (employeeName && allDaysSelected) {
                 guidanceSection.classList.add('hidden');
-                summarySection.classList.remove('hidden');
-
-                let summary = `*Pedido de Refeição - ${employeeName}* 🍽️\n\n`;
-                menuDaSemana.forEach(item => {
-                    const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
-                    const selectedOption = document.querySelector(`input[name="${dayId}"]:checked`);
-                    summary += `*${item.day}:*\n- ${selectedOption.value} (Guarnição: ${item.guarnicao.name})\n\n`;
-                });
-                summary += `_Enviado em ${new Date().toLocaleDateString('pt-BR')}_`;
-                summaryText.value = summary;
-
+                submitButtonContainer.classList.remove('hidden');
             } else {
-                // ERRO: Algo está faltando
-                summarySection.classList.add('hidden');
+                submitButtonContainer.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
-                
-                let message = '';
-                if (!isNameFilled) {
-                    message = 'Por favor, preencha seu nome. ';
-                }
-                if (!allDaysSelected) {
-                    if (isNameFilled) {
-                         message = `Olá, ${employeeName}! `;
-                    }
-                    message += `Falta selecionar o(s) prato(s) para o(s) seguinte(s) dia(s): ${missingDays.join(', ')}.`;
-                }
+                let message = !employeeName ? 'Por favor, preencha seu nome. ' : `Olá, ${employeeName}! `;
+                if (!allDaysSelected) message += `Falta selecionar o(s) prato(s) para: ${missingDays.join(', ')}.`;
                 guidanceText.textContent = message;
             }
         }
         
-        // --- Função para copiar o pedido e abrir o WhatsApp ---
-        function shareOrder() {
-            const textToCopy = document.getElementById('summaryText').value;
-            
-            const dummy = document.createElement('textarea');
-            document.body.appendChild(dummy);
-            dummy.value = textToCopy;
-            dummy.select();
+        // Função para submeter o pedido para o Firestore
+        async function submitOrder() {
+            const employeeName = document.getElementById('employeeName').value.trim();
+            if (!employeeName) return; 
+
+            const orderData = {
+                employeeName: employeeName,
+                timestamp: serverTimestamp()
+            };
+
+            menuDaSemana.forEach(item => {
+                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                const selectedOption = document.querySelector(`input[name="${dayId}"]:checked`);
+                orderData[dayId] = selectedOption.value;
+            });
+
             try {
-                document.execCommand('copy');
-                showToast(); 
-            } catch (err) {
-                console.error('Falha ao copiar:', err);
+                const button = document.getElementById('submitOrder');
+                button.disabled = true;
+                button.textContent = 'Enviando...';
+
+                await addDoc(collection(db, "pedidosDaSemana"), orderData);
+                
+                document.getElementById('user-view').innerHTML = `
+                    <div class="text-center p-10 bg-white rounded-lg shadow-lg">
+                        <h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2>
+                        <p class="mt-4 text-gray-600">Obrigado, ${employeeName}. Seu pedido foi registrado.</p>
+                        <button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button>
+                    </div>`;
+
+            } catch (error) {
+                console.error("Erro ao enviar pedido: ", error);
+                alert("Houve um erro ao enviar seu pedido. Tente novamente.");
+                const button = document.getElementById('submitOrder');
+                button.disabled = false;
+                button.textContent = 'Finalizar e Enviar Pedido';
             }
-            document.body.removeChild(dummy);
-
-            const phoneNumber = '5511945300075';
-            const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(textToCopy)}`;
-            window.open(whatsappUrl, '_blank');
         }
 
-        // --- Função para mostrar a notificação (toast) ---
-        function showToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.remove('hidden');
-            toast.classList.add('toast-animation');
+        // Função para carregar e exibir os pedidos no painel do admin
+        function loadAdminOrders() {
+            const ordersRef = collection(db, "pedidosDaSemana");
+            const ordersTableContainer = document.getElementById('ordersTableContainer');
 
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('toast-animation');
-            }, 3000);
+            onSnapshot(ordersRef, (snapshot) => {
+                if (snapshot.empty) {
+                    ordersTableContainer.innerHTML = '<p class="text-gray-500">Nenhum pedido recebido ainda.</p>';
+                    return;
+                }
+
+                let tableHTML = `<table class="min-w-full bg-white border border-gray-200">
+                                    <thead class="bg-gray-50"><tr>
+                                        <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">Funcionário</th>`;
+                menuDaSemana.forEach(item => tableHTML += `<th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-600">${item.day}</th>`);
+                tableHTML += `</tr></thead><tbody>`;
+
+                snapshot.docs.sort((a, b) => (a.data().timestamp > b.data().timestamp) ? 1 : -1).forEach(doc => {
+                    const order = doc.data();
+                    tableHTML += `<tr class="hover:bg-gray-50">
+                                    <td class="py-3 px-4 border-b font-bold">${order.employeeName}</td>`;
+                    menuDaSemana.forEach(item => {
+                        const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                        tableHTML += `<td class="py-3 px-4 border-b">${order[dayId] || 'N/A'}</td>`;
+                    });
+                    tableHTML += `</tr>`;
+                });
+
+                tableHTML += `</tbody></table>`;
+                ordersTableContainer.innerHTML = tableHTML;
+            });
         }
 
-        // --- Inicia tudo quando a página carrega ---
-        window.onload = () => {
-            createMenu();
-            updateSummaryAndVisibility(); 
+        // --- INICIALIZAÇÃO E EVENTOS ---
+        const userView = document.getElementById('user-view');
+        const adminView = document.getElementById('admin-view');
+        const switchToAdminBtn = document.getElementById('switchToAdmin');
+        const switchToUserBtn = document.getElementById('switchToUser');
+        
+        switchToAdminBtn.addEventListener('click', () => {
+            userView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            loadAdminOrders();
+        });
+        switchToUserBtn.addEventListener('click', () => {
+            adminView.classList.add('hidden');
+            userView.classList.remove('hidden');
+        });
+        
+        createMenu();
+        validateForm(); 
 
-            const employeeNameInput = document.getElementById('employeeName');
-            const menuContainer = document.getElementById('menu');
-
-            employeeNameInput.addEventListener('input', updateSummaryAndVisibility);
-            menuContainer.addEventListener('change', updateSummaryAndVisibility);
-        };
+        document.getElementById('employeeName').addEventListener('input', validateForm);
+        document.getElementById('menu').addEventListener('change', validateForm);
+        document.getElementById('submitOrder').addEventListener('click', submitOrder);
 
     </script>
 </body>
 </html>
+
