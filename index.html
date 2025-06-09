@@ -17,9 +17,28 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid #3498db; width: 40px; height: 40px; animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Estilos para o Modal de Edição */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 90%;
+            max-width: 640px; /* 40rem */
+        }
+
         @media print {
             @page { size: landscape; margin: 15mm; }
-            .no-print { display: none !important; }
+            .no-print, .modal-overlay { display: none !important; }
             body, #app-container { margin: 0; padding: 0; box-shadow: none; background: none; }
             #admin-view h1 { font-size: 24pt; } #admin-view h2 { font-size: 16pt; }
             #admin-view table { font-size: 10pt; width: 100%; } #admin-view th, #admin-view td { padding: 6px; }
@@ -62,12 +81,32 @@
             </section>
         </div>
     </div>
+
+    <div id="edit-modal" class="modal-overlay hidden no-print">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4">Editar Pedido</h2>
+            <form id="edit-order-form">
+                <input type="hidden" id="edit-order-id">
+                <div class="mb-4">
+                    <label for="edit-employeeName" class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label>
+                    <input type="text" id="edit-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg" readonly>
+                </div>
+                <div id="edit-menu-options" class="space-y-6">
+                    </div>
+                <div class="mt-6 flex justify-end space-x-4">
+                    <button type="button" id="cancel-edit" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // ... (código de configuração do Firebase e outras funções permanecem os mesmos)
         const firebaseConfig = {
           apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
           authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -81,9 +120,9 @@
         const auth = getAuth(app);
         const menuDocRef = doc(db, "cardapio", "semanal");
         const opcoesFixas = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🐔' }];
-        
         let menuDaSemana = [];
-
+        
+        // ... (funções createFallbackMenu, loadAndDisplayMenu, createMenuHTML, e a parte da IA permanecem iguais)
         function createFallbackMenu() {
             return [
                 { day: 'Segunda-feira', pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } },
@@ -93,7 +132,6 @@
                 { day: 'Sexta-feira', pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }
             ];
         }
-
         async function loadAndDisplayMenu() {
             try {
                 const docSnap = await getDoc(menuDocRef);
@@ -109,7 +147,6 @@
             }
             createMenuHTML();
         }
-        
         function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
             if (!menuContainer) return;
@@ -118,13 +155,16 @@
                 const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
                 const allOptions = [{ ...item.pratoPrincipal, type: 'Prato Principal' }, ...(item.opcao && item.opcao.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []), ...opcoesFixas.map(fixa => ({ ...fixa, type: 'Opção Fixa' }))];
                 let dayHTML = `<div class="day-section"><h3 class="text-xl font-bold text-gray-800">${item.day}</h3><div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição do dia: ${item.guarnicao.name} ${item.guarnicao.emoji}</div><div class="space-y-3">`;
-                allOptions.forEach((option) => dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer"><input type="radio" name="${dayId}" value="${option.name}" class="hidden"><div class="flex items-center"><span class="text-3xl mr-4">${option.emoji}</span><div class="flex-grow"><p class="font-semibold text-gray-800">${option.name}</p><p class="text-sm text-gray-500">${option.type}</p></div><svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg></div></label>`);
+                allOptions.forEach((option) => {
+                    if (option.name) {
+                        dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer"><input type="radio" name="${dayId}" value="${option.name}" class="hidden"><div class="flex items-center"><span class="text-3xl mr-4">${option.emoji}</span><div class="flex-grow"><p class="font-semibold text-gray-800">${option.name}</p><p class="text-sm text-gray-500">${option.type}</p></div><svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg></div></label>`;
+                    }
+                });
                 dayHTML += `</div></div>`;
                 menuContainer.innerHTML += dayHTML;
             });
             validateForm();
         }
-        
         document.getElementById('imageUpload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -136,24 +176,18 @@
             }
             reader.readAsDataURL(file);
         });
-        
         document.getElementById('processImageBtn').addEventListener('click', async () => {
             const loader = document.getElementById('loader');
             const button = document.getElementById('processImageBtn');
             const confirmationForm = document.getElementById('confirmation-form');
-
             button.disabled = true; button.textContent = 'A analisar...';
             loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
-
             const file = document.getElementById('imageUpload').files[0];
             const base64ImageData = (await toBase64(file)).split(',')[1];
-            
             const prompt = "Analise a imagem deste cardápio. Extraia as informações para cada dia da semana (de Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Retorne os dados como um objeto JSON. A estrutura do JSON deve ser um objeto com uma chave 'menu', que contém um array. Cada objeto no array representa um dia e deve conter as chaves 'day', 'pratoPrincipal' (com sub-chaves 'name' e 'emoji'), 'opcao' (com 'name' e 'emoji') e 'guarnicao' (com 'name' e 'emoji'). Se um campo não existir para um dia (ex: sem 'Opção'), o valor de 'name' deve ser uma string vazia. Atribua emojis apropriados para cada prato.";
             const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: file.type, data: base64ImageData } }] }] };
-            
             const apiKey = "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) {
@@ -173,7 +207,6 @@
                 loader.classList.add('hidden');
             }
         });
-
         function displayConfirmationForm(menuData) {
             const container = document.getElementById('confirmation-form');
             container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
@@ -184,7 +217,6 @@
             container.classList.remove('hidden');
             document.getElementById('saveNewMenuBtn').addEventListener('click', () => saveNewMenu(menuData.length));
         }
-
         async function saveNewMenu(itemCount) {
              const button = document.getElementById('saveNewMenuBtn');
              button.disabled = true; button.textContent = 'A salvar...';
@@ -212,9 +244,7 @@
                 button.disabled = false; button.textContent = 'Salvar Novo Cardápio';
              }
         }
-        
         const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); });
-
         function validateForm() {
             if(!document.getElementById('employeeName')) return;
             const employeeName = document.getElementById('employeeName').value.trim();
@@ -254,42 +284,170 @@
                 document.getElementById('submitOrder').disabled = false; document.getElementById('submitOrder').textContent = 'Finalizar e Enviar Pedido';
             }
         }
+        
+        // ===== FUNÇÃO DE CARREGAR PEDIDOS (TOTALMENTE MODIFICADA) =====
         function loadAdminOrders() {
             const ordersQuery = query(collection(db, "pedidosDaSemana"), orderBy("timestamp", "desc"));
             const ordersTableContainer = document.getElementById('ordersTableContainer');
+
             onSnapshot(ordersQuery, (snapshot) => {
-                if (snapshot.empty) { ordersTableContainer.innerHTML = '<p class="text-gray-500">Nenhum pedido recebido ainda.</p>'; return; }
-                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th>`;
-                menuDaSemana.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day}</th>`);
-                tableHTML += `</tr></thead><tbody>`;
+                if (snapshot.empty) {
+                    ordersTableContainer.innerHTML = '<p class="text-gray-500">Nenhum pedido recebido ainda.</p>';
+                    return;
+                }
+
+                const processedEmployees = new Set();
+                const uniqueDocs = [];
                 snapshot.docs.forEach(doc => {
+                    const orderData = doc.data();
+                    if (orderData.employeeName && !processedEmployees.has(orderData.employeeName)) {
+                        processedEmployees.add(orderData.employeeName);
+                        uniqueDocs.push(doc); // Guarda o documento inteiro (com ID)
+                    }
+                });
+
+                const nomesPratosFixos = opcoesFixas.map(p => p.name);
+                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">Data do Pedido</th>`;
+                menuDaSemana.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day}</th>`);
+                tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+
+                uniqueDocs.forEach(doc => {
                     const order = doc.data();
+                    const docId = doc.id;
                     tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td>`;
+
+                    let dataFormatada = 'N/A';
+                    if (order.timestamp && typeof order.timestamp.toDate === 'function') {
+                        dataFormatada = order.timestamp.toDate().toLocaleString('pt-BR');
+                    }
+                    tableHTML += `<td class="py-2 px-3 border-b text-sm">${dataFormatada}</td>`;
+
                     menuDaSemana.forEach(item => {
                         const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
-                        tableHTML += `<td class="py-2 px-3 border-b">${order[dayId] || 'N/A'}</td>`;
+                        const pratoSelecionado = order[dayId] || 'N/A';
+                        let textoDaCelula = '(Prato,opção)';
+                        if (nomesPratosFixos.includes(pratoSelecionado) || pratoSelecionado === 'N/A') {
+                            textoDaCelula = pratoSelecionado;
+                        }
+                        tableHTML += `<td class="py-2 px-3 border-b">${textoDaCelula}</td>`;
                     });
-                    tableHTML += `</tr>`;
+
+                    // Célula de Ações com botões de Editar e Excluir
+                    tableHTML += `<td class="py-2 px-3 border-b space-x-2">
+                        <button data-id="${docId}" class="edit-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button>
+                        <button data-id="${docId}" class="delete-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button>
+                    </td></tr>`;
                 });
+
                 tableHTML += `</tbody></table>`;
                 ordersTableContainer.innerHTML = tableHTML;
             });
         }
         
+        // ===== NOVAS FUNÇÕES E EVENTOS PARA EDITAR/EXCLUIR =====
+        async function openEditModal(docId) {
+            const modal = document.getElementById('edit-modal');
+            const form = document.getElementById('edit-order-form');
+            const menuOptionsContainer = document.getElementById('edit-menu-options');
+
+            try {
+                const orderDocRef = doc(db, "pedidosDaSemana", docId);
+                const orderSnap = await getDoc(orderDocRef);
+                if (!orderSnap.exists()) {
+                    alert("Erro: Pedido não encontrado.");
+                    return;
+                }
+                const orderData = orderSnap.data();
+
+                form.querySelector('#edit-order-id').value = docId;
+                form.querySelector('#edit-employeeName').value = orderData.employeeName;
+
+                menuOptionsContainer.innerHTML = ''; // Limpa as opções antigas
+                menuDaSemana.forEach(item => {
+                    const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                    const allOptions = [{ ...item.pratoPrincipal, type: 'Prato Principal' }, ...(item.opcao && item.opcao.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []), ...opcoesFixas.map(fixa => ({ ...fixa, type: 'Opção Fixa' }))];
+                    let dayHTML = `<div class="day-section"><h3 class="text-lg font-bold text-gray-800">${item.day}</h3><div class="space-y-2 mt-2">`;
+                    allOptions.forEach((option) => {
+                        if (option.name) {
+                            const isChecked = orderData[dayId] === option.name ? 'checked' : '';
+                            dayHTML += `<label class="block p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"><input type="radio" name="edit-${dayId}" value="${option.name}" class="mr-2" ${isChecked}><span class="font-semibold">${option.name}</span> <span class="text-sm text-gray-500">(${option.type})</span></label>`;
+                        }
+                    });
+                    dayHTML += `</div></div>`;
+                    menuOptionsContainer.innerHTML += dayHTML;
+                });
+
+                modal.classList.remove('hidden');
+            } catch(error) {
+                console.error("Erro ao abrir modal de edição:", error);
+                alert("Não foi possível carregar os dados para edição.");
+            }
+        }
+
+        async function saveOrderChanges(event) {
+            event.preventDefault();
+            const form = event.target;
+            const docId = form.querySelector('#edit-order-id').value;
+            const updatedData = {};
+            
+            menuDaSemana.forEach(item => {
+                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                const selectedOption = form.querySelector(`input[name="edit-${dayId}"]:checked`);
+                if (selectedOption) {
+                    updatedData[dayId] = selectedOption.value;
+                }
+            });
+
+            try {
+                const orderDocRef = doc(db, "pedidosDaSemana", docId);
+                await updateDoc(orderDocRef, updatedData);
+                alert("Pedido atualizado com sucesso!");
+                document.getElementById('edit-modal').classList.add('hidden');
+            } catch (error) {
+                console.error("Erro ao salvar alterações:", error);
+                alert("Falha ao salvar as alterações do pedido.");
+            }
+        }
+
+        async function deleteOrder(docId) {
+            if (confirm("Tem a certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.")) {
+                try {
+                    await deleteDoc(doc(db, "pedidosDaSemana", docId));
+                    alert("Pedido excluído com sucesso.");
+                } catch (error) {
+                    console.error("Erro ao excluir pedido:", error);
+                    alert("Falha ao excluir o pedido.");
+                }
+            }
+        }
+        
+        // Listener central para ações na tabela de pedidos
+        document.getElementById('ordersTableContainer').addEventListener('click', function(event) {
+            if (event.target.classList.contains('edit-btn')) {
+                const docId = event.target.dataset.id;
+                openEditModal(docId);
+            }
+            if (event.target.classList.contains('delete-btn')) {
+                const docId = event.target.dataset.id;
+                deleteOrder(docId);
+            }
+        });
+
+        // Listeners para fechar o modal
+        document.getElementById('cancel-edit').addEventListener('click', () => {
+            document.getElementById('edit-modal').classList.add('hidden');
+        });
+        document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
+
         async function main() {
             await signInAnonymously(auth);
-
             const userView = document.getElementById('user-view');
             const adminView = document.getElementById('admin-view');
-            
             await loadAndDisplayMenu();
-
             document.getElementById('switchToAdmin').addEventListener('click', () => {
                 const senhaDigitada = prompt("Para aceder ao painel, por favor, digite a senha:");
-                const SENHA_CORRETA = "admin123"; // Defina a sua senha secreta aqui
-
+                const SENHA_CORRETA = "admin123";
                 if (senhaDigitada === SENHA_CORRETA) {
-                    console.log("Acesso de administrador concedido.");
                     userView.classList.add('hidden');
                     adminView.classList.remove('hidden');
                     loadAdminOrders();
@@ -297,12 +455,10 @@
                     alert("Senha incorreta. Acesso negado.");
                 }
             });
-
             document.getElementById('switchToUser').addEventListener('click', () => {
                 adminView.classList.add('hidden');
                 userView.classList.remove('hidden');
             });
-
             if (document.getElementById('employeeName')) {
                 document.getElementById('employeeName').addEventListener('input', validateForm);
                 document.getElementById('menu').addEventListener('change', validateForm);
