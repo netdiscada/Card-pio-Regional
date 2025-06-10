@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +19,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .no-print { }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
-        .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 640px; }
+        .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
 
         #print-report { display: none; }
@@ -35,6 +35,30 @@
             #print-report th { background-color: #e2e8f0; font-weight: 600; }
             #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
         }
+        
+        #app-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(20px);
+        }
+        #app-toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        #app-toast.success { background-color: #22c55e; }
+        #app-toast.error { background-color: #ef4444; }
+        #app-toast.info { background-color: #3b82f6; }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -46,24 +70,34 @@
                 <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
                 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
+                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👋 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div><label for="employeeRGF" class="block text-sm font-medium text-gray-700">Seu RGF</label><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
                         <div><label for="employeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍲 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍔 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
                 <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
                 <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
             <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
-            <footer class="text-center mt-10"><button id="switchToAdmin" class="text-sm text-gray-500 hover:text-blue-600">Aceder ao Painel do Administrador</button></footer>
+            <footer class="text-center mt-10">
+                <button id="switchToAdmin" class="text-sm text-gray-500 hover:text-blue-600">Aceder ao Painel do Administrador</button>
+            </footer>
         </div>
 
         <div id="admin-view" class="hidden no-print">
-            <header class="text-center border-b pb-6 mb-6"><h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1><p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p></header>
-            <div class="mb-8"><button id="switchToUser" class="text-sm text-gray-500 hover:text-blue-600">← Voltar para o Cardápio</button></div>
+            <header class="text-center border-b pb-6 mb-6">
+                <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
+                <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
+                <div class="mt-4">
+                    <button id="adminLogoutBtn" class="bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600">Sair do Painel</button>
+                </div>
+            </header>
+            <div class="mb-8">
+                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
+            </div>
             
             <section id="employee-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">👥 Gerenciamento de Funcionários</h2>
@@ -84,7 +118,7 @@
             </section>
 
             <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🤖 Atualizar Cardápio com Imagem (IA)</h2>
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
                 <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
                 <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                 <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
@@ -109,84 +143,80 @@
         </div>
     </div>
 
-    <div id="edit-order-modal" class="modal-overlay hidden no-print">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold mb-4">Editar Pedido</h2>
-            <form id="edit-order-form">
-                 <input type="hidden" id="edit-order-id">
-                <div class="mb-4">
-                    <label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label>
-                    <input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly>
-                </div>
-                <div id="edit-menu-options" class="space-y-6"></div>
-                <div class="mt-6 flex justify-end space-x-4">
-                    <button type="button" id="cancel-order-edit" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modals -->
+    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
+    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
 
-    <div id="edit-employee-modal" class="modal-overlay hidden no-print">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2>
-            <form id="edit-employee-form">
-                <div class="mb-4">
-                    <label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label>
-                    <input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly>
-                </div>
-                <div class="mb-4">
-                    <label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                    <input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required>
-                </div>
-                <div class="mt-6 flex justify-end space-x-4">
-                    <button type="button" id="cancel-employee-edit" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="confirmation-modal" class="modal-overlay hidden no-print">
-        <div class="modal-content fade-in">
-            <h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2>
-            <p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p>
-            <div id="confirmation-summary" class="space-y-2 mb-8"></div>
-            <div class="flex justify-end space-x-4">
-                <button id="cancel-confirmation" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button>
-                <button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button>
-            </div>
-        </div>
-    </div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
+    <div id="app-toast"></div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import imageCompression from 'https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js';
 
         // --- CONFIGURAÇÃO FIREBASE ---
         const firebaseConfig = {
-          apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
-          authDomain: "cardapio-8ddea.firebaseapp.com",
-          projectId: "cardapio-8ddea",
-          storageBucket: "cardapio-8ddea.firebasestorage.app",
-          messagingSenderId: "1019677985212",
-          appId: "1:1019677985212:web:57c7820a62585a867dc3b9"
+            apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
+            authDomain: "cardapio-8ddea.firebaseapp.com",
+            projectId: "cardapio-8ddea",
+            storageBucket: "cardapio-8ddea.appspot.com",
+            messagingSenderId: "1019677985212",
+            appId: "1:1019677985212:web:57c7820a62585a867dc3b9"
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        // --- CONSTANTES E CONFIGURAÇÕES DA APLICAÇÃO ---
+        const APP_CONFIG = {
+            ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
+        };
+        
+        // CORREÇÃO: Voltando para os nomes originais das coleções em Português
         const menuDocRef = doc(db, "cardapio", "semanal");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
-
+        
         // --- ESTADO DA APLICAÇÃO ---
-        const opcoesFixas = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🐔' }];
-        let menuDaSemana = [];
+        const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
+        let weeklyMenu = [];
         let allOrders = [];
         let tempOrderData = {};
+        
+        // --- FUNÇÕES AUXILIARES ---
+        function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
+
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.getElementById('app-toast');
+            if(!toast) return;
+            toast.textContent = message;
+            toast.className = 'show';
+            toast.classList.add(type);
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
+        }
+        
+        function showCustomConfirm(message, onConfirm) {
+            const modal = document.getElementById('custom-confirm-modal');
+            const messageEl = document.getElementById('custom-confirm-message');
+            const okBtn = document.getElementById('custom-confirm-ok-btn');
+            
+            messageEl.textContent = message;
+            modal.classList.remove('hidden');
+
+            const newOkBtn = okBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+            
+            newOkBtn.addEventListener('click', () => {
+                onConfirm();
+                modal.classList.add('hidden');
+            });
+        }
 
         // --- GERENCIAMENTO DE FUNCIONÁRIOS ---
         function loadAndRenderEmployees() {
@@ -211,6 +241,9 @@
                 });
                 tableHTML += '</tbody></table>';
                 container.innerHTML = tableHTML;
+            }, (error) => {
+                 console.error("Erro ao carregar funcionários:", error);
+                 showToast("Falha ao carregar funcionários. Verifique o console para mais detalhes.", "error");
             });
         }
 
@@ -221,32 +254,31 @@
             const rgf = rgfInput.value.trim();
             const nome = nameInput.value.trim();
 
-            if (!rgf || !nome) {
-                alert("Por favor, preencha o RGF e o Nome.");
-                return;
-            }
+            if (!rgf || !nome) { showToast("Por favor, preencha o RGF e o Nome.", 'error'); return; }
 
             try {
+                const docSnap = await getDoc(doc(db, "funcionarios", rgf));
+                if (docSnap.exists()) { showToast("RGF já cadastrado para: " + docSnap.data().nome, 'info'); return; }
                 await setDoc(doc(db, "funcionarios", rgf), { nome });
-                alert("Funcionário adicionado com sucesso!");
-                rgfInput.value = '';
-                nameInput.value = '';
+                showToast("Funcionário adicionado com sucesso!", 'success');
+                rgfInput.value = ''; nameInput.value = '';
             } catch (error) {
                 console.error("Erro ao adicionar funcionário: ", error);
-                alert("Ocorreu um erro ao adicionar o funcionário.");
+                showToast("Ocorreu um erro ao adicionar o funcionário.", 'error');
             }
         }
 
-        async function handleDeleteEmployee(rgf) {
-            if (confirm(`Tem a certeza que deseja excluir o funcionário com RGF ${rgf}? Esta ação não pode ser desfeita.`)) {
+        function handleDeleteEmployee(rgf) {
+            const message = `Tem a certeza que deseja excluir o funcionário com RGF ${rgf}? Esta ação não pode ser desfeita.`;
+            showCustomConfirm(message, async () => {
                 try {
                     await deleteDoc(doc(db, "funcionarios", rgf));
-                    alert("Funcionário excluído com sucesso.");
+                    showToast("Funcionário excluído com sucesso.", 'success');
                 } catch (error) {
                     console.error("Erro ao excluir funcionário: ", error);
-                    alert("Falha ao excluir o funcionário.");
+                    showToast("Falha ao excluir o funcionário.", 'error');
                 }
-            }
+            });
         }
         
         function openEmployeeEditModal(rgf, nome) {
@@ -260,73 +292,65 @@
             const rgf = document.getElementById('editEmployeeRGF').value;
             const newName = document.getElementById('editEmployeeName').value.trim();
 
-            if (!newName) {
-                alert("O nome não pode ficar em branco.");
-                return;
-            }
+            if (!newName) { showToast("O nome não pode ficar em branco.", 'error'); return; }
             try {
                 await updateDoc(doc(db, "funcionarios", rgf), { nome: newName });
-                alert("Funcionário atualizado com sucesso!");
+                showToast("Funcionário atualizado com sucesso!", 'success');
                 document.getElementById('edit-employee-modal').classList.add('hidden');
             } catch (error) {
                 console.error("Erro ao salvar alterações do funcionário: ", error);
-                alert("Falha ao salvar as alterações.");
+                showToast("Falha ao salvar as alterações do funcionário.", 'error');
             }
         }
         
         // --- LÓGICA DE AUTOCOMPLETE ---
         async function findEmployeeByRGF(rgf) {
             const nameInput = document.getElementById('employeeName');
-            if (!rgf) {
-                nameInput.value = '';
-                nameInput.placeholder = 'Preenchido automaticamente';
-                return;
-            }
+            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return; }
             try {
-                const employeeDocRef = doc(db, "funcionarios", rgf);
-                const docSnap = await getDoc(employeeDocRef);
+                const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
-                    validateForm();
                 } else {
-                    nameInput.value = '';
-                    nameInput.placeholder = 'RGF não encontrado';
+                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
                 }
+                validateForm();
             } catch (error) {
                 console.error("Erro ao buscar funcionário:", error);
-                nameInput.value = '';
-                nameInput.placeholder = 'Erro na busca';
+                nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
+                showToast("Erro ao buscar funcionário.", 'error');
             }
         }
         
         // --- LÓGICA PRINCIPAL DO USUÁRIO ---
         function createFallbackMenu() {
             const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-            return days.map(day => ({ day, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🤷' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
+            return days.map(day => ({ day, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🗓️' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
         }
 
-        async function loadAndDisplayMenu() {
-            try {
-                const docSnap = await getDoc(menuDocRef);
-                menuDaSemana = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
-            } catch (error) {
-                console.error("Erro ao carregar o cardápio:", error);
-                menuDaSemana = createFallbackMenu();
-            }
-            createMenuHTML();
+        function loadAndDisplayMenu() {
+            onSnapshot(menuDocRef, (docSnap) => {
+                weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
+                createMenuHTML();
+            }, (error) => {
+                 console.error("Erro ao carregar o cardápio:", error);
+                 showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
+                 weeklyMenu = createFallbackMenu();
+                 createMenuHTML();
+            });
         }
         
         function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
             if (!menuContainer) return;
             menuContainer.innerHTML = '';
-            menuDaSemana.forEach(item => {
-                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+            weeklyMenu.forEach(item => {
+                const dayId = getDayId(item.day);
                 const allOptions = [
                     { ...item.pratoPrincipal, type: 'Prato Principal' },
                     ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
-                    ...opcoesFixas.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
-                    { name: 'Não vou almoçar', emoji: '✖️', type: 'Ausência' }
+                    ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
+                    { name: 'Não vou almoçar', emoji: '❌', type: 'Ausência' }
                 ];
 
                 let dayHTML = `<div class="day-section"><h3 class="text-xl font-bold text-gray-800">${item.day}</h3><div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji}</div><div class="space-y-3">`;
@@ -349,7 +373,7 @@
             const submitBtnContainer = document.getElementById('submitButtonContainer');
             if (!name || !rgf || !guidanceSection) return;
 
-            const missingDays = menuDaSemana.filter(item => !document.querySelector(`input[name="${item.day.replace(/[^a-zA-Z]/g, "").toLowerCase()}"]:checked`)).map(item => item.day);
+            const missingDays = weeklyMenu.filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`)).map(item => item.day);
             
             if (name && rgf && missingDays.length === 0) {
                 guidanceSection.classList.add('hidden');
@@ -359,7 +383,7 @@
                 guidanceSection.classList.remove('hidden');
                 let message = '';
                 if(!rgf) message = 'Digite seu RGF para começar. ';
-                else if(!name) message = 'RGF não encontrado no sistema. Verifique o RGF ou peça para um administrador cadastrá-lo. ';
+                else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
                 if (missingDays.length > 0) message += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
                 guidanceText.textContent = message || 'Por favor, preencha todos os campos.';
             }
@@ -373,8 +397,8 @@
             };
             const summaryContainer = document.getElementById('confirmation-summary');
             summaryContainer.innerHTML = '';
-            menuDaSemana.forEach(item => {
-                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+            weeklyMenu.forEach(item => {
+                const dayId = getDayId(item.day);
                 const choice = document.querySelector(`input[name="${dayId}"]:checked`).value;
                 tempOrderData[dayId] = choice;
                 summaryContainer.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${choice}</p>`;
@@ -389,12 +413,12 @@
                 await addDoc(pedidosCollectionRef, tempOrderData);
                 document.getElementById('confirmation-modal').classList.add('hidden');
                 document.getElementById('form-container').classList.add('hidden');
-                const successMessage = document.getElementById('success-message');
                 document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
-                successMessage.classList.remove('hidden');
+                document.getElementById('success-message').classList.remove('hidden');
+                showToast("Pedido enviado com sucesso!", 'success');
             } catch (error) {
                 console.error("Erro ao enviar pedido: ", error);
-                alert("Ocorreu um erro ao enviar o seu pedido. Tente novamente.");
+                showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
             } finally {
                 button.disabled = false; button.textContent = 'Confirmar e Enviar';
             }
@@ -402,35 +426,40 @@
         
         // --- FUNÇÕES DA ÁREA DO ADMINISTRADOR ---
         function loadAdminData() {
-            const ordersQuery = query(pedidosCollectionRef, orderBy("timestamp", "desc"));
-            onSnapshot(ordersQuery, (snapshot) => {
-                const processedEmployees = new Set();
-                const uniqueDocs = [];
-                snapshot.docs.forEach(doc => {
+            onSnapshot(pedidosCollectionRef, (snapshot) => {
+                const latestOrdersMap = new Map();
+                snapshot.forEach(doc => {
                     const orderData = doc.data();
-                    if (orderData.employeeName && !processedEmployees.has(orderData.employeeName.toLowerCase())) {
-                        processedEmployees.add(orderData.employeeName.toLowerCase());
-                        uniqueDocs.push(doc);
+                    if (orderData.employeeRGF) {
+                        const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
+                         if (!latestOrdersMap.has(orderData.employeeRGF) || timestamp > latestOrdersMap.get(orderData.employeeRGF).timestamp) {
+                            latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
+                        }
                     }
                 });
-                allOrders = uniqueDocs;
+                
+                allOrders = Array.from(latestOrdersMap.values())
+                    .map(item => item.doc)
+                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
+
                 updateDashboard(allOrders);
                 renderOrdersTable(allOrders);
+            }, (error) => {
+                console.error("Erro ao carregar dados do administrador:", error);
+                showToast("Erro ao carregar dados do administrador.", 'error');
             });
         }
 
         function updateDashboard(orders) {
             const dashboard = document.getElementById('admin-dashboard');
-            if (orders.length === 0) {
-                dashboard.innerHTML = '<p class="text-gray-500">Nenhum pedido para calcular totais.</p>';
-                return;
-            }
+            if (!weeklyMenu || weeklyMenu.length === 0) { dashboard.innerHTML = '<p class="text-gray-500">Cardápio semanal não carregado.</p>'; return; }
+            if (orders.length === 0) { dashboard.innerHTML = '<p class="text-gray-500">Nenhum pedido para calcular totais.</p>'; return; }
 
             const dailyCounts = {};
-            menuDaSemana.forEach(dayItem => {
-                const dayId = dayItem.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+            weeklyMenu.forEach(dayItem => {
                 dailyCounts[dayItem.day] = {};
                 orders.forEach(orderDoc => {
+                    const dayId = getDayId(dayItem.day);
                     const choice = orderDoc.data()[dayId];
                     if (choice && choice !== 'Não vou almoçar') {
                         dailyCounts[dayItem.day][choice] = (dailyCounts[dayItem.day][choice] || 0) + 1;
@@ -442,13 +471,8 @@
             Object.entries(dailyCounts).forEach(([day, counts]) => {
                 let dayHTML = `<div class="p-4 bg-gray-50 rounded-lg"><h3 class="font-bold text-lg text-gray-800 mb-2">${day}</h3><div class="space-y-1">`;
                 const sortedCounts = Object.entries(counts).sort(([,a],[,b]) => b - a);
-                if (sortedCounts.length === 0) {
-                    dayHTML += `<p class="text-sm text-gray-500">Nenhum pedido neste dia.</p>`;
-                } else {
-                    sortedCounts.forEach(([item, count]) => {
-                        dayHTML += `<div class="flex justify-between text-sm"><span class="text-gray-600">${item}</span><span class="font-semibold text-blue-700">${count}</span></div>`;
-                    });
-                }
+                if (sortedCounts.length === 0) { dayHTML += `<p class="text-sm text-gray-500">Nenhum pedido neste dia.</p>`; } 
+                else { sortedCounts.forEach(([item, count]) => { dayHTML += `<div class="flex justify-between text-sm"><span class="text-gray-600">${item}</span><span class="font-semibold text-blue-700">${count}</span></div>`; }); }
                 dayHTML += '</div></div>';
                 dashboard.innerHTML += dayHTML;
             });
@@ -459,20 +483,18 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            if (filteredOrders.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>';
-                return;
-            }
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
+            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
 
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
-            menuDaSemana.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
+            weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
 
             filteredOrders.forEach(doc => {
                 const order = doc.data();
                 tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
-                menuDaSemana.forEach(dayMenuItem => {
-                    const dayId = dayMenuItem.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                weeklyMenu.forEach(dayMenuItem => {
+                    const dayId = getDayId(dayMenuItem.day);
                     let choice = order[dayId] || 'N/A';
                     if (choice === dayMenuItem.pratoPrincipal.name) choice = 'Prato';
                     else if (dayMenuItem.opcao?.name && choice === dayMenuItem.opcao.name) choice = 'Opção';
@@ -488,17 +510,11 @@
             const reportContainer = document.getElementById('print-report');
             reportContainer.innerHTML = '<h1>Relatório de Pedidos da Semana - Regional Quatinga</h1>';
             
-            menuDaSemana.forEach(dayMenuItem => {
-                const dayId = dayMenuItem.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+            weeklyMenu.forEach(dayMenuItem => {
+                const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
-                
-                const dailyOrders = allOrders.filter(orderDoc => {
-                    const choice = orderDoc.data()[dayId];
-                    return choice && choice !== 'Não vou almoçar';
-                });
-                
+                const dailyOrders = allOrders.filter(orderDoc => orderDoc.data()[dayId] && orderDoc.data()[dayId] !== 'Não vou almoçar');
                 dailyOrders.sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
                 dailyOrders.forEach(orderDoc => {
                     const order = orderDoc.data();
                     let choice = order[dayId];
@@ -506,11 +522,9 @@
                     else if (dayMenuItem.opcao?.name && choice === dayMenuItem.opcao.name) choice = 'Opção';
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choice}</td></tr>`;
                 });
-                
                 tableHTML += '</tbody></table></div>';
                 reportContainer.innerHTML += tableHTML;
             });
-            
             window.print();
         }
 
@@ -520,44 +534,28 @@
             const employeeNameInput = document.getElementById('edit-order-employeeName');
             const orderIdInput = document.getElementById('edit-order-id');
 
-            formContent.innerHTML = '<p class="text-center text-gray-500">A carregar dados do pedido...</p>';
+            formContent.innerHTML = '<p class="text-center text-gray-500">A carregar...</p>';
             modal.classList.remove('hidden');
 
             try {
-                const orderDocRef = doc(db, "pedidosDaSemana", docId);
-                const docSnap = await getDoc(orderDocRef);
-
-                if (!docSnap.exists()) {
-                    alert("Erro: Pedido não encontrado.");
-                    modal.classList.add('hidden');
-                    return;
-                }
+                const docSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
+                if (!docSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
 
                 const orderData = docSnap.data();
                 employeeNameInput.value = orderData.employeeName;
                 orderIdInput.value = docId;
                 formContent.innerHTML = '';
 
-                menuDaSemana.forEach(item => {
-                    const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+                weeklyMenu.forEach(item => {
+                    const dayId = getDayId(item.day);
                     const currentChoice = orderData[dayId];
-                    const allOptions = [
-                        { ...item.pratoPrincipal },
-                        ...(item.opcao?.name ? [{ ...item.opcao }] : []),
-                        ...opcoesFixas,
-                        { name: 'Não vou almoçar', emoji: '✖️' }
-                    ];
-
+                    const allOptions = [ { ...item.pratoPrincipal }, ...(item.opcao?.name ? [{ ...item.opcao }] : []), ...fixedOptions, { name: 'Não vou almoçar', emoji: '❌' }];
                     let dayHTML = `<fieldset class="day-section border p-4 rounded-lg"><legend class="font-bold text-lg text-gray-800 px-2">${item.day}</legend><div class="space-y-2 mt-2">`;
                     allOptions.forEach((option, index) => {
                         if (option.name) {
                             const uniqueId = `${dayId}-${index}`;
                             const isChecked = (option.name === currentChoice) ? 'checked' : '';
-                            dayHTML += `
-                                <div class="flex items-center">
-                                    <input type="radio" id="${uniqueId}" name="${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" ${isChecked} required>
-                                    <label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label>
-                                </div>`;
+                            dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
                         }
                     });
                     dayHTML += `</div></fieldset>`;
@@ -565,7 +563,7 @@
                 });
             } catch (error) {
                 console.error("Erro ao abrir modal de edição:", error);
-                alert("Não foi possível carregar os dados do pedido para edição.");
+                showToast("Não foi possível carregar os dados do pedido.", 'error');
                 modal.classList.add('hidden');
             }
         }
@@ -573,47 +571,42 @@
         async function saveOrderChanges(event) {
             event.preventDefault();
             const button = event.target.querySelector('button[type="submit"]');
-            button.disabled = true;
-            button.textContent = 'A salvar...';
-
+            button.disabled = true; button.textContent = 'A salvar...';
             const docId = document.getElementById('edit-order-id').value;
             const updateData = {};
-
-            menuDaSemana.forEach(item => {
-                const dayId = item.day.replace(/[^a-zA-Z]/g, "").toLowerCase();
+            weeklyMenu.forEach(item => {
+                const dayId = getDayId(item.day);
                 const selectedOption = document.querySelector(`#edit-order-form input[name="${dayId}"]:checked`);
-                if (selectedOption) {
-                    updateData[dayId] = selectedOption.value;
-                }
+                if (selectedOption) { updateData[dayId] = selectedOption.value; }
             });
-
             try {
                 await updateDoc(doc(db, "pedidosDaSemana", docId), updateData);
-                alert("Pedido atualizado com sucesso!");
+                showToast("Pedido atualizado com sucesso!", 'success');
                 document.getElementById('edit-order-modal').classList.add('hidden');
             } catch (error) {
                 console.error("Erro ao salvar alterações do pedido:", error);
-                alert("Falha ao salvar as alterações do pedido.");
+                showToast("Falha ao salvar as alterações do pedido.", 'error');
             } finally {
-                button.disabled = false;
-                button.textContent = 'Salvar Alterações';
+                button.disabled = false; button.textContent = 'Salvar Alterações';
             }
         }
 
-        async function deleteOrder(docId) {
-            if (confirm(`Tem a certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.`)) {
+        function deleteOrder(docId) {
+            const message = "Tem a certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.";
+            showCustomConfirm(message, async () => {
                 try {
                     await deleteDoc(doc(db, "pedidosDaSemana", docId));
-                    alert("Pedido excluído com sucesso.");
+                    showToast("Pedido excluído com sucesso.", 'success');
                 } catch (error) {
                     console.error("Erro ao excluir pedido: ", error);
-                    alert("Falha ao excluir o pedido.");
+                    showToast("Falha ao excluir o pedido.", 'error');
                 }
-            }
+            });
         }
 
         // --- FUNÇÕES DE ATUALIZAÇÃO DE CARDÁPIO POR IA ---
-        const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); });
+        const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
+        
         document.getElementById('imageUpload').addEventListener('change', function(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -624,113 +617,174 @@
             }
             reader.readAsDataURL(file);
         });
+
         document.getElementById('processImageBtn').addEventListener('click', async () => {
             const loader = document.getElementById('loader'); const button = document.getElementById('processImageBtn'); const confirmationForm = document.getElementById('confirmation-form');
             button.disabled = true; button.textContent = 'A analisar...'; loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
-            const file = document.getElementById('imageUpload').files[0]; const base64ImageData = (await toBase64(file)).split(',')[1];
-            const prompt = "Analise a imagem deste cardápio. Extraia as informações para cada dia da semana (de Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Retorne os dados como um objeto JSON. A estrutura do JSON deve ser um objeto com uma chave 'menu', que contém um array. Cada objeto no array representa um dia e deve conter as chaves 'day', 'pratoPrincipal' (com sub-chaves 'name' e 'emoji'), 'opcao' (com 'name' e 'emoji') e 'guarnicao' (com 'name' e 'emoji'). Se um campo não existir para um dia (ex: sem 'Opção'), o valor de 'name' deve ser uma string vazia. Atribua emojis apropriados para cada prato.";
-            const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: file.type, data: base64ImageData } }] }] };
-            // AQUI ESTÁ A MUDANÇA: Troca de 'gemini-pro-vision' para 'gemini-1.5-flash'
-            const apiKey = "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI"; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const file = document.getElementById('imageUpload').files[0]; 
+            const options = { maxSizeMB: 1.5, maxWidthOrHeight: 1500, useWebWorker: true };
             try {
+                const compressedFile = await imageCompression(file, options);
+                const base64ImageData = await toBase64(compressedFile);
+                const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🥗"}, "guarnicao": {"name": "Nome", "emoji": "🍚"}}, ...]}. Se um campo como 'Opção' não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
+                const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
+                const apiKey = firebaseConfig.apiKey;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; 
+
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { const errorBody = await response.json(); throw new Error(`Erro da API: ${errorBody.error.message}`); }
+                if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
                 const result = await response.json();
-                let textResponse = result.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const menuData = JSON.parse(textResponse); displayConfirmationForm(menuData.menu);
-            } catch (error) { console.error("Erro ao analisar a imagem:", error); alert("Ocorreu um erro ao ler a imagem."); } 
-            finally { button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); }
+                
+                let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
+                
+                textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+                const menuData = JSON.parse(textResponse);
+
+                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inválida."); }
+                
+                displayConfirmationForm(menuData.menu);
+
+            } catch (error) { 
+                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
+            } finally { 
+                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
+            }
         });
+
         function displayConfirmationForm(menuData) {
-            const container = document.getElementById('confirmation-form'); container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
+            const container = document.getElementById('confirmation-form'); 
+            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
+            
             menuData.forEach((item, index) => {
-                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4"><h4 class="font-bold">${item.day}</h4><div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2"><div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name}" class="w-full border rounded p-1"></div></div></div>`;
+                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4">
+                    <h4 class="font-bold">${item.day}</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                        <div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
+                    </div></div>`;
             });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg">Salvar Novo Cardápio</button></div>`;
-            container.classList.remove('hidden'); document.getElementById('saveNewMenuBtn').addEventListener('click', () => saveNewMenu(menuData.length));
+            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
+            container.classList.remove('hidden'); 
+            
+            document.getElementById('saveNewMenuBtn').addEventListener('click', () => saveNewMenu(menuData));
+            document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
+                container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+                showToast("Atualização cancelada.", 'info');
+            });
         }
-        async function saveNewMenu(itemCount) {
-             const button = document.getElementById('saveNewMenuBtn'); button.disabled = true; button.textContent = 'A salvar...'; const newMenu = [];
-             for(let i=0; i < itemCount; i++) { newMenu.push({ day: document.querySelector(`#prato-${i}`).closest('.p-4').querySelector('h4').textContent, pratoPrincipal: { name: document.getElementById(`prato-${i}`).value, emoji: '🍽️' }, opcao: { name: document.getElementById(`opcao-${i}`).value, emoji: '🥣' }, guarnicao: { name: document.getElementById(`guarnicao-${i}`).value, emoji: '🥗' } }); }
-             try { await setDoc(menuDocRef, { menu: newMenu }); alert('Cardápio atualizado com sucesso!'); document.getElementById('confirmation-form').classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden'); document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; await loadAndDisplayMenu(); } 
-             catch (error) { console.error("Erro ao salvar o cardápio:", error); alert("Ocorreu um erro ao salvar o novo cardápio."); } 
-             finally { button.disabled = false; button.textContent = 'Salvar Novo Cardápio'; }
+
+        async function saveNewMenu(menuData) {
+             const button = document.getElementById('saveNewMenuBtn'); button.disabled = true; button.textContent = 'A salvar...'; 
+             const newMenu = menuData.map((item, i) => ({ 
+                    day: item.day, 
+                    pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
+                    opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🥗' }, 
+                    guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🍚' } 
+                })); 
+             try { 
+                await setDoc(menuDocRef, { menu: newMenu }); 
+                showToast('Cardápio atualizado com sucesso!', 'success'); 
+                document.getElementById('confirmation-form').classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+             } catch (error) { 
+                console.error("Erro ao salvar o cardápio:", error); showToast("Erro ao salvar o novo cardápio.", 'error'); 
+             } finally { 
+                button.disabled = false; button.textContent = 'Salvar Novo Cardápio'; 
+            }
+        }
+
+        // --- LÓGICA DE AUTENTICAÇÃO E TROCA DE VISTAS ---
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.uid === APP_CONFIG.ADMIN_UID) { showAdminView(); } 
+            else { showUserView(); }
+        });
+
+        function showUserView() {
+            document.getElementById('user-view').classList.remove('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('admin-login-modal').classList.add('hidden');
+            loadAndDisplayMenu(); 
+        }
+
+        function showAdminView() {
+            document.getElementById('user-view').classList.add('hidden');
+            document.getElementById('admin-view').classList.remove('hidden');
+            document.getElementById('admin-login-modal').classList.add('hidden');
+            loadAdminData();
+            loadAndRenderEmployees();
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Entrando...';
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) {
+                    await signOut(auth);
+                    showToast("Credenciais válidas, mas este usuário não é um administrador.", 'error');
+                }
+                // Se o login for bem-sucedido e o UID estiver correto, onAuthStateChanged cuidará de mostrar a view de admin.
+            } catch (error) {
+                console.error("Erro no login de administrador:", error);
+                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
+                showToast(msg, 'error', 5000);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Entrar';
+            }
+        }
+
+        async function handleAdminLogout() {
+            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); } 
+            catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
         }
 
         // --- FUNÇÃO PRINCIPAL E EVENT LISTENERS ---
-        async function main() {
-            await signInAnonymously(auth);
-            await loadAndDisplayMenu();
+        function main() {
+            const rgfInput = document.getElementById('employeeRGF');
+            rgfInput.value = localStorage.getItem('employeeRGF') || '';
+            if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
+            rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); });
+            rgfInput.addEventListener('input', (e) => findEmployeeByRGF(e.target.value));
             
-            // Listeners da Visão do Usuário
-            const userView = document.getElementById('user-view');
-            if (userView) {
-                const rgfInput = document.getElementById('employeeRGF');
-                rgfInput.value = localStorage.getItem('employeeRGF') || '';
-                if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
-                rgfInput.addEventListener('blur', (e) => findEmployeeByRGF(e.target.value));
-                rgfInput.addEventListener('input', (e) => {
-                    localStorage.setItem('employeeRGF', e.target.value);
-                    validateForm();
-                });
-                document.getElementById('menu').addEventListener('change', validateForm);
-                document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
-                document.getElementById('submitOrder').addEventListener('click', submitOrder);
-                document.getElementById('cancel-confirmation').addEventListener('click', () => document.getElementById('confirmation-modal').classList.add('hidden'));
-            }
-
-            // Listeners de Troca de Visão (Admin/Usuário)
-            document.getElementById('switchToAdmin').addEventListener('click', () => {
-                const senha = prompt("Para aceder ao painel, digite a senha:", "");
-                if (senha === "admin123") {
-                    document.getElementById('user-view').classList.add('hidden');
-                    document.getElementById('admin-view').classList.remove('hidden');
-                    loadAdminData();
-                    loadAndRenderEmployees();
-                } else if (senha !== null) { alert("Senha incorreta."); }
+            document.getElementById('menu').addEventListener('change', validateForm);
+            document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
+            document.getElementById('submitOrder').addEventListener('click', submitOrder);
+            
+            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
+                btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
             });
 
-            document.getElementById('switchToUser').addEventListener('click', () => {
-                document.getElementById('admin-view').classList.add('hidden');
-                document.getElementById('user-view').classList.remove('hidden');
-            });
+            document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
+            document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
             
-            // Listeners da Visão do Admin
+            document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
+            document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
+            
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
-                if (e.target.classList.contains('edit-employee-btn')) {
-                    openEmployeeEditModal(e.target.dataset.id, e.target.dataset.name);
-                }
-                if (e.target.classList.contains('delete-employee-btn')) {
-                    handleDeleteEmployee(e.target.dataset.id);
-                }
+                if (e.target.classList.contains('edit-employee-btn')) { openEmployeeEditModal(e.target.dataset.id, e.target.dataset.name); }
+                if (e.target.classList.contains('delete-employee-btn')) { handleDeleteEmployee(e.target.dataset.id); }
             });
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
-            document.getElementById('cancel-employee-edit').addEventListener('click', () => {
-                document.getElementById('edit-employee-modal').classList.add('hidden');
-            });
-
+            
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
             document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
             
-            // Listeners dos botões de Ações na tabela de Pedidos
             document.getElementById('ordersTableContainer').addEventListener('click', function(e) {
-                if (e.target.classList.contains('edit-order-btn')) {
-                    openOrderEditModal(e.target.dataset.id);
-                }
-                if (e.target.classList.contains('delete-order-btn')) {
-                    deleteOrder(e.target.dataset.id);
-                }
+                if (e.target.classList.contains('edit-order-btn')) { openOrderEditModal(e.target.dataset.id); }
+                if (e.target.classList.contains('delete-order-btn')) { deleteOrder(e.target.dataset.id); }
             });
-
-            // Listeners do Modal de Edição de Pedidos
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
-            document.getElementById('cancel-order-edit').addEventListener('click', () => {
-                document.getElementById('edit-order-modal').classList.add('hidden');
-            });
         }
 
-        main().catch(error => console.error("Falha na inicialização:", error));
+        main();
     </script>
 </body>
 </html>
+
