@@ -837,7 +837,13 @@
             container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
             container.classList.remove('hidden'); 
             
-            document.getElementById('saveNewMenuBtn').addEventListener('click', () => saveNewMenu(menuData));
+            document.getElementById('saveNewMenuBtn').addEventListener('click', () => {
+                const message = "Tem certeza que deseja salvar o novo cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente. Esta ação não pode ser desfeita.";
+                showCustomConfirm(message, () => {
+                    saveNewMenu(menuData);
+                });
+            });
+
             document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
                 container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
                 document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
@@ -845,29 +851,50 @@
             });
         }
         
+        async function clearAllOrders() {
+            console.log("Iniciando a limpeza de todos os pedidos da semana...");
+            const querySnapshot = await getDocs(pedidosCollectionRef);
+            const deletionPromises = [];
+            querySnapshot.forEach((doc) => {
+                deletionPromises.push(deleteDoc(doc.ref));
+            });
+            await Promise.all(deletionPromises);
+            console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
+        }
+
         async function saveNewMenu(menuData) {
-             const button = document.getElementById('saveNewMenuBtn'); button.disabled = true; button.textContent = 'A salvar...'; 
-             const newMenu = menuData.map((item, i) => ({ 
-                 day: item.day, 
-                 pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
-                 opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
-                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
-                 isHoliday: document.getElementById(`holiday-${i}`).checked,
-                 isSpecial: document.getElementById(`special-${i}`).checked,
-             })); 
-             try { 
-                 await setDoc(menuDocRef, { menu: newMenu }); 
-                 showToast('Cardápio atualizado com sucesso!', 'success'); 
-                 document.getElementById('confirmation-form').classList.add('hidden'); 
-                 document.getElementById('imagePreview').classList.add('hidden');
-                 document.getElementById('image-processor-container').classList.add('hidden'); 
-                 document.getElementById('imageUpload').value = ''; 
-                 document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-             } catch (error) { 
-                 console.error("Erro ao salvar o cardápio:", error); showToast("Erro ao salvar o novo cardápio.", 'error'); 
-             } finally { 
-                 button.disabled = false; button.textContent = 'Salvar Novo Cardápio'; 
-             }
+            const button = document.getElementById('saveNewMenuBtn'); 
+            const cancelButton = document.getElementById('cancelNewMenuBtn');
+            button.disabled = true;
+            cancelButton.disabled = true;
+            button.textContent = 'A salvar...'; 
+
+            const newMenu = menuData.map((item, i) => ({ 
+                day: item.day, 
+                pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
+                opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
+                guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
+                isHoliday: document.getElementById(`holiday-${i}`).checked,
+                isSpecial: document.getElementById(`special-${i}`).checked,
+            })); 
+
+            try { 
+                await setDoc(menuDocRef, { menu: newMenu });
+                await clearAllOrders();
+                showToast('Cardápio atualizado e pedidos zerados!', 'success'); 
+                document.getElementById('confirmation-form').classList.add('hidden'); 
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden'); 
+                document.getElementById('imageUpload').value = ''; 
+                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+            } catch (error) { 
+                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
+                showToast("Erro ao salvar o novo cardápio.", 'error'); 
+            } finally { 
+                button.disabled = false; 
+                cancelButton.disabled = false;
+                button.textContent = 'Salvar Novo Cardápio'; 
+            }
         }
         
         function handleWhatsAppNotification() {
