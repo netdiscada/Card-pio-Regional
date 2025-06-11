@@ -401,7 +401,7 @@
             const q = query(pedidosCollectionRef, where("weekId", "==", weekId));
 
             unsubscribeStatusListener = onSnapshot(q, (snapshot) => {
-                if(allEmployees.length === 0) return; // Aguarda funcionários serem carregados
+                if(allEmployees.length === 0) return; 
 
                 const orderedRGFs = new Set(snapshot.docs.map(doc => doc.data().employeeRGF));
                 
@@ -681,12 +681,4 @@
 
             document.getElementById('announce-whatsapp-btn').addEventListener('click', () => {
                 const appUrl = "https://netdiscada.github.io/Card-pio-Regional/";
-                const message = encodeURIComponent(`Olá, equipe! 👋 O delicioso cardápio da semana já está disponível no app Delícias Urbanas. Não se esqueçam de fazer seus pedidos! \n\n${appUrl}`);
-                window.open(`whatsapp://send?text=${message}`, '_blank');
-            });
-        }
-
-        main();
-    </script>
-</body>
-</html>
+                const message = encodeURIComponent(`Olá, equipe! 👋 O delicioso cardápio da semana já
