@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delícias Urbanas - App de Pedidos com IA</title>
+    <title>Del铆cias Urbanas - App de Pedidos com IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,18 +68,18 @@
         
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
+                <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Del铆cias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu card谩pio da semana est谩 servido!</p></header>
                 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👋 1. Identificação</h2>
+                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">馃憢 1. Identifica莽茫o</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div><label for="employeeRGF" class="block text-sm font-medium text-gray-700">Seu RGF</label><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
                         <div><label for="employeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍔 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
-                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">馃崝 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o card谩pio...</div></div></div>
+                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma op莽茫o para cada dia.</p></div>
                 <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
             <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
@@ -91,65 +91,65 @@
         <div id="admin-view" class="hidden no-print">
             <header class="text-center border-b pb-6 mb-6">
                 <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
-                <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
+                <p class="text-lg text-gray-600 mt-1">Del铆cias Urbanas</p>
                 <div class="mt-4">
                     <button id="adminLogoutBtn" class="bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600">Sair do Painel</button>
                 </div>
             </header>
             <div class="mb-8">
-                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
+                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">猬咃笍 Voltar para o Card谩pio (Vis茫o Usu谩rio)</button>
             </div>
             
             <section id="employee-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">👥 Gerenciamento de Funcionários</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">馃懃 Gerenciamento de Funcion谩rios</h2>
                 <form id="add-employee-form" class="grid sm:grid-cols-3 gap-4 items-end mb-6">
                     <div>
                         <label for="newEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label>
-                        <input type="text" id="newEmployeeRGF" placeholder="RGF do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                        <input type="text" id="newEmployeeRGF" placeholder="RGF do funcion谩rio" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
                     </div>
                     <div>
                         <label for="newEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                        <input type="text" id="newEmployeeName" placeholder="Nome do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                        <input type="text" id="newEmployeeName" placeholder="Nome do funcion谩rio" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Adicionar Funcionário</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Adicionar Funcion谩rio</button>
                 </form>
                 <div id="employee-list-container" class="overflow-x-auto">
-                    <p class="text-gray-500">A carregar lista de funcionários...</p>
+                    <p class="text-gray-500">A carregar lista de funcion谩rios...</p>
                 </div>
             </section>
 
             <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
-                <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">馃崪 Atualizar Card谩pio com Imagem (IA)</h2>
+                <p class="text-gray-600 mb-4">Envie uma imagem do novo card谩pio. A nossa intelig锚ncia artificial ir谩 ler e preencher os campos para si.</p>
                 <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                 <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
-                <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio</button></div>
+                <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Card谩pio</button></div>
                 <div id="loader" class="hidden mx-auto my-4 loader"></div>
                 <div id="confirmation-form" class="hidden mt-6"></div>
             </section>
             
             <section id="dashboard-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Dashboard de Totais da Semana</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">馃搳 Dashboard de Totais da Semana</h2>
                 <div id="admin-dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><p class="text-gray-500">A calcular totais...</p></div>
             </section>
 
             <section id="orders-section">
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
-                    <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
-                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
+                    <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="馃攷 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
+                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">馃枿锔� Salvar Relat贸rio como PDF</button>
                 </div>
                 <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos...</p></div>
             </section>
         </div>
     </div>
 
-    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcion谩rio</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Altera莽玫es</button></div></form></div></div>
+    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcion谩rio</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Altera莽玫es</button></div></form></div></div>
     <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
     <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
 
-    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar A莽茫o</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
     <div id="app-toast"></div>
@@ -159,7 +159,7 @@
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
-        // --- CONFIGURAÇÃO FIREBASE ---
+        // --- CONFIGURA脟脙O FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -172,7 +172,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // --- CONSTANTES E CONFIGURAÇÕES DA APLICAÇÃO ---
+        // --- CONSTANTES E CONFIGURA脟脮ES DA APLICA脟脙O ---
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
         };
@@ -181,13 +181,13 @@
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
         
-        // --- ESTADO DA APLICAÇÃO ---
-        const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
+        // --- ESTADO DA APLICA脟脙O ---
+        const fixedOptions = [{ name: 'Omelete', emoji: '馃嵆' }, { name: 'Fil茅 de frango', emoji: '馃崡' }];
         let weeklyMenu = [];
         let allOrders = [];
         let tempOrderData = {};
         
-        // --- FUNÇÕES AUXILIARES ---
+        // --- FUN脟脮ES AUXILIARES ---
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
 
         function showToast(message, type = 'info', duration = 3000) {
@@ -216,16 +216,16 @@
             });
         }
 
-        // --- GERENCIAMENTO DE FUNCIONÁRIOS ---
+        // --- GERENCIAMENTO DE FUNCION脕RIOS ---
         function loadAndRenderEmployees() {
             const q = query(funcionariosCollectionRef, orderBy("nome"));
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('employee-list-container');
                 if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcionário cadastrado.</p>';
+                    container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcion谩rio cadastrado.</p>';
                     return;
                 }
-                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">A莽玫es</th></tr></thead><tbody>`;
                 snapshot.forEach(doc => {
                     const employee = doc.data();
                     tableHTML += `<tr>
@@ -240,8 +240,8 @@
                 tableHTML += '</tbody></table>';
                 container.innerHTML = tableHTML;
             }, (error) => {
-                 console.error("Erro ao carregar funcionários:", error);
-                 showToast("Falha ao carregar funcionários. Verifique o console para mais detalhes.", "error");
+                 console.error("Erro ao carregar funcion谩rios:", error);
+                 showToast("Falha ao carregar funcion谩rios. Verifique o console para mais detalhes.", "error");
             });
         }
 
@@ -256,23 +256,23 @@
 
             try {
                 await setDoc(doc(db, "funcionarios", rgf), { nome });
-                showToast("Funcionário adicionado com sucesso!", 'success');
+                showToast("Funcion谩rio adicionado com sucesso!", 'success');
                 rgfInput.value = ''; nameInput.value = '';
             } catch (error) {
-                console.error("Erro ao adicionar funcionário: ", error);
-                showToast("Ocorreu um erro ao adicionar o funcionário.", 'error');
+                console.error("Erro ao adicionar funcion谩rio: ", error);
+                showToast("Ocorreu um erro ao adicionar o funcion谩rio.", 'error');
             }
         }
 
         function handleDeleteEmployee(rgf, name) {
-            const message = `Tem a certeza que deseja excluir o funcionário ${name} (RGF: ${rgf})? Esta ação não pode ser desfeita.`;
+            const message = `Tem a certeza que deseja excluir o funcion谩rio ${name} (RGF: ${rgf})? Esta a莽茫o n茫o pode ser desfeita.`;
             showCustomConfirm(message, async () => {
                 try {
                     await deleteDoc(doc(db, "funcionarios", rgf));
-                    showToast("Funcionário excluído com sucesso.", 'success');
+                    showToast("Funcion谩rio exclu铆do com sucesso.", 'success');
                 } catch (error) {
-                    console.error("Erro ao excluir funcionário: ", error);
-                    showToast("Falha ao excluir o funcionário.", 'error');
+                    console.error("Erro ao excluir funcion谩rio: ", error);
+                    showToast("Falha ao excluir o funcion谩rio.", 'error');
                 }
             });
         }
@@ -288,14 +288,14 @@
             const rgf = document.getElementById('editEmployeeRGF').value;
             const newName = document.getElementById('editEmployeeName').value.trim();
 
-            if (!newName) { showToast("O nome não pode ficar em branco.", 'error'); return; }
+            if (!newName) { showToast("O nome n茫o pode ficar em branco.", 'error'); return; }
             try {
                 await updateDoc(doc(db, "funcionarios", rgf), { nome: newName });
-                showToast("Funcionário atualizado com sucesso!", 'success');
+                showToast("Funcion谩rio atualizado com sucesso!", 'success');
                 document.getElementById('edit-employee-modal').classList.add('hidden');
             } catch (error) {
-                console.error("Erro ao salvar alterações do funcionário: ", error);
-                showToast("Falha ao salvar as alterações do funcionário.", 'error');
+                console.error("Erro ao salvar altera莽玫es do funcion谩rio: ", error);
+                showToast("Falha ao salvar as altera莽玫es do funcion谩rio.", 'error');
             }
         }
         
@@ -307,19 +307,19 @@
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
                 } else {
-                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
+                    nameInput.value = ''; nameInput.placeholder = 'RGF n茫o encontrado';
                 }
                 validateForm();
             } catch (error) {
-                console.error("Erro ao buscar funcionário:", error);
+                console.error("Erro ao buscar funcion谩rio:", error);
                 nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
-                showToast("Erro ao buscar funcionário.", 'error');
+                showToast("Erro ao buscar funcion谩rio.", 'error');
             }
         }
         
         function createFallbackMenu() {
-            const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-            return days.map(day => ({ day, isHoliday: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🗓️' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
+            const days = ['Segunda-feira', 'Ter莽a-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+            return days.map(day => ({ day, isHoliday: false, pratoPrincipal: { name: 'Card谩pio n茫o definido', emoji: '馃棑锔�' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
         }
 
         function loadAndDisplayMenu() {
@@ -327,14 +327,14 @@
                 weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
                 createMenuHTML();
             }, (error) => {
-                 console.error("Erro ao carregar o cardápio:", error);
-                 showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
+                 console.error("Erro ao carregar o card谩pio:", error);
+                 showToast("Erro ao carregar o card谩pio. Usando card谩pio padr茫o.", 'error');
                  weeklyMenu = createFallbackMenu();
                  createMenuHTML();
             });
         }
         
-        // --- FUNÇÕES DE INTERFACE (ATUALIZADAS) ---
+        // --- FUN脟脮ES DE INTERFACE (ATUALIZADAS) ---
 
         function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
@@ -345,25 +345,25 @@
                 const dayId = getDayId(item.day);
                 let dayHTML = `<div class="day-section space-y-3">`;
 
-                // Verifica se é feriado
+                // Verifica se 茅 feriado
                 if (item.isHoliday) {
                     dayHTML += `
                         <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
                         <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
-                            <p class="font-bold">🎉 Feriado</p>
-                            <p>Não haverá refeição neste dia.</p>
+                            <p class="font-bold">馃帀 Feriado</p>
+                            <p>N茫o haver谩 refei莽茫o neste dia.</p>
                         </div>`;
                 } else {
-                    // Lógica para dias normais
+                    // L贸gica para dias normais
                     const allOptions = [
                         { ...item.pratoPrincipal, type: 'Prato Principal' },
-                        ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
-                        ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
+                        ...(item.opcao?.name ? [{ ...item.opcao, type: 'Op莽茫o do Dia' }] : []),
+                        ...fixedOptions.map(fixa => ({ ...fixa, type: 'Op莽茫o Fixa' })),
                     ];
 
                     dayHTML += `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
                     if (item.guarnicao?.name) {
-                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji}</div>`;
+                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarni莽茫o: ${item.guarnicao.name} ${item.guarnicao.emoji}</div>`;
                     }
                     
                     dayHTML += `<div class="space-y-3">`;
@@ -374,9 +374,9 @@
                     });
                     dayHTML += `</div>`;
                     
-                    // Campo de anotações
+                    // Campo de anota莽玫es
                     dayHTML += `<div class="mt-3">
-                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anota莽玫es? Ex: sem cebola, ponto da carne, etc."></textarea>
                     </div>`;
                 }
 
@@ -395,7 +395,7 @@
             const submitBtnContainer = document.getElementById('submitButtonContainer');
             if (!guidanceSection || !submitBtnContainer) return;
 
-            // Filtra apenas os dias que NÃO são feriados para validar
+            // Filtra apenas os dias que N脙O s茫o feriados para validar
             const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
             const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
 
@@ -406,14 +406,14 @@
                 submitBtnContainer.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
                 let message = '';
-                if(!rgf) message = 'Digite seu RGF para começar. ';
-                else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
+                if(!rgf) message = 'Digite seu RGF para come莽ar. ';
+                else if(!name) message = 'RGF n茫o encontrado. Pe莽a para um administrador cadastr谩-lo. ';
                 else if (!hasAllSelections) {
-                    // Verifica os dias em falta apenas nos não-feriados
+                    // Verifica os dias em falta apenas nos n茫o-feriados
                     const missingDays = nonHolidayItems
                         .filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`))
                         .map(item => item.day);
-                    if (missingDays.length > 0) message += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
+                    if (missingDays.length > 0) message += `Falta selecionar op莽玫es para: ${missingDays.join(', ')}.`;
                 }
                 guidanceText.textContent = message || 'Por favor, preencha todos os campos.';
             }
@@ -431,10 +431,10 @@
             weeklyMenu.forEach(item => {
                 const dayId = getDayId(item.day);
                 
-                // Só processa dias que não são feriados
+                // S贸 processa dias que n茫o s茫o feriados
                 if (!item.isHoliday) {
                     const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
-                    if (!choiceInput) return; // Pula se por algum motivo não estiver selecionado
+                    if (!choiceInput) return; // Pula se por algum motivo n茫o estiver selecionado
                     const choice = choiceInput.value;
                     const notes = document.getElementById(`notes-${dayId}`).value.trim();
 
@@ -495,7 +495,7 @@
 
         function updateDashboard(orders) {
             const dashboard = document.getElementById('admin-dashboard');
-            if (!weeklyMenu || weeklyMenu.length === 0) { dashboard.innerHTML = '<p class="text-gray-500">Cardápio semanal não carregado.</p>'; return; }
+            if (!weeklyMenu || weeklyMenu.length === 0) { dashboard.innerHTML = '<p class="text-gray-500">Card谩pio semanal n茫o carregado.</p>'; return; }
             if (orders.length === 0) { dashboard.innerHTML = '<p class="text-gray-500">Nenhum pedido para calcular totais.</p>'; return; }
 
             const dailyCounts = {};
@@ -528,11 +528,11 @@
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
             if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
-            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
+            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando card谩pio...</p>'; return; }
 
-            let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
+            let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcion谩rio</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
             weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
-            tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+            tableHTML += `<th class="py-2 px-3 border-b text-left">A莽玫es</th></tr></thead><tbody>`;
 
             filteredOrders.forEach(doc => {
                 const order = doc.data();
@@ -546,7 +546,7 @@
                     } else {
                         let choice = order[dayId] || 'N/A';
                         if (choice === dayMenuItem.pratoPrincipal.name) choice = 'Prato';
-                        else if (dayMenuItem.opcao?.name && choice === dayMenuItem.opcao.name) choice = 'Opção';
+                        else if (dayMenuItem.opcao?.name && choice === dayMenuItem.opcao.name) choice = 'Op莽茫o';
                         
                         const notes = order[`${dayId}_notes`];
                         cellContent = choice;
@@ -564,10 +564,10 @@
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            reportContainer.innerHTML = '<h1>Relatório de Pedidos da Semana - Regional Quatinga</h1>';
+            reportContainer.innerHTML = '<h1>Relat贸rio de Pedidos da Semana - Regional Quatinga</h1>';
             
             weeklyMenu.forEach(dayMenuItem => {
-                if (dayMenuItem.isHoliday) return; // Pula a criação de tabela para feriados
+                if (dayMenuItem.isHoliday) return; // Pula a cria莽茫o de tabela para feriados
 
                 const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
@@ -580,7 +580,7 @@
                     const order = orderDoc.data();
                     let choice = order[dayId];
                     if (choice === dayMenuItem.pratoPrincipal.name) choice = 'Prato';
-                    else if (dayMenuItem.opcao?.name && choice === dayMenuItem.opcao.name) choice = 'Opção';
+                    else if (dayMenuItem.opcao?.name && choice === dayMenuItem.opcao.name) choice = 'Op莽茫o';
                     
                     const notes = order[`${dayId}_notes`];
                     let choiceHTML = choice;
@@ -607,7 +607,7 @@
 
             try {
                 const docSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
-                if (!docSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
+                if (!docSnap.exists()) { showToast("Erro: Pedido n茫o encontrado.", 'error'); modal.classList.add('hidden'); return; }
 
                 const orderData = docSnap.data();
                 employeeNameInput.value = orderData.employeeName;
@@ -636,7 +636,7 @@
                         dayHTML += `</div>`;
                         
                         dayHTML += `<div class="mt-4">
-                            <label for="edit-notes-${dayId}" class="block text-sm font-medium text-gray-700">Anotações</label>
+                            <label for="edit-notes-${dayId}" class="block text-sm font-medium text-gray-700">Anota莽玫es</label>
                             <textarea id="edit-notes-${dayId}" name="edit-notes-${dayId}" rows="2" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">${currentNotes}</textarea>
                         </div>`;
                     }
@@ -645,8 +645,8 @@
                     formContent.innerHTML += dayHTML;
                 });
             } catch (error) {
-                console.error("Erro ao abrir modal de edição:", error);
-                showToast("Não foi possível carregar os dados do pedido.", 'error');
+                console.error("Erro ao abrir modal de edi莽茫o:", error);
+                showToast("N茫o foi poss铆vel carregar os dados do pedido.", 'error');
                 modal.classList.add('hidden');
             }
         }
@@ -675,19 +675,19 @@
                 showToast("Pedido atualizado com sucesso!", 'success');
                 document.getElementById('edit-order-modal').classList.add('hidden');
             } catch (error) {
-                console.error("Erro ao salvar alterações do pedido:", error);
-                showToast("Falha ao salvar as alterações do pedido.", 'error');
+                console.error("Erro ao salvar altera莽玫es do pedido:", error);
+                showToast("Falha ao salvar as altera莽玫es do pedido.", 'error');
             } finally {
-                button.disabled = false; button.textContent = 'Salvar Alterações';
+                button.disabled = false; button.textContent = 'Salvar Altera莽玫es';
             }
         }
 
         function deleteOrder(docId, name) {
-            const message = `Tem a certeza que deseja excluir o pedido de ${name}? Esta ação não pode ser desfeita.`;
+            const message = `Tem a certeza que deseja excluir o pedido de ${name}? Esta a莽茫o n茫o pode ser desfeita.`;
             showCustomConfirm(message, async () => {
                 try {
                     await deleteDoc(doc(db, "pedidosDaSemana", docId));
-                    showToast("Pedido excluído com sucesso.", 'success');
+                    showToast("Pedido exclu铆do com sucesso.", 'success');
                 } catch (error) {
                     console.error("Erro ao excluir pedido: ", error);
                     showToast("Falha ao excluir o pedido.", 'error');
@@ -695,7 +695,7 @@
             });
         }
 
-        // --- FUNÇÕES DE ATUALIZAÇÃO DE CARDÁPIO POR IA ---
+        // --- FUN脟脮ES DE ATUALIZA脟脙O DE CARD脕PIO POR IA ---
         const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
         
         document.getElementById('imageUpload').addEventListener('change', function(event) {
@@ -711,7 +711,7 @@
 
         document.getElementById('processImageBtn').addEventListener('click', async () => {
             if (typeof imageCompression === 'undefined') {
-                showToast('Erro: Biblioteca de compressão não carregou.', 'error');
+                showToast('Erro: Biblioteca de compress茫o n茫o carregou.', 'error');
                 return;
             }
 
@@ -723,7 +723,7 @@
                 const compressedFile = await imageCompression(file, options);
                 const base64ImageData = await toBase64(compressedFile);
                 
-                const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado (procure por termos como 'FERIADO'), marque-o. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🥗"}, "guarnicao": {"name": "Nome", "emoji": "🍚"}}, {"day": "Terça-feira", "isHoliday": true, "pratoPrincipal": {"name": "", "emoji": ""}, "opcao": {"name": "", "emoji": ""}, "guarnicao": {"name": "", "emoji": ""}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
+                const prompt = `Analise a imagem deste card谩pio semanal. Extraia as informa莽玫es para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Op莽茫o' e a 'Guarni莽茫o'. Se o dia for um feriado (procure por termos como 'FERIADO'), marque-o. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "pratoPrincipal": {"name": "Nome", "emoji": "馃崨"}, "opcao": {"name": "Nome", "emoji": "馃"}, "guarnicao": {"name": "Nome", "emoji": "馃崥"}}, {"day": "Ter莽a-feira", "isHoliday": true, "pratoPrincipal": {"name": "", "emoji": ""}, "opcao": {"name": "", "emoji": ""}, "guarnicao": {"name": "", "emoji": ""}}, ...]}. Se um campo n茫o existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a 煤nica coisa na resposta.`;
 
                 const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
                 const apiKey = firebaseConfig.apiKey;
@@ -739,40 +739,40 @@
                 textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
                 const menuData = JSON.parse(textResponse);
 
-                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inválida."); }
+                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inv谩lida."); }
                 
                 displayConfirmationForm(menuData.menu);
 
             } catch (error) { 
                 console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
             } finally { 
-                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
+                button.disabled = false; button.textContent = 'Analisar Card谩pio'; loader.classList.add('hidden'); 
             }
         });
 
         function displayConfirmationForm(menuData) {
             const container = document.getElementById('confirmation-form'); 
-            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
+            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extra铆dos</h3>';
             
             menuData.forEach((item, index) => {
                 container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4">
                     <h4 class="font-bold">${item.day}</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
                         <div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div>
-                        <div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
-                        <div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Op莽茫o</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Guarni莽茫o</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
                     </div>
                     <div class="mt-2"><label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"> <span class="ml-2 text-sm text-gray-900">Marcar como Feriado</span></label></div>
                     </div>`;
             });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
+            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Card谩pio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
             container.classList.remove('hidden'); 
             
             document.getElementById('saveNewMenuBtn').addEventListener('click', () => saveNewMenu(menuData));
             document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
                 container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
                 document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
-                showToast("Atualização cancelada.", 'info');
+                showToast("Atualiza莽茫o cancelada.", 'info');
             });
         }
 
@@ -780,20 +780,20 @@
              const button = document.getElementById('saveNewMenuBtn'); button.disabled = true; button.textContent = 'A salvar...'; 
              const newMenu = menuData.map((item, i) => ({ 
                  day: item.day, 
-                 pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
-                 opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🥗' }, 
-                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🍚' },
+                 pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '馃崨' }, 
+                 opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '馃' }, 
+                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '馃崥' },
                  isHoliday: document.getElementById(`holiday-${i}`).checked
              })); 
              try { 
                  await setDoc(menuDocRef, { menu: newMenu }); 
-                 showToast('Cardápio atualizado com sucesso!', 'success'); 
+                 showToast('Card谩pio atualizado com sucesso!', 'success'); 
                  document.getElementById('confirmation-form').classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
                  document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
              } catch (error) { 
-                 console.error("Erro ao salvar o cardápio:", error); showToast("Erro ao salvar o novo cardápio.", 'error'); 
+                 console.error("Erro ao salvar o card谩pio:", error); showToast("Erro ao salvar o novo card谩pio.", 'error'); 
              } finally { 
-                 button.disabled = false; button.textContent = 'Salvar Novo Cardápio'; 
+                 button.disabled = false; button.textContent = 'Salvar Novo Card谩pio'; 
              }
         }
 
@@ -803,8 +803,8 @@
             } else {
                 if (!auth.currentUser) {
                     signInAnonymously(auth).catch((error) => {
-                        console.error("Erro no login anónimo:", error);
-                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
+                        console.error("Erro no login an贸nimo:", error);
+                        showToast("N茫o foi poss铆vel conectar-se. Verifique a sua liga莽茫o.", "error");
                     });
                 }
                 showUserView();
@@ -836,7 +836,7 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) {
                     await signOut(auth);
-                    showToast("Credenciais válidas, mas este usuário não é um administrador.", 'error');
+                    showToast("Credenciais v谩lidas, mas este usu谩rio n茫o 茅 um administrador.", 'error');
                 }
             } catch (error) {
                 console.error("Erro no login de administrador:", error);
