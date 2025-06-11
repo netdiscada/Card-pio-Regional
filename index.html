@@ -71,14 +71,14 @@
                 <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
                 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👋 1. Identificação</h2>
+                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div><label for="employeeRGF" class="block text-sm font-medium text-gray-700">Seu RGF</label><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
                         <div><label for="employeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍔 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
                 <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
                 <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
@@ -100,6 +100,29 @@
                 <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
             
+            <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
+                <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <p class="text-gray-500">A carregar status dos pedidos...</p>
+                </div>
+            </section>
+
+            <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
+                <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
+                <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
+                <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio</button></div>
+                <div id="loader" class="hidden mx-auto my-4 loader"></div>
+                <div id="confirmation-form" class="hidden mt-6"></div>
+                <div id="whatsapp-notification-container" class="mt-4 text-center hidden">
+                    <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                        Notificar Funcionários no WhatsApp
+                    </button>
+                </div>
+            </section>
+
             <section id="employee-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">👥 Gerenciamento de Funcionários</h2>
                 <form id="add-employee-form" class="grid sm:grid-cols-3 gap-4 items-end mb-6">
@@ -118,18 +141,8 @@
                 </div>
             </section>
 
-            <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
-                <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
-                <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
-                <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio</button></div>
-                <div id="loader" class="hidden mx-auto my-4 loader"></div>
-                <div id="confirmation-form" class="hidden mt-6"></div>
-            </section>
-            
             <section id="dashboard-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Dashboard de Totais da Semana</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📈 Dashboard de Totais da Semana</h2>
                 <div id="admin-dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><p class="text-gray-500">A calcular totais...</p></div>
             </section>
 
@@ -148,7 +161,6 @@
     <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
     <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
     <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
-
     <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
@@ -156,7 +168,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         // --- CONFIGURAÇÃO FIREBASE ---
@@ -182,7 +194,7 @@
         const funcionariosCollectionRef = collection(db, "funcionarios");
         
         // --- ESTADO DA APLICAÇÃO ---
-        const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
+        const fixedOptions = [{ name: 'Omelete', emoji: ' omelete ' }, { name: 'Filé de frango', emoji: ' filé de frango ' }];
         let weeklyMenu = [];
         let allOrders = [];
         let tempOrderData = {};
@@ -319,7 +331,7 @@
         
         function createFallbackMenu() {
             const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-            return days.map(day => ({ day, isHoliday: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🗓️' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
+            return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
         }
 
         function loadAndDisplayMenu() {
@@ -335,7 +347,6 @@
         }
         
         // --- FUNÇÕES DE INTERFACE (ATUALIZADAS) ---
-
         function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
             if (!menuContainer) return;
@@ -344,26 +355,32 @@
             weeklyMenu.forEach(item => {
                 const dayId = getDayId(item.day);
                 let dayHTML = `<div class="day-section space-y-3">`;
-
-                // Verifica se é feriado
-                if (item.isHoliday) {
-                    dayHTML += `
+                
+                let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
+                if (item.isSpecial) {
+                    dayTitleHTML = `<div class="flex items-center gap-3">
                         <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
+                        <span class="text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1">✨ Almoço Especial</span>
+                    </div>`;
+                }
+                
+                if (item.isHoliday) {
+                    dayHTML += dayTitleHTML;
+                    dayHTML += `
                         <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
-                            <p class="font-bold">🎉 Feriado</p>
+                            <p class="font-bold">🎊 Feriado</p>
                             <p>Não haverá refeição neste dia.</p>
                         </div>`;
                 } else {
-                    // Lógica para dias normais
                     const allOptions = [
                         { ...item.pratoPrincipal, type: 'Prato Principal' },
                         ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
                         ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
                     ];
 
-                    dayHTML += `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
+                    dayHTML += dayTitleHTML;
                     if (item.guarnicao?.name) {
-                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji}</div>`;
+                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
                     }
                     
                     dayHTML += `<div class="space-y-3">`;
@@ -374,7 +391,6 @@
                     });
                     dayHTML += `</div>`;
                     
-                    // Campo de anotações
                     dayHTML += `<div class="mt-3">
                         <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
                     </div>`;
@@ -395,7 +411,6 @@
             const submitBtnContainer = document.getElementById('submitButtonContainer');
             if (!guidanceSection || !submitBtnContainer) return;
 
-            // Filtra apenas os dias que NÃO são feriados para validar
             const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
             const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
 
@@ -409,7 +424,6 @@
                 if(!rgf) message = 'Digite seu RGF para começar. ';
                 else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
                 else if (!hasAllSelections) {
-                    // Verifica os dias em falta apenas nos não-feriados
                     const missingDays = nonHolidayItems
                         .filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`))
                         .map(item => item.day);
@@ -431,10 +445,9 @@
             weeklyMenu.forEach(item => {
                 const dayId = getDayId(item.day);
                 
-                // Só processa dias que não são feriados
                 if (!item.isHoliday) {
                     const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
-                    if (!choiceInput) return; // Pula se por algum motivo não estiver selecionado
+                    if (!choiceInput) return;
                     const choice = choiceInput.value;
                     const notes = document.getElementById(`notes-${dayId}`).value.trim();
 
@@ -468,6 +481,7 @@
             }
         }
         
+        // --- FUNÇÕES DE ADMINISTRAÇÃO (ATUALIZADAS) ---
         function loadAdminData() {
             onSnapshot(pedidosCollectionRef, (snapshot) => {
                 const latestOrdersMap = new Map();
@@ -487,10 +501,43 @@
 
                 updateDashboard(allOrders);
                 renderOrdersTable(allOrders);
+                renderOrderStatus(allOrders); // NOVA CHAMADA
             }, (error) => {
                 console.error("Erro ao carregar dados do administrador:", error);
                 showToast("Erro ao carregar dados do administrador.", 'error');
             });
+        }
+        
+        // NOVO: Renderiza o status de quem pediu e quem não pediu
+        async function renderOrderStatus(orders) {
+            const container = document.getElementById('order-status-container');
+            container.innerHTML = '<p class="text-gray-500">A processar...</p>';
+
+            try {
+                const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
+                const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
+
+                const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
+                const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
+
+                let html = `
+                    <div>
+                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
+                    </div>
+                `;
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error("Erro ao renderizar status de pedidos:", error);
+                container.innerHTML = '<p class="text-red-500">Falha ao carregar status dos funcionários.</p>';
+            }
         }
 
         function updateDashboard(orders) {
@@ -500,7 +547,7 @@
 
             const dailyCounts = {};
             weeklyMenu.forEach(dayItem => {
-                if(dayItem.isHoliday) return; // Pula feriados
+                if(dayItem.isHoliday) return;
                 dailyCounts[dayItem.day] = {};
                 orders.forEach(orderDoc => {
                     const dayId = getDayId(dayItem.day);
@@ -567,8 +614,7 @@
             reportContainer.innerHTML = '<h1>Relatório de Pedidos da Semana - Regional Quatinga</h1>';
             
             weeklyMenu.forEach(dayMenuItem => {
-                if (dayMenuItem.isHoliday) return; // Pula a criação de tabela para feriados
-
+                if (dayMenuItem.isHoliday) return;
                 const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
                 
@@ -587,7 +633,6 @@
                     if (notes) {
                         choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
                     }
-
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
                 });
                 tableHTML += '</tbody></table></div>';
@@ -695,7 +740,7 @@
             });
         }
 
-        // --- FUNÇÕES DE ATUALIZAÇÃO DE CARDÁPIO POR IA ---
+        // --- FUNÇÕES DE ATUALIZAÇÃO DE CARDÁPIO POR IA (ATUALIZADAS) ---
         const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
         
         document.getElementById('imageUpload').addEventListener('change', function(event) {
@@ -705,6 +750,7 @@
                 document.getElementById('imagePreview').src = e.target.result;
                 document.getElementById('imagePreview').classList.remove('hidden');
                 document.getElementById('image-processor-container').classList.remove('hidden');
+                document.getElementById('whatsapp-notification-container').classList.add('hidden'); // Esconde o botão de notificação
             }
             reader.readAsDataURL(file);
         });
@@ -723,7 +769,8 @@
                 const compressedFile = await imageCompression(file, options);
                 const base64ImageData = await toBase64(compressedFile);
                 
-                const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado (procure por termos como 'FERIADO'), marque-o. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🥗"}, "guarnicao": {"name": "Nome", "emoji": "🍚"}}, {"day": "Terça-feira", "isHoliday": true, "pratoPrincipal": {"name": "", "emoji": ""}, "opcao": {"name": "", "emoji": ""}, "guarnicao": {"name": "", "emoji": ""}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
+                // PROMPT ATUALIZADO
+                const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado, marque-o. Além disso, determine se o almoço é 'especial' (ex: uma refeição comemorativa, temática ou de maior qualidade) e defina o campo booleano 'isSpecial'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "isSpecial": false, "pratoPrincipal": {"name": "Nome", "emoji": " prato "}, "opcao": {"name": "Nome", "emoji": " opção "}, "guarnicao": {"name": "Nome", "emoji": " guarnição "}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
 
                 const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
                 const apiKey = firebaseConfig.apiKey;
@@ -739,7 +786,7 @@
                 textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
                 const menuData = JSON.parse(textResponse);
 
-                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inválida."); }
+                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
                 
                 displayConfirmationForm(menuData.menu);
 
@@ -750,6 +797,7 @@
             }
         });
 
+        // FORMULÁRIO DE CONFIRMAÇÃO ATUALIZADO
         function displayConfirmationForm(menuData) {
             const container = document.getElementById('confirmation-form'); 
             container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
@@ -762,7 +810,10 @@
                         <div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
                         <div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
                     </div>
-                    <div class="mt-2"><label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"> <span class="ml-2 text-sm text-gray-900">Marcar como Feriado</span></label></div>
+                    <div class="mt-3 flex items-center space-x-6">
+                        <label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-indigo-600"> <span class="ml-2 text-sm text-gray-900">Marcar como Feriado</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="special-${index}" ${item.isSpecial ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-purple-600"> <span class="ml-2 text-sm text-gray-900">✨ Almoço Especial</span></label>
+                    </div>
                     </div>`;
             });
             container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
@@ -775,28 +826,43 @@
                 showToast("Atualização cancelada.", 'info');
             });
         }
-
+        
+        // SALVAR CARDÁPIO ATUALIZADO
         async function saveNewMenu(menuData) {
              const button = document.getElementById('saveNewMenuBtn'); button.disabled = true; button.textContent = 'A salvar...'; 
              const newMenu = menuData.map((item, i) => ({ 
                  day: item.day, 
                  pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
-                 opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🥗' }, 
-                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🍚' },
-                 isHoliday: document.getElementById(`holiday-${i}`).checked
+                 opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
+                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
+                 isHoliday: document.getElementById(`holiday-${i}`).checked,
+                 isSpecial: document.getElementById(`special-${i}`).checked, // Novo
              })); 
              try { 
                  await setDoc(menuDocRef, { menu: newMenu }); 
                  showToast('Cardápio atualizado com sucesso!', 'success'); 
-                 document.getElementById('confirmation-form').classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
-                 document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+                 document.getElementById('confirmation-form').classList.add('hidden'); 
+                 document.getElementById('imagePreview').classList.add('hidden');
+                 document.getElementById('image-processor-container').classList.add('hidden'); 
+                 document.getElementById('imageUpload').value = ''; 
+                 document.getElementById('whatsapp-notification-container').classList.remove('hidden'); // MOSTRA o botão de notificação
              } catch (error) { 
                  console.error("Erro ao salvar o cardápio:", error); showToast("Erro ao salvar o novo cardápio.", 'error'); 
              } finally { 
                  button.disabled = false; button.textContent = 'Salvar Novo Cardápio'; 
              }
         }
+        
+        // NOVO: Função para notificar via WhatsApp
+        function handleWhatsAppNotification() {
+            const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
+            showToast('Abra o WhatsApp para enviar a notificação.', 'info');
+        }
 
+        // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
         onAuthStateChanged(auth, (user) => {
             if (user && user.uid === APP_CONFIG.ADMIN_UID) {
                 showAdminView();
@@ -853,6 +919,7 @@
         }
 
         function main() {
+            // Event Listeners para Visão de Usuário
             const rgfInput = document.getElementById('employeeRGF');
             rgfInput.value = localStorage.getItem('employeeRGF') || '';
             if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
@@ -867,6 +934,7 @@
                 btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
             });
 
+            // Event Listeners para Visão de Admin
             document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
             
@@ -875,8 +943,8 @@
             
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
-                if (e.target.classList.contains('edit-employee-btn')) { openEmployeeEditModal(e.target.dataset.id, e.target.dataset.name); }
-                if (e.target.classList.contains('delete-employee-btn')) { handleDeleteEmployee(e.target.dataset.id, e.target.dataset.name); }
+                if (e.target.closest('.edit-employee-btn')) { openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name); }
+                if (e.target.closest('.delete-employee-btn')) { handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name); }
             });
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
             
@@ -884,10 +952,13 @@
             document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
             
             document.getElementById('ordersTableContainer').addEventListener('click', function(e) {
-                if (e.target.classList.contains('edit-order-btn')) { openOrderEditModal(e.target.dataset.id); }
-                if (e.target.classList.contains('delete-order-btn')) { deleteOrder(e.target.dataset.id, e.target.dataset.name); }
+                if (e.target.closest('.edit-order-btn')) { openOrderEditModal(e.target.closest('.edit-order-btn').dataset.id); }
+                if (e.target.closest('.delete-order-btn')) { deleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name); }
             });
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
+            
+            // NOVO: Event listener para o botão de notificação do WhatsApp
+            document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
         }
 
         main();
