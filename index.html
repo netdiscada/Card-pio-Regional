@@ -130,7 +130,7 @@
     <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
     <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
     <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
-    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Entrar</button></div></form></div></div>
+    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Entrar</button></div></form></div></div>
     <div id="announce-menu-modal" class="modal-overlay hidden no-print"><div class="modal-content text-center"><h2 class="text-2xl font-bold mb-2 text-green-600">Cardápio Atualizado!</h2><p class="mb-6 text-gray-600">Lembre a equipe de fazer os pedidos.</p><button id="announce-whatsapp-btn" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-lg">📢 Anunciar no WhatsApp</button><button class="cancel-modal-btn mt-3 text-sm text-gray-500">Fechar</button></div></div>
     <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
@@ -147,7 +147,7 @@
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
             projectId: "cardapio-8ddea",
-            storageBucket: "cardapio-8ddea.firebasestorage.app", // Corrigido para .firebasestorage.app
+            storageBucket: "cardapio-8ddea.appspot.com",
             messagingSenderId: "1019677985212",
             appId: "1:1019677985212:web:57c7820a62585a867dc3b9"
         };
@@ -156,6 +156,7 @@
         const auth = getAuth(app);
 
         // --- CONSTANTES E ESTADO ---
+        const ADMIN_UID = 'LqAXao4FuOQAvzS3uQAd9et6OnK2'; // UID do admin
         const menuDocRef = doc(db, "cardapio", "semanal");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
@@ -230,7 +231,7 @@
                 });
                 tableHTML += '</tbody></table>';
                 container.innerHTML = tableHTML;
-            });
+            }, console.error);
         }
         async function handleAddEmployee(e) {
             e.preventDefault();
@@ -285,7 +286,7 @@
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
                  showToast("Não foi possível carregar o cardápio. Verifique sua conexão e as regras do Firestore.", "error");
-                 createMenuHTML(); // Tenta renderizar com o menu vazio
+                 createMenuHTML(); 
             });
         }
         function createMenuHTML() {
@@ -391,13 +392,11 @@
         // --- LÓGICA DO PAINEL ADMIN ---
         function loadAdminData() {
             loadAndRenderEmployees();
-            // Listener para todos os pedidos para o histórico
             const q = query(pedidosCollectionRef, orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
                 allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderOrdersTable(allOrders);
             }, console.error);
-            // Listener separado para o status da semana atual
             startStatusListener();
         }
         
@@ -409,7 +408,7 @@
 
             unsubscribeStatusListener = onSnapshot(q, (snapshot) => {
                 if(allEmployees.length === 0) {
-                    setTimeout(startStatusListener, 1000); // Tenta de novo se os funcionários não carregaram
+                    setTimeout(startStatusListener, 1000); 
                     return; 
                 }
 
@@ -429,7 +428,7 @@
                 } else {
                     document.getElementById('report-button-container').classList.add('hidden');
                 }
-            });
+            }, console.error);
         }
 
         // --- GERENCIAMENTO DE PEDIDOS (ADMIN) ---
@@ -608,113 +607,4 @@
             const container = document.getElementById('confirmation-form'); 
             container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
             menuData.forEach((item, index) => {
-                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4"><h4 class="font-bold">${item.day}</h4><div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2"><div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div></div><div class="mt-2 grid grid-cols-2 gap-4"><label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4"> <span class="ml-2 text-sm">Marcar como Feriado</span></label><label class="flex items-center"><input type="checkbox" id="special-${index}" ${item.isSpecial ? 'checked' : ''} class="h-4 w-4"> <span class="ml-2 text-sm">Marcar como Especial</span></label></div></div>`;
-            });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button></div>`;
-            document.getElementById('saveNewMenuBtn').addEventListener('click', () => saveNewMenu(menuData));
-        }
-        
-        async function saveNewMenu(menuData) {
-             const newMenu = menuData.map((item, i) => ({ 
-                 day: item.day, 
-                 isHoliday: document.getElementById(`holiday-${i}`).checked,
-                 isSpecial: document.getElementById(`special-${i}`).checked,
-                 pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
-                 opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🥗' }, 
-                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🍚' },
-             }));
-             try { 
-                 await setDoc(menuDocRef, { menu: newMenu }); 
-                 showToast('Cardápio atualizado com sucesso!', 'success'); 
-                 document.getElementById('confirmation-form').classList.add('hidden');
-                 document.getElementById('announce-menu-modal').classList.remove('hidden');
-             } catch (error) { showToast("Erro ao salvar o novo cardápio.", 'error'); }
-        }
-
-        // --- GESTÃO DE VIEWS E AUTENTICAÇÃO ---
-        onAuthStateChanged(auth, (user) => {
-            // A verificação de admin agora é feita pelas regras do Firestore,
-            // aqui apenas diferenciamos entre logado (qualquer tipo) e não logado.
-            if (user) { 
-                // Verifica se o usuário logado é o admin para mostrar a view correta
-                if (user.uid === 'LqAXao4FuOQAvzS3uQAd9et6OnK2') {
-                    showAdminView();
-                } else {
-                    showUserView();
-                }
-            } else { // Nenhum usuário, tenta login anônimo para a visão de usuário
-                signInAnonymously(auth).catch(console.error);
-                showUserView();
-            }
-        });
-        function showUserView() {
-            document.getElementById('user-view').classList.remove('hidden');
-            document.getElementById('admin-view').classList.add('hidden');
-            if (unsubscribeStatusListener) {
-                unsubscribeStatusListener();
-                unsubscribeStatusListener = null;
-            }
-            loadAndDisplayMenu(); 
-        }
-        function showAdminView() {
-            document.getElementById('user-view').classList.add('hidden');
-            document.getElementById('admin-view').classList.remove('hidden');
-            document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAdminData();
-        }
-        async function handleAdminLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-            try { await signInWithEmailAndPassword(auth, email, password); } 
-            catch (error) { showToast("Email ou senha incorretos.", "error"); }
-        }
-        async function handleAdminLogout() {
-            try { await signOut(auth); showToast("Logout bem-sucedido!", 'info'); } 
-            catch (error) { showToast("Erro ao fazer logout.", 'error'); }
-        }
-        
-        // --- INICIALIZAÇÃO E EVENTOS ---
-        function main() {
-            // Eventos do Usuário
-            document.getElementById('employeeRGF').addEventListener('blur', (e) => findEmployeeByRGF(e.target.value));
-            document.getElementById('menu').addEventListener('change', validateForm);
-            document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
-            document.getElementById('submitOrder').addEventListener('click', submitOrder);
-            
-            // Eventos de Modals
-            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden')));
-
-            // Eventos de Admin
-            document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
-            document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
-            document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
-            document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
-            document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
-            document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
-            document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
-            document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
-            document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
-            
-            document.getElementById('employee-list-container').addEventListener('click', (e) => {
-                if (e.target.classList.contains('edit-employee-btn')) { openEmployeeEditModal(e.target.dataset.id, e.target.dataset.name); }
-                if (e.target.classList.contains('delete-employee-btn')) { handleDeleteEmployee(e.target.dataset.id, e.target.dataset.name); }
-            });
-
-            document.getElementById('ordersTableContainer').addEventListener('click', (e) => {
-                if (e.target.classList.contains('edit-order-btn')) { openOrderEditModal(e.target.dataset.id); }
-                if (e.target.classList.contains('delete-order-btn')) { deleteOrder(e.target.dataset.id, e.target.dataset.name); }
-            });
-
-            document.getElementById('announce-whatsapp-btn').addEventListener('click', () => {
-                const appUrl = "https://netdiscada.github.io/Card-pio-Regional/";
-                const message = encodeURIComponent(`Olá, equipe! 👋 O delicioso cardápio da semana já está disponível no app Delícias Urbanas. Não se esqueçam de fazer seus pedidos! \n\n${appUrl}`);
-                window.open(`whatsapp://send?text=${message}`, '_blank');
-            });
-        }
-
-        // Adiciona um listener que espera o HTML estar 100% carregado antes de executar o javascript principal.
-        document.addEventListener('DOMContentLoaded', main);
-    </script>
-</body>
-</html>
+                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4"><h4 class="font-bold">${item.day}</h4><div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2"><div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div><div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="
