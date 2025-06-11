@@ -22,6 +22,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
+
         #print-report { display: none; }
         @media print {
             @page { size: A4 portrait; margin: 15mm; }
@@ -35,6 +36,7 @@
             #print-report th { background-color: #e2e8f0; font-weight: 600; }
             #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
         }
+        
         #app-toast {
             position: fixed;
             bottom: 20px;
@@ -168,6 +170,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -179,12 +182,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
         };
+        
         const menuDocRef = doc(db, "cardapio", "semanal");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
+        
         const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
         let weeklyMenu = [];
         let allOrders = [];
@@ -211,6 +217,7 @@
 
             const newOkBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+            
             newOkBtn.addEventListener('click', () => {
                 onConfirm();
                 modal.classList.add('hidden');
@@ -251,6 +258,7 @@
             const nameInput = document.getElementById('newEmployeeName');
             const rgf = rgfInput.value.trim();
             const nome = nameInput.value.trim();
+
             if (!rgf || !nome) { showToast("Por favor, preencha o RGF e o Nome.", 'error'); return; }
 
             try {
@@ -270,7 +278,7 @@
                     await deleteDoc(doc(db, "funcionarios", rgf));
                     showToast("Funcionário excluído com sucesso.", 'success');
                 } catch (error) {
-                     console.error("Erro ao excluir funcionário: ", error);
+                    console.error("Erro ao excluir funcionário: ", error);
                     showToast("Falha ao excluir o funcionário.", 'error');
                 }
             });
@@ -306,8 +314,7 @@
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
                 } else {
-                    nameInput.value = '';
-                    nameInput.placeholder = 'RGF não encontrado';
+                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
                 }
                 validateForm();
             } catch (error) {
@@ -344,7 +351,6 @@
                 let dayHTML = `<div class="day-section space-y-3">`;
                 
                 let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
-                
                 if (item.isSpecial) {
                     dayTitleHTML = `<div class="flex items-center gap-3">
                         <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
@@ -365,6 +371,7 @@
                         ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
                         ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
                     ];
+
                     dayHTML += dayTitleHTML;
                     if (item.guarnicao?.name) {
                         dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
@@ -410,6 +417,7 @@
 
             const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
             const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
+
             if (name && rgf && hasAllSelections) {
                 guidanceSection.classList.add('hidden');
                 submitBtnContainer.classList.remove('hidden');
@@ -473,8 +481,7 @@
                 console.error("Erro ao enviar pedido: ", error);
                 showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
             } finally {
-                button.disabled = false;
-                button.textContent = 'Confirmar e Enviar';
+                button.disabled = false; button.textContent = 'Confirmar e Enviar';
             }
         }
         
@@ -486,7 +493,7 @@
                     if (orderData.employeeRGF) {
                         const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
                          if (!latestOrdersMap.has(orderData.employeeRGF) || timestamp > latestOrdersMap.get(orderData.employeeRGF).timestamp) {
-                            latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
+                             latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
                          }
                     }
                 });
@@ -513,8 +520,10 @@
                 const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
+
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
                 const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
+
                 let html = `
                     <div>
                         <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
@@ -566,12 +575,14 @@
             const container = document.getElementById('ordersTableContainer');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
+
             if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
             if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
 
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
             weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+
             filteredOrders.forEach(doc => {
                 const order = doc.data();
                 tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
@@ -610,6 +621,7 @@
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
             reportContainer.innerHTML = '<h1>Relatório de Pedidos da Semana - Regional Quatinga</h1>';
+            
             weeklyMenu.forEach(dayMenuItem => {
                 if (dayMenuItem.isHoliday) return; 
 
@@ -628,6 +640,7 @@
                     const mainDishName = dayMenuItem.pratoPrincipal.name;
                     const optionDishName = dayMenuItem.opcao?.name;
                     let reportChoice = '';
+
                     if (choice === mainDishName) {
                         reportChoice = 'PRATO';
                     } else if (optionDishName && choice === optionDishName) {
@@ -657,6 +670,7 @@
 
             formContent.innerHTML = '<p class="text-center text-gray-500">A carregar...</p>';
             modal.classList.remove('hidden');
+
             try {
                 const docSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
                 if (!docSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
@@ -709,6 +723,7 @@
             button.disabled = true; button.textContent = 'A salvar...';
             const docId = document.getElementById('edit-order-id').value;
             const updateData = {};
+            
             weeklyMenu.forEach(item => {
                 if (!item.isHoliday) {
                     const dayId = getDayId(item.day);
@@ -720,6 +735,7 @@
                     updateData[`${dayId}_notes`] = notes;
                 }
             });
+
             try {
                 await updateDoc(doc(db, "pedidosDaSemana", docId), updateData);
                 showToast("Pedido atualizado com sucesso!", 'success');
@@ -728,8 +744,7 @@
                 console.error("Erro ao salvar alterações do pedido:", error);
                 showToast("Falha ao salvar as alterações do pedido.", 'error');
             } finally {
-                button.disabled = false;
-                button.textContent = 'Salvar Alterações';
+                button.disabled = false; button.textContent = 'Salvar Alterações';
             }
         }
 
@@ -740,13 +755,14 @@
                     await deleteDoc(doc(db, "pedidosDaSemana", docId));
                     showToast("Pedido excluído com sucesso.", 'success');
                 } catch (error) {
-                     console.error("Erro ao excluir pedido: ", error);
+                    console.error("Erro ao excluir pedido: ", error);
                     showToast("Falha ao excluir o pedido.", 'error');
                 }
             });
         }
 
         const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
+        
         document.getElementById('imageUpload').addEventListener('change', function(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -758,6 +774,7 @@
             }
             reader.readAsDataURL(file);
         });
+
         document.getElementById('processImageBtn').addEventListener('click', async () => {
             if (typeof imageCompression === 'undefined') {
                 showToast('Erro: Biblioteca de compressão não carregou.', 'error');
@@ -781,6 +798,7 @@
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
                 const result = await response.json();
+                
                 let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
                 
@@ -790,16 +808,16 @@
                 if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
                 
                 displayConfirmationForm(menuData.menu);
+
             } catch (error) { 
-                console.error("Erro ao processar IA:", error);
-                showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000);
+                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
             } finally { 
-                button.disabled = false;
-                button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
+                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
             }
         });
+
         function displayConfirmationForm(menuData) {
-            const container = document.getElementById('confirmation-form');
+            const container = document.getElementById('confirmation-form'); 
             container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
             
             menuData.forEach((item, index) => {
@@ -825,6 +843,7 @@
                     saveNewMenu(menuData);
                 });
             });
+
             document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
                 container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
                 document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
@@ -844,11 +863,12 @@
         }
 
         async function saveNewMenu(menuData) {
-            const button = document.getElementById('saveNewMenuBtn');
+            const button = document.getElementById('saveNewMenuBtn'); 
             const cancelButton = document.getElementById('cancelNewMenuBtn');
             button.disabled = true;
             cancelButton.disabled = true;
-            button.textContent = 'A salvar...';
+            button.textContent = 'A salvar...'; 
+
             const newMenu = menuData.map((item, i) => ({ 
                 day: item.day, 
                 pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
@@ -856,7 +876,8 @@
                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
                 isHoliday: document.getElementById(`holiday-${i}`).checked,
                 isSpecial: document.getElementById(`special-${i}`).checked,
-            }));
+            })); 
+
             try { 
                 await setDoc(menuDocRef, { menu: newMenu });
                 await clearAllOrders();
@@ -867,10 +888,10 @@
                 document.getElementById('imageUpload').value = ''; 
                 document.getElementById('whatsapp-notification-container').classList.remove('hidden');
             } catch (error) { 
-                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error);
+                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
                 showToast("Erro ao salvar o novo cardápio.", 'error'); 
             } finally { 
-                button.disabled = false;
+                button.disabled = false; 
                 cancelButton.disabled = false;
                 button.textContent = 'Salvar Novo Cardápio'; 
             }
@@ -885,17 +906,16 @@
         }
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                if (user.uid === APP_CONFIG.ADMIN_UID) {
-                    showAdminView();
-                } else {
-                    showUserView();
-                }
+            if (user && user.uid === APP_CONFIG.ADMIN_UID) {
+                showAdminView();
             } else {
-                signInAnonymously(auth).catch((error) => {
-                    console.error("Erro no login anónimo:", error);
-                    showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
-                });
+                if (!auth.currentUser) {
+                    signInAnonymously(auth).catch((error) => {
+                        console.error("Erro no login anónimo:", error);
+                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
+                    });
+                }
+                showUserView();
             }
         });
 
@@ -903,7 +923,7 @@
             document.getElementById('user-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu();
+            loadAndDisplayMenu(); 
         }
 
         function showAdminView() {
@@ -931,16 +951,13 @@
                 const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
                 showToast(msg, 'error', 5000);
             } finally {
-                btn.disabled = false;
-                btn.textContent = 'Entrar';
+                btn.disabled = false; btn.textContent = 'Entrar';
             }
         }
 
         async function handleAdminLogout() {
-            try { await signOut(auth);
-                showToast("Logout de administrador bem-sucedido!", 'info'); } 
-            catch (error) { console.error("Erro no logout:", error);
-                showToast("Erro ao fazer logout.", 'error'); }
+            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); } 
+            catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
         }
 
         function main() {
@@ -957,6 +974,7 @@
             document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
                 btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
             });
+
             document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
             
