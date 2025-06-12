@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delícias Urbanas - App de Pedidos com IA</title>
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
-    
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
         .font-brand { font-family: 'Lobster Two', cursive; }
@@ -22,84 +18,38 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid #3498db; width: 40px; height: 40px; animation: spin 2s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .no-print { }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
-
-        #app-toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            pointer-events: none;
-            transform: translateX(-50%) translateY(20px);
+        #print-report { display: none; }
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            body > *:not(#print-report) { display: none !important; }
+            #print-report { display: block !important; }
+            #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+            .report-day-section { margin-bottom: 12px; page-break-inside: avoid; }
+            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+            #print-report th, #print-report td { border: 1px solid #999; padding: 5px; text-align: left; }
+            #print-report th { background-color: #e2e8f0; font-weight: 600; }
+            #print-report .rgf-col { width: 15%; }
+            #print-report .nome-col { width: 60%; }
+            #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
         }
-        #app-toast.show {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(-50%) translateY(0);
-        }
+        #app-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; pointer-events: none; transform: translateX(-50%) translateY(20px); }
+        #app-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
         #app-toast.success { background-color: #22c55e; }
         #app-toast.error { background-color: #ef4444; }
         #app-toast.info { background-color: #3b82f6; }
-
-        /* ESTILOS DE IMPRESSÃO ATUALIZADOS */
-        @media print {
-            body > *:not(#print-report) {
-                display: none !important;
-            }
-            #print-report {
-                display: block !important;
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-            }
-            @page {
-                size: A4 portrait;
-                margin: 10mm; /* Margens compactas */
-            }
-            h1 {
-                font-size: 16pt;
-                text-align: center;
-                margin-bottom: 8px; /* Margem reduzida */
-                font-family: 'Poppins', sans-serif;
-            }
-            .report-day-section {
-                margin-bottom: 8px; /* Margem reduzida */
-                page-break-inside: avoid;
-            }
-            .report-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 9pt;
-            }
-            .report-table th, .report-table td {
-                border: 1px solid #ccc;
-                padding: 4px;
-                text-align: left;
-            }
-            .report-table th {
-                background-color: #e2e8f0;
-                font-weight: 600;
-            }
-            .rgf-col { width: 15%; }
-            .nome-col { width: 60%; }
-            .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
-        }
     </style>
 </head>
 <body class="bg-slate-50">
 
-    <div id="app-container" class="no-print">
-        <div id="user-view">
+    <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
+        
+        <div id="user-view" class="no-print">
             <div id="form-container">
                 <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
                 
@@ -121,7 +71,7 @@
             </footer>
         </div>
 
-        <div id="admin-view" class="hidden">
+        <div id="admin-view" class="hidden no-print">
             <header class="text-center border-b pb-6 mb-6">
                 <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
                 <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
@@ -148,6 +98,12 @@
                 <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio</button></div>
                 <div id="loader" class="hidden mx-auto my-4 loader"></div>
                 <div id="confirmation-form" class="hidden mt-6"></div>
+                <div id="whatsapp-notification-container" class="mt-4 text-center hidden">
+                    <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                        Notificar Funcionários no WhatsApp
+                    </button>
+                </div>
             </section>
 
             <section id="employee-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
@@ -172,7 +128,7 @@
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
                     <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
-                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Imprimir Relatório</button>
+                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
                 </div>
                 <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos...</p></div>
             </section>
@@ -186,7 +142,7 @@
     <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
-    <div id="app-toast" class="no-print"></div>
+    <div id="app-toast"></div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -224,7 +180,7 @@
             const toast = document.getElementById('app-toast');
             if(!toast) return;
             toast.textContent = message;
-            toast.className = 'show no-print';
+            toast.className = 'show';
             toast.classList.add(type);
             setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
         }
@@ -270,7 +226,7 @@
                 container.innerHTML = tableHTML;
             }, (error) => {
                  console.error("Erro ao carregar funcionários:", error);
-                 showToast("Falha ao carregar funcionários.", "error");
+                 showToast("Falha ao carregar funcionários. Verifique o console para mais detalhes.", "error");
             });
         }
 
@@ -355,7 +311,7 @@
             onSnapshot(menuDocRef, (docSnap) => {
                 weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
                 createMenuHTML();
-                renderOrdersTable(allOrders);
+                renderOrdersTable(allOrders); 
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
                  showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
@@ -564,15 +520,15 @@
                 container.innerHTML = '<p class="text-red-500">Falha ao carregar status dos funcionários.</p>';
             }
         }
-
+        
         function renderOrdersTable(orders) {
             const container = document.getElementById('ordersTableContainer');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
             if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
-
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
+            
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
             weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
@@ -611,40 +567,49 @@
             tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
         }
-        
+
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
+            if (allOrders.length === 0 || weeklyMenu.length === 0) {
+                showToast("Não há pedidos ou cardápio para gerar o relatório.", "info");
+                return;
+            }
+            reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
             
-            let reportHTML = '<h1>Regional Quatinga</h1>';
+            let allDaysHTML = '';
             weeklyMenu.forEach(dayMenuItem => {
-                if (dayMenuItem.isHoliday) return;
+                if (dayMenuItem.isHoliday) return; 
+
                 const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
-                const dailyOrders = allOrders.filter(orderDoc => orderDoc.data()[dayId]).sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
+                
+                const dailyOrders = allOrders
+                    .filter(orderDoc => orderDoc.data()[dayId])
+                    .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
+                
                 dailyOrders.forEach(orderDoc => {
                     const order = orderDoc.data();
                     const choice = order[dayId];
                     const notes = order[`${dayId}_notes`];
+                    
                     const mainDishName = dayMenuItem.pratoPrincipal.name;
                     const optionDishName = dayMenuItem.opcao?.name;
-                    let reportChoice = (choice === mainDishName) ? 'PRATO' : ((optionDishName && choice === optionDishName) ? 'OPÇÃO' : choice.toUpperCase());
-                    let choiceHTML = reportChoice + (notes ? ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>` : '');
+                    let reportChoice = '';
+
+                    if (choice === mainDishName) { reportChoice = 'PRATO'; } 
+                    else if (optionDishName && choice === optionDishName) { reportChoice = 'OPÇÃO'; } 
+                    else { reportChoice = choice.toUpperCase(); }
+                    
+                    let choiceHTML = reportChoice;
+                    if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
+
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
                 });
                 tableHTML += '</tbody></table></div>';
-                reportHTML += tableHTML;
+                allDaysHTML += tableHTML;
             });
-            reportContainer.innerHTML = reportHTML;
-
-            const originalTitle = document.title;
-            document.title = 'Cardapio Quatinga';
-
+            reportContainer.innerHTML += allDaysHTML;
             window.print();
-
-            setTimeout(() => {
-                document.title = originalTitle;
-            }, 500);
         }
 
         async function openOrderEditModal(docId) {
@@ -755,6 +720,7 @@
                 document.getElementById('imagePreview').src = e.target.result;
                 document.getElementById('imagePreview').classList.remove('hidden');
                 document.getElementById('image-processor-container').classList.remove('hidden');
+                document.getElementById('whatsapp-notification-container').classList.add('hidden');
             }
             reader.readAsDataURL(file);
         });
@@ -818,7 +784,7 @@
                     </div>
                     </div>`;
             });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio e Notificar</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
+            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
             container.classList.remove('hidden'); 
             
             document.getElementById('saveNewMenuBtn').addEventListener('click', () => {
@@ -870,14 +836,14 @@
                 document.getElementById('imagePreview').classList.add('hidden');
                 document.getElementById('image-processor-container').classList.add('hidden'); 
                 document.getElementById('imageUpload').value = ''; 
-                handleWhatsAppNotification();
+                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
             } catch (error) { 
                 console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
                 showToast("Erro ao salvar o novo cardápio.", 'error'); 
             } finally { 
                 button.disabled = false; 
                 cancelButton.disabled = false;
-                button.textContent = 'Salvar Novo Cardápio e Notificar'; 
+                button.textContent = 'Salvar Novo Cardápio'; 
             }
         }
         
@@ -886,6 +852,7 @@
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank');
+            showToast('Abra o WhatsApp para enviar a notificação.', 'info');
         }
 
         onAuthStateChanged(auth, (user) => {
@@ -895,7 +862,7 @@
                 if (!auth.currentUser) {
                     signInAnonymously(auth).catch((error) => {
                         console.error("Erro no login anónimo:", error);
-                        showToast("Não foi possível conectar-se.", "error");
+                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
                     });
                 }
                 showUserView();
@@ -913,7 +880,7 @@
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu();
+            loadAndDisplayMenu(); 
             loadAdminData();
             loadAndRenderEmployees();
         }
@@ -932,7 +899,7 @@
                 }
             } catch (error) {
                 console.error("Erro no login de administrador:", error);
-                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth.user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
+                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
                 showToast(msg, 'error', 5000);
             } finally {
                 btn.disabled = false; btn.textContent = 'Entrar';
@@ -980,6 +947,8 @@
                 if (e.target.closest('.delete-order-btn')) { deleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name); }
             });
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
+            
+            document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
         }
 
         main();
