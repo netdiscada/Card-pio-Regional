@@ -13,9 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" referrerpolicy="no-referrer"></script>
-    
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
         .font-brand { font-family: 'Lobster Two', cursive; }
@@ -29,13 +26,20 @@
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
 
-        #print-report { display: none; background-color: white; padding: 20px; }
-        #print-report h1 { font-size: 16pt; text-align: center; margin-bottom: 12px; font-family: 'Poppins', sans-serif; color: #000; }
-        #print-report .report-day-section { margin-bottom: 15px; page-break-inside: avoid; }
-        #print-report .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-        #print-report th, #print-report td { border: 1px solid #ccc; padding: 4px; text-align: left; color: #000; }
-        #print-report th { background-color: #e2e8f0; font-weight: 600; }
-        #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+        /* Estilos para a impressão de alta qualidade */
+        #print-report { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-report, #print-report * { visibility: visible; }
+            #print-report { position: absolute; left: 0; top: 0; width: 100%; }
+            @page { size: A4 portrait; margin: 10mm; }
+            h1 { font-size: 16pt; text-align: center; margin-bottom: 12px; font-family: 'Poppins', sans-serif; }
+            .report-day-section { margin-bottom: 15px; page-break-inside: avoid; }
+            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+            .report-table th, .report-table td { border: 1px solid #ccc; padding: 4px; text-align: left; }
+            .report-table th { background-color: #e2e8f0; font-weight: 600; }
+            .rgf-col { width: 15%; } .nome-col { width: 60%; } .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+        }
         
         #app-toast {
             position: fixed;
@@ -139,7 +143,7 @@
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
                     <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
-                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">📲 Gerar e Compartilhar Relatório</button>
+                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Imprimir Relatório</button>
                 </div>
                 <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos...</p></div>
             </section>
@@ -160,8 +164,6 @@
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
-        const { jsPDF } = window.jspdf;
-
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -580,21 +582,19 @@
             tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
         }
-
-        async function generateAndShareReport() {
-            const reportBtn = document.getElementById('generateReportBtn');
-            reportBtn.disabled = true;
-            reportBtn.textContent = 'A gerar PDF...';
-
+        
+        // FUNÇÃO DE IMPRESSÃO ATUALIZADA
+        function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
             
+            // Monta o conteúdo do relatório
+            let reportHTML = '<h1>Regional Quatinga</h1>';
             weeklyMenu.forEach(dayMenuItem => {
-                if (dayMenuItem.isHoliday) return; 
+                if (dayMenuItem.isHoliday) return;
                 const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
-                const dailyOrders = allOrders.filter(orderDoc => orderDoc.data()[dayId]).sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
-                
+                const dailyOrders = allOrders.filter(orderDoc => orderDoc.data()[dayId]).sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
+
                 dailyOrders.forEach(orderDoc => {
                     const order = orderDoc.data();
                     const choice = order[dayId];
@@ -606,57 +606,21 @@
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
                 });
                 tableHTML += '</tbody></table></div>';
-                reportContainer.innerHTML += tableHTML;
+                reportHTML += tableHTML;
             });
-            
-            reportContainer.style.display = 'block';
-            reportContainer.style.position = 'absolute';
-            reportContainer.style.left = '-9999px';
-            
-            try {
-                const canvas = await html2canvas(reportContainer, { scale: 2 });
-                const imgData = canvas.toDataURL('image/png');
+            reportContainer.innerHTML = reportHTML;
 
-                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const canvasWidth = canvas.width;
-                const canvasHeight = canvas.height;
-                const canvasAspectRatio = canvasWidth / canvasHeight;
-                const pdfAspectRatio = pdfWidth / pdfHeight;
+            // Salva o título original e define o novo para o nome do arquivo
+            const originalTitle = document.title;
+            document.title = 'Cardapio Quatinga';
 
-                let finalCanvasWidth, finalCanvasHeight;
-                if(canvasAspectRatio > pdfAspectRatio){
-                    finalCanvasWidth = pdfWidth;
-                    finalCanvasHeight = pdfWidth / canvasAspectRatio;
-                } else {
-                    finalCanvasHeight = pdfHeight;
-                    finalCanvasWidth = pdfHeight * canvasAspectRatio;
-                }
-                pdf.addImage(imgData, 'PNG', 0, 0, finalCanvasWidth, finalCanvasHeight);
-                const pdfBlob = pdf.output('blob');
-                const reportFile = new File([pdfBlob], "relatorio-pedidos.pdf", { type: "application/pdf" });
-                
-                if (navigator.canShare && navigator.canShare({ files: [reportFile] })) {
-                    await navigator.share({
-                        files: [reportFile],
-                        title: 'Relatório de Pedidos da Semana',
-                        text: 'Segue o relatório de pedidos da semana.'
-                    });
-                } else {
-                    pdf.save('relatorio-pedidos.pdf');
-                    showToast('PDF salvo. Anexe-o manualmente na conversa.', 'info', 5000);
-                }
-            } catch (error) {
-                console.error("Erro ao gerar ou compartilhar PDF:", error);
-                showToast("Falha ao gerar o PDF. Verifique o console.", "error");
-            } finally {
-                reportContainer.style.display = 'none';
-                reportContainer.style.position = 'static';
-                reportContainer.style.left = 'auto';
-                reportBtn.disabled = false;
-                reportBtn.textContent = '📲 Gerar e Compartilhar Relatório';
-            }
+            // Chama a impressão
+            window.print();
+
+            // Restaura o título original após a impressão
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 500);
         }
 
         async function openOrderEditModal(docId) {
@@ -898,7 +862,6 @@
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank');
-            showToast('Abra o WhatsApp para enviar a notificação.', 'info');
         }
 
         onAuthStateChanged(auth, (user) => {
@@ -986,7 +949,7 @@
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
             
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
-            document.getElementById('generateReportBtn').addEventListener('click', generateAndShareReport);
+            document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
             
             document.getElementById('ordersTableContainer').addEventListener('click', function(e) {
                 if (e.target.closest('.edit-order-btn')) { openOrderEditModal(e.target.closest('.edit-order-btn').dataset.id); }
