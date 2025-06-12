@@ -609,7 +609,17 @@
                 allDaysHTML += tableHTML;
             });
             reportContainer.innerHTML += allDaysHTML;
+
+            const originalTitle = document.title;
+            document.title = 'cardapio quatinga';
+            
             window.print();
+            
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 100);
+
+            handleWhatsAppNotification();
         }
 
         async function openOrderEditModal(docId) {
