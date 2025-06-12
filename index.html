@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoVBL5gI9kLmbG0CsdC3ZGxpSTRgfA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
         .font-brand { font-family: 'Lobster Two', cursive; }
@@ -23,19 +25,13 @@
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
 
-        #print-report { display: none; }
-        @media print {
-            @page { size: A4 portrait; margin: 10mm; }
-            .no-print { display: none !important; }
-            body > *:not(#print-report) { display: none !important; }
-            #print-report { display: block !important; }
-            #print-report h1 { font-size: 16pt; text-align: center; margin-bottom: 12px; font-family: 'Poppins', sans-serif; }
-            #print-report .report-day-section { margin-bottom: 15px; page-break-inside: avoid; }
-            #print-report .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-            #print-report th, #print-report td { border: 1px solid #ccc; padding: 4px; text-align: left; }
-            #print-report th { background-color: #e2e8f0; font-weight: 600; }
-            #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
-        }
+        #print-report { display: none; background-color: white; padding: 20px; }
+        #print-report h1 { font-size: 16pt; text-align: center; margin-bottom: 12px; font-family: 'Poppins', sans-serif; color: #000; }
+        #print-report .report-day-section { margin-bottom: 15px; page-break-inside: avoid; }
+        #print-report .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+        #print-report th, #print-report td { border: 1px solid #ccc; padding: 4px; text-align: left; color: #000; }
+        #print-report th { background-color: #e2e8f0; font-weight: 600; }
+        #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
         
         #app-toast {
             position: fixed;
@@ -66,7 +62,7 @@
 
     <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
         
-        <div id="user-view" class="no-print">
+        <div id="user-view">
             <div id="form-container">
                 <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
                 
@@ -88,7 +84,7 @@
             </footer>
         </div>
 
-        <div id="admin-view" class="hidden no-print">
+        <div id="admin-view" class="hidden">
             <header class="text-center border-b pb-6 mb-6">
                 <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
                 <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
@@ -139,18 +135,18 @@
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
                     <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
-                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório e Notificar</button>
+                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">📲 Gerar e Compartilhar Relatório</button>
                 </div>
                 <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos...</p></div>
             </section>
         </div>
     </div>
 
-    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
-    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
-    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
+    <div id="edit-order-modal" class="modal-overlay hidden"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="edit-employee-modal" class="modal-overlay hidden"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="confirmation-modal" class="modal-overlay hidden"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
+    <div id="admin-login-modal" class="modal-overlay hidden"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
     <div id="app-toast"></div>
@@ -160,6 +156,8 @@
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
+        const { jsPDF } = window.jspdf;
+
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -237,7 +235,7 @@
                 container.innerHTML = tableHTML;
             }, (error) => {
                  console.error("Erro ao carregar funcionários:", error);
-                 showToast("Falha ao carregar funcionários. Verifique o console para mais detalhes.", "error");
+                 showToast("Falha ao carregar funcionários.", "error");
             });
         }
 
@@ -579,53 +577,82 @@
             container.innerHTML = tableHTML;
         }
 
-        function generateAndPrintReport() {
+        async function generateAndShareReport() {
+            const reportBtn = document.getElementById('generateReportBtn');
+            reportBtn.disabled = true;
+            reportBtn.textContent = 'A gerar PDF...';
+
             const reportContainer = document.getElementById('print-report');
             reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
             
             weeklyMenu.forEach(dayMenuItem => {
                 if (dayMenuItem.isHoliday) return; 
-
                 const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
-                
-                const dailyOrders = allOrders
-                    .filter(orderDoc => orderDoc.data()[dayId])
-                    .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
+                const dailyOrders = allOrders.filter(orderDoc => orderDoc.data()[dayId]).sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
                 
                 dailyOrders.forEach(orderDoc => {
                     const order = orderDoc.data();
                     const choice = order[dayId];
                     const notes = order[`${dayId}_notes`];
-                    
                     const mainDishName = dayMenuItem.pratoPrincipal.name;
                     const optionDishName = dayMenuItem.opcao?.name;
-                    let reportChoice = '';
-
-                    if (choice === mainDishName) {
-                        reportChoice = 'PRATO';
-                    } else if (optionDishName && choice === optionDishName) {
-                        reportChoice = 'OPÇÃO';
-                    } else {
-                        reportChoice = choice.toUpperCase();
-                    }
-                    
-                    let choiceHTML = reportChoice;
-                    if (notes) {
-                        choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
-                    }
-
+                    let reportChoice = (choice === mainDishName) ? 'PRATO' : ((optionDishName && choice === optionDishName) ? 'OPÇÃO' : choice.toUpperCase());
+                    let choiceHTML = reportChoice + (notes ? ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>` : '');
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
                 });
                 tableHTML += '</tbody></table></div>';
                 reportContainer.innerHTML += tableHTML;
             });
-            window.print();
             
-            const message = `Relatório de pedidos da semana gerado e pronto para envio.`;
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
-            window.open(whatsappUrl, '_blank');
+            reportContainer.style.display = 'block';
+            reportContainer.style.position = 'absolute';
+            reportContainer.style.left = '-9999px';
+            
+            try {
+                const canvas = await html2canvas(reportContainer, { scale: 2 });
+                const imgData = canvas.toDataURL('image/png');
+
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+                const canvasAspectRatio = canvasWidth / canvasHeight;
+                const pdfAspectRatio = pdfWidth / pdfHeight;
+
+                let finalCanvasWidth, finalCanvasHeight;
+                if(canvasAspectRatio > pdfAspectRatio){
+                    finalCanvasWidth = pdfWidth;
+                    finalCanvasHeight = pdfWidth / canvasAspectRatio;
+                } else {
+                    finalCanvasHeight = pdfHeight;
+                    finalCanvasWidth = pdfHeight * canvasAspectRatio;
+                }
+                pdf.addImage(imgData, 'PNG', 0, 0, finalCanvasWidth, finalCanvasHeight);
+                const pdfBlob = pdf.output('blob');
+                const reportFile = new File([pdfBlob], "relatorio-pedidos.pdf", { type: "application/pdf" });
+                
+                if (navigator.canShare && navigator.canShare({ files: [reportFile] })) {
+                    await navigator.share({
+                        files: [reportFile],
+                        title: 'Relatório de Pedidos da Semana',
+                        text: 'Segue o relatório de pedidos da semana.'
+                    });
+                } else {
+                    pdf.save('relatorio-pedidos.pdf');
+                    showToast('PDF salvo. Anexe-o manualmente na conversa.', 'info', 5000);
+                }
+            } catch (error) {
+                console.error("Erro ao gerar ou compartilhar PDF:", error);
+                showToast("Falha ao gerar o PDF. Verifique o console.", "error");
+            } finally {
+                reportContainer.style.display = 'none';
+                reportContainer.style.position = 'static';
+                reportContainer.style.left = 'auto';
+                reportBtn.disabled = false;
+                reportBtn.textContent = '📲 Gerar e Compartilhar Relatório';
+            }
         }
 
         async function openOrderEditModal(docId) {
@@ -877,7 +904,7 @@
                 if (!auth.currentUser) {
                     signInAnonymously(auth).catch((error) => {
                         console.error("Erro no login anónimo:", error);
-                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
+                        showToast("Não foi possível conectar-se.", "error");
                     });
                 }
                 showUserView();
@@ -955,7 +982,7 @@
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
             
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
-            document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
+            document.getElementById('generateReportBtn').addEventListener('click', generateAndShareReport);
             
             document.getElementById('ordersTableContainer').addEventListener('click', function(e) {
                 if (e.target.closest('.edit-order-btn')) { openOrderEditModal(e.target.closest('.edit-order-btn').dataset.id); }
