@@ -24,17 +24,64 @@
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
 
         #print-report { display: none; }
+        
         @media print {
-            @page { size: A4 portrait; margin: 15mm; }
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
             .no-print { display: none !important; }
             body > *:not(#print-report) { display: none !important; }
             #print-report { display: block !important; }
-            #print-report h1 { font-size: 20pt; text-align: center; margin-bottom: 12px; font-family: 'Poppins', sans-serif; }
-            #print-report .report-day-section { margin-bottom: 20px; page-break-inside: avoid; }
-            #print-report .report-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
-            #print-report th, #print-report td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-            #print-report th { background-color: #e2e8f0; font-weight: 600; }
-            #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+
+            #print-report h1 {
+                font-size: 18pt;
+                text-align: center;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+
+            #print-report h2 {
+                font-size: 12pt;
+                text-align: center;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 400;
+                margin-top: 0;
+                margin-bottom: 15px;
+                color: #555;
+            }
+
+            #print-report .report-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9pt;
+            }
+            #print-report th, #print-report td {
+                border: 1px solid #ccc;
+                padding: 5px;
+                text-align: center;
+                vertical-align: middle;
+            }
+            #print-report th {
+                background-color: #e2e8f0;
+                font-weight: 600;
+            }
+
+            #print-report .rgf-col { width: 10%; }
+            #print-report .nome-col { width: 35%; }
+            #print-report .nome-data {
+                font-weight: bold;
+                text-align: left;
+            }
+            
+            #print-report .notes {
+                font-style: italic;
+                font-weight: normal;
+                font-size: 8pt;
+                color: #333;
+                display: block;
+            }
         }
         
         #app-toast {
@@ -170,7 +217,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -182,15 +228,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
         };
-        
         const menuDocRef = doc(db, "cardapio", "semanal");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
-        
         const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
         let weeklyMenu = [];
         let allOrders = [];
@@ -217,7 +260,6 @@
 
             const newOkBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
-            
             newOkBtn.addEventListener('click', () => {
                 onConfirm();
                 modal.classList.add('hidden');
@@ -258,7 +300,6 @@
             const nameInput = document.getElementById('newEmployeeName');
             const rgf = rgfInput.value.trim();
             const nome = nameInput.value.trim();
-
             if (!rgf || !nome) { showToast("Por favor, preencha o RGF e o Nome.", 'error'); return; }
 
             try {
@@ -278,7 +319,7 @@
                     await deleteDoc(doc(db, "funcionarios", rgf));
                     showToast("Funcionário excluído com sucesso.", 'success');
                 } catch (error) {
-                    console.error("Erro ao excluir funcionário: ", error);
+                     console.error("Erro ao excluir funcionário: ", error);
                     showToast("Falha ao excluir o funcionário.", 'error');
                 }
             });
@@ -314,7 +355,8 @@
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
                 } else {
-                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
+                    nameInput.value = '';
+                    nameInput.placeholder = 'RGF não encontrado';
                 }
                 validateForm();
             } catch (error) {
@@ -351,6 +393,7 @@
                 let dayHTML = `<div class="day-section space-y-3">`;
                 
                 let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
+                
                 if (item.isSpecial) {
                     dayTitleHTML = `<div class="flex items-center gap-3">
                         <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
@@ -371,7 +414,6 @@
                         ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
                         ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
                     ];
-
                     dayHTML += dayTitleHTML;
                     if (item.guarnicao?.name) {
                         dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
@@ -417,7 +459,7 @@
 
             const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
             const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
-
+            
             if (name && rgf && hasAllSelections) {
                 guidanceSection.classList.add('hidden');
                 submitBtnContainer.classList.remove('hidden');
@@ -481,7 +523,8 @@
                 console.error("Erro ao enviar pedido: ", error);
                 showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
             } finally {
-                button.disabled = false; button.textContent = 'Confirmar e Enviar';
+                button.disabled = false;
+                button.textContent = 'Confirmar e Enviar';
             }
         }
         
@@ -520,7 +563,6 @@
                 const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
-
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
                 const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
 
@@ -575,14 +617,14 @@
             const container = document.getElementById('ordersTableContainer');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
-
+            
             if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
             if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
 
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
             weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
-
+            
             filteredOrders.forEach(doc => {
                 const order = doc.data();
                 tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
@@ -620,45 +662,77 @@
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            reportContainer.innerHTML = '<h1>Relatório de Pedidos da Semana - Regional Quatinga</h1>';
-            
-            weeklyMenu.forEach(dayMenuItem => {
-                if (dayMenuItem.isHoliday) return; 
+            if (!allOrders || allOrders.length === 0) {
+                showToast("Nenhum pedido para gerar relatório.", "info");
+                return;
+            }
+            if (!weeklyMenu || weeklyMenu.length === 0) {
+                showToast("Cardápio não carregado, impossível gerar relatório.", "info");
+                return;
+            }
 
-                const dayId = getDayId(dayMenuItem.day);
-                let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
+            const nonHolidayDays = weeklyMenu.filter(day => !day.isHoliday);
+
+            let tableHTML = `
+                <h1>Relatório de Pedidos da Semana</h1>
+                <h2>Delícias Urbanas - Regional Quatinga</h2>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th class="rgf-col">RGF</th>
+                            <th class="nome-col">NOME</th>`;
+            
+            nonHolidayDays.forEach(dayMenuItem => {
+                tableHTML += `<th>${dayMenuItem.day}</th>`;
+            });
+
+            tableHTML += `
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            allOrders.forEach(orderDoc => {
+                const order = orderDoc.data();
+                tableHTML += `
+                    <tr>
+                        <td>${order.employeeRGF || 'N/A'}</td>
+                        <td class="nome-data">${order.employeeName}</td>`;
                 
-                const dailyOrders = allOrders
-                    .filter(orderDoc => orderDoc.data()[dayId])
-                    .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
-                
-                dailyOrders.forEach(orderDoc => {
-                    const order = orderDoc.data();
+                nonHolidayDays.forEach(dayMenuItem => {
+                    const dayId = getDayId(dayMenuItem.day);
                     const choice = order[dayId];
                     const notes = order[`${dayId}_notes`];
                     
-                    const mainDishName = dayMenuItem.pratoPrincipal.name;
-                    const optionDishName = dayMenuItem.opcao?.name;
-                    let reportChoice = '';
+                    let cellContent = '';
+                    if (choice) {
+                        const mainDishName = dayMenuItem.pratoPrincipal.name;
+                        const optionDishName = dayMenuItem.opcao?.name;
+                        
+                        if (choice === mainDishName) {
+                            cellContent = 'PRATO';
+                        } else if (optionDishName && choice === optionDishName) {
+                            cellContent = 'OPÇÃO';
+                        } else {
+                            cellContent = choice.toUpperCase();
+                        }
 
-                    if (choice === mainDishName) {
-                        reportChoice = 'PRATO';
-                    } else if (optionDishName && choice === optionDishName) {
-                        reportChoice = 'OPÇÃO';
+                        if (notes) {
+                            cellContent += ` <span class="notes">(${notes})</span>`;
+                        }
                     } else {
-                        reportChoice = choice.toUpperCase();
+                        cellContent = '-';
                     }
-                    
-                    let choiceHTML = reportChoice;
-                    if (notes) {
-                        choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
-                    }
-
-                    tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
+                    tableHTML += `<td>${cellContent}</td>`;
                 });
-                tableHTML += '</tbody></table></div>';
-                reportContainer.innerHTML += tableHTML;
+
+                tableHTML += `</tr>`;
             });
+
+            tableHTML += `
+                    </tbody>
+                </table>`;
+
+            reportContainer.innerHTML = tableHTML;
             window.print();
         }
 
@@ -670,7 +744,6 @@
 
             formContent.innerHTML = '<p class="text-center text-gray-500">A carregar...</p>';
             modal.classList.remove('hidden');
-
             try {
                 const docSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
                 if (!docSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
@@ -723,7 +796,6 @@
             button.disabled = true; button.textContent = 'A salvar...';
             const docId = document.getElementById('edit-order-id').value;
             const updateData = {};
-            
             weeklyMenu.forEach(item => {
                 if (!item.isHoliday) {
                     const dayId = getDayId(item.day);
@@ -735,7 +807,6 @@
                     updateData[`${dayId}_notes`] = notes;
                 }
             });
-
             try {
                 await updateDoc(doc(db, "pedidosDaSemana", docId), updateData);
                 showToast("Pedido atualizado com sucesso!", 'success');
@@ -744,7 +815,8 @@
                 console.error("Erro ao salvar alterações do pedido:", error);
                 showToast("Falha ao salvar as alterações do pedido.", 'error');
             } finally {
-                button.disabled = false; button.textContent = 'Salvar Alterações';
+                button.disabled = false;
+                button.textContent = 'Salvar Alterações';
             }
         }
 
@@ -755,7 +827,7 @@
                     await deleteDoc(doc(db, "pedidosDaSemana", docId));
                     showToast("Pedido excluído com sucesso.", 'success');
                 } catch (error) {
-                    console.error("Erro ao excluir pedido: ", error);
+                     console.error("Erro ao excluir pedido: ", error);
                     showToast("Falha ao excluir o pedido.", 'error');
                 }
             });
@@ -798,7 +870,6 @@
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
                 const result = await response.json();
-                
                 let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
                 
@@ -808,16 +879,17 @@
                 if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
                 
                 displayConfirmationForm(menuData.menu);
-
             } catch (error) { 
-                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
+                console.error("Erro ao processar IA:", error);
+                showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000);
             } finally { 
-                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
+                button.disabled = false;
+                button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
             }
         });
 
         function displayConfirmationForm(menuData) {
-            const container = document.getElementById('confirmation-form'); 
+            const container = document.getElementById('confirmation-form');
             container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
             
             menuData.forEach((item, index) => {
@@ -843,7 +915,6 @@
                     saveNewMenu(menuData);
                 });
             });
-
             document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
                 container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
                 document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
@@ -863,12 +934,11 @@
         }
 
         async function saveNewMenu(menuData) {
-            const button = document.getElementById('saveNewMenuBtn'); 
+            const button = document.getElementById('saveNewMenuBtn');
             const cancelButton = document.getElementById('cancelNewMenuBtn');
             button.disabled = true;
             cancelButton.disabled = true;
-            button.textContent = 'A salvar...'; 
-
+            button.textContent = 'A salvar...';
             const newMenu = menuData.map((item, i) => ({ 
                 day: item.day, 
                 pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
@@ -876,8 +946,7 @@
                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
                 isHoliday: document.getElementById(`holiday-${i}`).checked,
                 isSpecial: document.getElementById(`special-${i}`).checked,
-            })); 
-
+            }));
             try { 
                 await setDoc(menuDocRef, { menu: newMenu });
                 await clearAllOrders();
@@ -888,10 +957,10 @@
                 document.getElementById('imageUpload').value = ''; 
                 document.getElementById('whatsapp-notification-container').classList.remove('hidden');
             } catch (error) { 
-                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
+                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error);
                 showToast("Erro ao salvar o novo cardápio.", 'error'); 
             } finally { 
-                button.disabled = false; 
+                button.disabled = false;
                 cancelButton.disabled = false;
                 button.textContent = 'Salvar Novo Cardápio'; 
             }
@@ -910,7 +979,7 @@
                 showAdminView();
             } else {
                 if (!auth.currentUser) {
-                    signInAnonymously(auth).catch((error) => {
+                     signInAnonymously(auth).catch((error) => {
                         console.error("Erro no login anónimo:", error);
                         showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
                     });
@@ -918,12 +987,11 @@
                 showUserView();
             }
         });
-
         function showUserView() {
             document.getElementById('user-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
+            loadAndDisplayMenu();
         }
 
         function showAdminView() {
@@ -951,13 +1019,16 @@
                 const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
                 showToast(msg, 'error', 5000);
             } finally {
-                btn.disabled = false; btn.textContent = 'Entrar';
+                btn.disabled = false;
+                btn.textContent = 'Entrar';
             }
         }
 
         async function handleAdminLogout() {
-            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); } 
-            catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
+            try { await signOut(auth);
+                showToast("Logout de administrador bem-sucedido!", 'info'); } 
+            catch (error) { console.error("Erro no logout:", error);
+                showToast("Erro ao fazer logout.", 'error'); }
         }
 
         function main() {
@@ -974,7 +1045,6 @@
             document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
                 btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
             });
-
             document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
             
