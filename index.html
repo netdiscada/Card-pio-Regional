@@ -26,21 +26,6 @@
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
 
-        /* Estilos para a impressão de alta qualidade */
-        #print-report { display: none; }
-        @media print {
-            body * { visibility: hidden; }
-            #print-report, #print-report * { visibility: visible; }
-            #print-report { position: absolute; left: 0; top: 0; width: 100%; }
-            @page { size: A4 portrait; margin: 10mm; }
-            h1 { font-size: 16pt; text-align: center; margin-bottom: 12px; font-family: 'Poppins', sans-serif; }
-            .report-day-section { margin-bottom: 15px; page-break-inside: avoid; }
-            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-            .report-table th, .report-table td { border: 1px solid #ccc; padding: 4px; text-align: left; }
-            .report-table th { background-color: #e2e8f0; font-weight: 600; }
-            .rgf-col { width: 15%; } .nome-col { width: 60%; } .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
-        }
-        
         #app-toast {
             position: fixed;
             bottom: 20px;
@@ -64,12 +49,56 @@
         #app-toast.success { background-color: #22c55e; }
         #app-toast.error { background-color: #ef4444; }
         #app-toast.info { background-color: #3b82f6; }
+
+        /* ESTILOS DE IMPRESSÃO ATUALIZADOS */
+        @media print {
+            body > *:not(#print-report) {
+                display: none !important;
+            }
+            #print-report {
+                display: block !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 10mm; /* Margens compactas */
+            }
+            h1 {
+                font-size: 16pt;
+                text-align: center;
+                margin-bottom: 8px; /* Margem reduzida */
+                font-family: 'Poppins', sans-serif;
+            }
+            .report-day-section {
+                margin-bottom: 8px; /* Margem reduzida */
+                page-break-inside: avoid;
+            }
+            .report-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9pt;
+            }
+            .report-table th, .report-table td {
+                border: 1px solid #ccc;
+                padding: 4px;
+                text-align: left;
+            }
+            .report-table th {
+                background-color: #e2e8f0;
+                font-weight: 600;
+            }
+            .rgf-col { width: 15%; }
+            .nome-col { width: 60%; }
+            .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+        }
     </style>
 </head>
 <body class="bg-slate-50">
 
-    <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
-        
+    <div id="app-container" class="no-print">
         <div id="user-view">
             <div id="form-container">
                 <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
@@ -150,14 +179,14 @@
         </div>
     </div>
 
-    <div id="edit-order-modal" class="modal-overlay hidden"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="edit-employee-modal" class="modal-overlay hidden"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="confirmation-modal" class="modal-overlay hidden"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
-    <div id="admin-login-modal" class="modal-overlay hidden"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
-    <div id="custom-confirm-modal" class="modal-overlay hidden"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
+    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
+    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
-    <div id="app-toast"></div>
+    <div id="app-toast" class="no-print"></div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -195,7 +224,7 @@
             const toast = document.getElementById('app-toast');
             if(!toast) return;
             toast.textContent = message;
-            toast.className = 'show';
+            toast.className = 'show no-print';
             toast.classList.add(type);
             setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
         }
@@ -583,11 +612,9 @@
             container.innerHTML = tableHTML;
         }
         
-        // FUNÇÃO DE IMPRESSÃO ATUALIZADA
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
             
-            // Monta o conteúdo do relatório
             let reportHTML = '<h1>Regional Quatinga</h1>';
             weeklyMenu.forEach(dayMenuItem => {
                 if (dayMenuItem.isHoliday) return;
@@ -610,14 +637,11 @@
             });
             reportContainer.innerHTML = reportHTML;
 
-            // Salva o título original e define o novo para o nome do arquivo
             const originalTitle = document.title;
             document.title = 'Cardapio Quatinga';
 
-            // Chama a impressão
             window.print();
 
-            // Restaura o título original após a impressão
             setTimeout(() => {
                 document.title = originalTitle;
             }, 500);
@@ -908,7 +932,7 @@
                 }
             } catch (error) {
                 console.error("Erro no login de administrador:", error);
-                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
+                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth.user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
                 showToast(msg, 'error', 5000);
             } finally {
                 btn.disabled = false; btn.textContent = 'Entrar';
