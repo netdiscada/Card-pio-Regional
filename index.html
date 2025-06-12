@@ -22,41 +22,24 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
-
         #print-report { display: none; }
         @media print {
-            @page { size: A4 portrait; margin: 15mm; }
+            @page { size: A4 portrait; margin: 10mm; }
+            html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
             .no-print { display: none !important; }
             body > *:not(#print-report) { display: none !important; }
             #print-report { display: block !important; }
-            #print-report h1 { font-size: 20pt; text-align: center; margin-bottom: 12px; font-family: 'Poppins', sans-serif; }
-            #print-report .report-day-section { margin-bottom: 20px; page-break-inside: avoid; }
-            #print-report .report-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
-            #print-report th, #print-report td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+            #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+            .report-day-section { margin-bottom: 12px; page-break-inside: avoid; }
+            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+            #print-report th, #print-report td { border: 1px solid #999; padding: 5px; text-align: left; }
             #print-report th { background-color: #e2e8f0; font-weight: 600; }
-            #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+            #print-report .rgf-col { width: 15%; }
+            #print-report .nome-col { width: 60%; }
+            #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
         }
-        
-        #app-toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            pointer-events: none;
-            transform: translateX(-50%) translateY(20px);
-        }
-        #app-toast.show {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(-50%) translateY(0);
-        }
+        #app-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; pointer-events: none; transform: translateX(-50%) translateY(20px); }
+        #app-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
         #app-toast.success { background-color: #22c55e; }
         #app-toast.error { background-color: #ef4444; }
         #app-toast.info { background-color: #3b82f6; }
@@ -139,11 +122,6 @@
                 <div id="employee-list-container" class="overflow-x-auto">
                     <p class="text-gray-500">A carregar lista de funcionários...</p>
                 </div>
-            </section>
-
-            <section id="dashboard-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📈 Dashboard de Totais da Semana</h2>
-                <div id="admin-dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><p class="text-gray-500">A calcular totais...</p></div>
             </section>
 
             <section id="orders-section">
@@ -333,11 +311,13 @@
             onSnapshot(menuDocRef, (docSnap) => {
                 weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
                 createMenuHTML();
+                renderOrdersTable(allOrders); 
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
                  showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
                  weeklyMenu = createFallbackMenu();
                  createMenuHTML();
+                 renderOrdersTable(allOrders);
             });
         }
         
@@ -502,7 +482,6 @@
                     .map(item => item.doc)
                     .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
 
-                updateDashboard(allOrders);
                 renderOrdersTable(allOrders);
                 renderOrderStatus(allOrders);
             }, (error) => {
@@ -541,44 +520,15 @@
                 container.innerHTML = '<p class="text-red-500">Falha ao carregar status dos funcionários.</p>';
             }
         }
-
-        function updateDashboard(orders) {
-            const dashboard = document.getElementById('admin-dashboard');
-            if (!weeklyMenu || weeklyMenu.length === 0) { dashboard.innerHTML = '<p class="text-gray-500">Cardápio semanal não carregado.</p>'; return; }
-            if (orders.length === 0) { dashboard.innerHTML = '<p class="text-gray-500">Nenhum pedido para calcular totais.</p>'; return; }
-
-            const dailyCounts = {};
-            weeklyMenu.forEach(dayItem => {
-                if(dayItem.isHoliday) return;
-                dailyCounts[dayItem.day] = {};
-                orders.forEach(orderDoc => {
-                    const dayId = getDayId(dayItem.day);
-                    const choice = orderDoc.data()[dayId];
-                    if (choice) {
-                        dailyCounts[dayItem.day][choice] = (dailyCounts[dayItem.day][choice] || 0) + 1;
-                    }
-                });
-            });
-
-            dashboard.innerHTML = '';
-            Object.entries(dailyCounts).forEach(([day, counts]) => {
-                let dayHTML = `<div class="p-4 bg-gray-50 rounded-lg"><h3 class="font-bold text-lg text-gray-800 mb-2">${day}</h3><div class="space-y-1">`;
-                const sortedCounts = Object.entries(counts).sort(([,a],[,b]) => b - a);
-                if (sortedCounts.length === 0) { dayHTML += `<p class="text-sm text-gray-500">Nenhum pedido neste dia.</p>`; } 
-                else { sortedCounts.forEach(([item, count]) => { dayHTML += `<div class="flex justify-between text-sm"><span class="text-gray-600">${item}</span><span class="font-semibold text-blue-700">${count}</span></div>`; }); }
-                dayHTML += '</div></div>';
-                dashboard.innerHTML += dayHTML;
-            });
-        }
-
+        
         function renderOrdersTable(orders) {
             const container = document.getElementById('ordersTableContainer');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
             if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
-
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
+            
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
             weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
@@ -620,8 +570,13 @@
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            reportContainer.innerHTML = '<h1>Relatório de Pedidos da Semana - Regional Quatinga</h1>';
+            if (allOrders.length === 0 || weeklyMenu.length === 0) {
+                showToast("Não há pedidos ou cardápio para gerar o relatório.", "info");
+                return;
+            }
+            reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
             
+            let allDaysHTML = '';
             weeklyMenu.forEach(dayMenuItem => {
                 if (dayMenuItem.isHoliday) return; 
 
@@ -641,24 +596,19 @@
                     const optionDishName = dayMenuItem.opcao?.name;
                     let reportChoice = '';
 
-                    if (choice === mainDishName) {
-                        reportChoice = 'PRATO';
-                    } else if (optionDishName && choice === optionDishName) {
-                        reportChoice = 'OPÇÃO';
-                    } else {
-                        reportChoice = choice.toUpperCase();
-                    }
+                    if (choice === mainDishName) { reportChoice = 'PRATO'; } 
+                    else if (optionDishName && choice === optionDishName) { reportChoice = 'OPÇÃO'; } 
+                    else { reportChoice = choice.toUpperCase(); }
                     
                     let choiceHTML = reportChoice;
-                    if (notes) {
-                        choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
-                    }
+                    if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
 
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
                 });
                 tableHTML += '</tbody></table></div>';
-                reportContainer.innerHTML += tableHTML;
+                allDaysHTML += tableHTML;
             });
+            reportContainer.innerHTML += allDaysHTML;
             window.print();
         }
 
@@ -930,6 +880,7 @@
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
+            loadAndDisplayMenu(); 
             loadAdminData();
             loadAndRenderEmployees();
         }
