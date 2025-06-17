@@ -61,9 +61,17 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
-                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
-                <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
+                <div id="user-order-view" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-6 rounded-xl mb-6">
+                    <h2 class="text-xl font-bold text-blue-800 mb-4">✅ Seu Pedido da Semana já foi Registrado!</h2>
+                    <div id="user-order-summary" class="space-y-2"></div>
+                    <p class="mt-4 text-sm text-blue-600">Para alterar seu pedido, por favor, entre em contato com o administrador.</p>
+                </div>
+
+                <div id="menu-selection-container">
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
+                    <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
+                    <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
+                </div>
             </div>
             <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
             <footer class="text-center mt-10">
@@ -146,7 +154,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         const firebaseConfig = {
@@ -286,19 +294,59 @@
         
         async function findEmployeeByRGF(rgf) {
             const nameInput = document.getElementById('employeeName');
-            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; validateForm(); return; }
+            if (!rgf) { 
+                nameInput.value = ''; 
+                nameInput.placeholder = 'Preenchido automaticamente'; 
+                document.getElementById('user-order-view').classList.add('hidden');
+                document.getElementById('menu-selection-container').classList.remove('hidden');
+                validateForm(); 
+                return; 
+            }
             try {
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
+                    await checkForExistingOrder(rgf);
                 } else {
-                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
+                    nameInput.value = ''; 
+                    nameInput.placeholder = 'RGF não encontrado';
+                    document.getElementById('user-order-view').classList.add('hidden');
+                    document.getElementById('menu-selection-container').classList.remove('hidden');
                 }
                 validateForm();
             } catch (error) {
                 console.error("Erro ao buscar funcionário:", error);
-                nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
+                nameInput.value = ''; 
+                nameInput.placeholder = 'Erro na busca';
                 showToast("Erro ao buscar funcionário.", 'error');
+            }
+        }
+
+        async function checkForExistingOrder(rgf) {
+            const q = query(pedidosCollectionRef, where("employeeRGF", "==", rgf), orderBy("timestamp", "desc"), limit(1));
+            const querySnapshot = await getDocs(q);
+
+            const userOrderView = document.getElementById('user-order-view');
+            const menuSelectionContainer = document.getElementById('menu-selection-container');
+            const userOrderSummary = document.getElementById('user-order-summary');
+            
+            if (!querySnapshot.empty) {
+                const orderData = querySnapshot.docs[0].data();
+                userOrderSummary.innerHTML = '';
+                
+                weeklyMenu.forEach(item => {
+                    if (item.isHoliday) return;
+                    const dayId = getDayId(item.day);
+                    const choice = orderData[dayId] || 'Não escolhido';
+                    const notes = orderData[`${dayId}_notes`];
+                    userOrderSummary.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${choice} ${notes ? `<span class="text-sm italic">(${notes})</span>` : ''}</p>`;
+                });
+
+                userOrderView.classList.remove('hidden');
+                menuSelectionContainer.classList.add('hidden');
+            } else {
+                userOrderView.classList.add('hidden');
+                menuSelectionContainer.classList.remove('hidden');
             }
         }
         
@@ -311,6 +359,8 @@
             onSnapshot(menuDocRef, (docSnap) => {
                 weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
                 createMenuHTML();
+                const rgf = document.getElementById('employeeRGF').value;
+                if(rgf) { findEmployeeByRGF(rgf); }
                 renderOrdersTable(allOrders); 
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
@@ -915,7 +965,11 @@
             const rgfInput = document.getElementById('employeeRGF');
             rgfInput.value = localStorage.getItem('employeeRGF') || '';
             if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
-            rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
+            rgfInput.addEventListener('blur', (e) => { 
+                const newRGF = e.target.value.trim();
+                localStorage.setItem('employeeRGF', newRGF); 
+                findEmployeeByRGF(newRGF); 
+            });
             rgfInput.addEventListener('input', validateForm);
             
             document.getElementById('menu').addEventListener('change', validateForm);
