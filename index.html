@@ -22,6 +22,9 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
+        textarea:disabled, input[type="radio"]:disabled + div { cursor: not-allowed; opacity: 0.7; }
+        .menu-option-card:has(input:disabled) { background-color: #f9fafb; border-color: #e5e7eb; cursor: not-allowed; }
+
         #print-report { display: none; }
         @media print {
             @page { size: A4 portrait; margin: 10mm; }
@@ -48,11 +51,11 @@
 <body class="bg-slate-50">
 
     <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
-        
+
         <div id="user-view" class="no-print">
             <div id="form-container">
                 <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
-                
+
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -61,7 +64,9 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
+                <div id="current-week-order-display" class="mb-8 bg-white rounded-xl shadow-sm p-6"></div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos (Próxima Semana)</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
                 <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
                 <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
@@ -82,27 +87,34 @@
             <div class="mb-8">
                 <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
-            
+
             <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana Atual</h2>
                 <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <p class="text-gray-500">A carregar status dos pedidos...</p>
                 </div>
             </section>
 
             <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
-                <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio da PRÓXIMA Semana com Imagem (IA)</h2>
+                <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio para a próxima semana. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
                 <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                 <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
-                <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio</button></div>
+                <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio da Próxima Semana</button></div>
                 <div id="loader" class="hidden mx-auto my-4 loader"></div>
                 <div id="confirmation-form" class="hidden mt-6"></div>
                 <div id="whatsapp-notification-container" class="mt-4 text-center hidden">
                     <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                        Notificar Funcionários no WhatsApp
+                        Notificar Funcionários no WhatsApp (Próxima Semana)
                     </button>
+                </div>
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">🚀 Gerenciamento de Transição de Cardápio</h3>
+                    <button id="promoteMenuBtn" class="w-full bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 shadow-md">
+                        Promover Cardápio da Próxima Semana para Atual
+                    </button>
+                    <p class="text-sm text-gray-500 mt-2">Esta ação tornará o cardápio da "próxima semana" o cardápio "atual". O cardápio da "próxima semana" será então reiniciado. Os pedidos da próxima semana serão movidos para a semana atual.</p>
                 </div>
             </section>
 
@@ -126,29 +138,34 @@
 
             <section id="orders-section">
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
+                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos (Semana Atual)</h2>
                     <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
                     <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
                 </div>
                 <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos...</p></div>
             </section>
+
+            <section id="next-week-orders-section" class="mt-12">
+                <h2 class="text-xl font-semibold text-gray-700 mb-3 mt-8 border-t pt-6">🔔 Pedidos para Próxima Semana</h2>
+                <div id="nextWeekOrdersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos da próxima semana...</p></div>
+            </section>
         </div>
     </div>
 
-    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><input type="hidden" id="edit-order-type"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
     <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
+    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido (Próxima Semana)</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
     <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
     <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
     <div id="app-toast"></div>
-    
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
+
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -164,38 +181,45 @@
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
         };
-        
-        const menuDocRef = doc(db, "cardapio", "semanal");
+
+        const currentWeekMenuRef = doc(db, "cardapio", "currentWeek");
+        const nextWeekMenuRef = doc(db, "cardapio", "nextWeek");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
+        const pedidosProximaSemanaCollectionRef = collection(db, "pedidosProximaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
-        
+
         const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
+
         let weeklyMenu = [];
+        let currentWeeklyMenu = [];
         let allOrders = [];
+        let allNextWeekOrders = [];
         let tempOrderData = {};
-        
+        let employeeCurrentOrder = null;
+        let employeeNextOrder = null;
+
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
 
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.getElementById('app-toast');
             if(!toast) return;
-            toast.textContent = message;
+            toast.textContent = message; // Safe: textContent used
             toast.className = 'show';
             toast.classList.add(type);
             setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
         }
-        
+
         function showCustomConfirm(message, onConfirm) {
             const modal = document.getElementById('custom-confirm-modal');
             const messageEl = document.getElementById('custom-confirm-message');
             const okBtn = document.getElementById('custom-confirm-ok-btn');
-            
-            messageEl.textContent = message;
+
+            messageEl.textContent = message; // Safe: textContent used
             modal.classList.remove('hidden');
 
             const newOkBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
-            
+
             newOkBtn.addEventListener('click', () => {
                 onConfirm();
                 modal.classList.add('hidden');
@@ -206,24 +230,59 @@
             const q = query(funcionariosCollectionRef, orderBy("nome"));
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('employee-list-container');
+                container.innerHTML = ''; // Clear previous content
+
                 if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcionário cadastrado.</p>';
+                    const p = document.createElement('p');
+                    p.className = 'text-gray-500 text-center py-4';
+                    p.textContent = 'Nenhum funcionário cadastrado.';
+                    container.appendChild(p);
                     return;
                 }
-                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+
+                const table = document.createElement('table');
+                table.className = 'min-w-full bg-white border';
+                const thead = table.createTHead();
+                const headerRow = thead.insertRow();
+                const headers = ['RGF', 'Nome', 'Ações'];
+                headers.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.className = 'py-2 px-3 border-b text-left';
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+
+                const tbody = table.createTBody();
                 snapshot.forEach(doc => {
                     const employee = doc.data();
-                    tableHTML += `<tr>
-                        <td class="py-2 px-3 border-b font-mono">${doc.id}</td>
-                        <td class="py-2 px-3 border-b font-semibold">${employee.nome}</td>
-                        <td class="py-2 px-3 border-b space-x-2">
-                            <button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button>
-                            <button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button>
-                        </td>
-                    </tr>`;
+                    const tr = tbody.insertRow();
+
+                    let tdRGF = tr.insertCell();
+                    tdRGF.className = 'py-2 px-3 border-b font-mono';
+                    tdRGF.textContent = doc.id;
+
+                    let tdName = tr.insertCell();
+                    tdName.className = 'py-2 px-3 border-b font-semibold';
+                    tdName.textContent = employee.nome;
+
+                    let tdActions = tr.insertCell();
+                    tdActions.className = 'py-2 px-3 border-b space-x-2';
+
+                    const editButton = document.createElement('button');
+                    editButton.dataset.id = doc.id;
+                    editButton.dataset.name = employee.nome;
+                    editButton.className = 'edit-employee-btn text-blue-600 hover:text-blue-800 text-sm font-semibold';
+                    editButton.textContent = 'Editar';
+                    tdActions.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.dataset.id = doc.id;
+                    deleteButton.dataset.name = employee.nome;
+                    deleteButton.className = 'delete-employee-btn text-red-600 hover:text-red-800 text-sm font-semibold';
+                    deleteButton.textContent = 'Excluir';
+                    tdActions.appendChild(deleteButton);
                 });
-                tableHTML += '</tbody></table>';
-                container.innerHTML = tableHTML;
+                container.appendChild(table);
             }, (error) => {
                  console.error("Erro ao carregar funcionários:", error);
                  showToast("Falha ao carregar funcionários. Verifique o console para mais detalhes.", "error");
@@ -261,7 +320,7 @@
                 }
             });
         }
-        
+
         function openEmployeeEditModal(rgf, nome) {
             document.getElementById('editEmployeeRGF').value = rgf;
             document.getElementById('editEmployeeName').value = nome;
@@ -283,108 +342,295 @@
                 showToast("Falha ao salvar as alterações do funcionário.", 'error');
             }
         }
-        
+
         async function findEmployeeByRGF(rgf) {
             const nameInput = document.getElementById('employeeName');
-            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; validateForm(); return; }
+            if (!rgf) {
+                nameInput.value = '';
+                nameInput.placeholder = 'Preenchido automaticamente';
+                employeeCurrentOrder = null;
+                employeeNextOrder = null;
+                displayCurrentWeekOrder();
+                createMenuHTML();
+                validateForm();
+                return;
+            }
             try {
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
-                    nameInput.value = docSnap.data().nome;
+                    nameInput.value = docSnap.data().nome; // Safe: input value
+                    await fetchAndDisplayEmployeeOrders(rgf);
                 } else {
-                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
+                    nameInput.value = '';
+                    nameInput.placeholder = 'RGF não encontrado';
+                    employeeCurrentOrder = null;
+                    employeeNextOrder = null;
+                    displayCurrentWeekOrder();
+                    createMenuHTML();
                 }
                 validateForm();
             } catch (error) {
                 console.error("Erro ao buscar funcionário:", error);
                 nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
                 showToast("Erro ao buscar funcionário.", 'error');
+                employeeCurrentOrder = null;
+                employeeNextOrder = null;
+                displayCurrentWeekOrder();
+                createMenuHTML();
+                validateForm();
             }
         }
-        
-        function createFallbackMenu() {
-            const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-            return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
+
+        async function fetchAndDisplayEmployeeOrders(rgf) {
+            employeeCurrentOrder = null;
+            employeeNextOrder = null;
+            try {
+                const qCurrent = query(pedidosCollectionRef, where("employeeRGF", "==", rgf), orderBy("timestamp", "desc"));
+                const currentOrderSnapshot = await getDocs(qCurrent);
+                if (!currentOrderSnapshot.empty) {
+                    employeeCurrentOrder = currentOrderSnapshot.docs[0].data();
+                }
+            } catch (error) { console.error("Erro ao buscar pedido da semana atual:", error); showToast("Erro ao buscar pedido da semana atual.", "error");}
+            try {
+                const qNext = query(pedidosProximaSemanaCollectionRef, where("employeeRGF", "==", rgf), orderBy("timestamp", "desc"));
+                const nextOrderSnapshot = await getDocs(qNext);
+                if (!nextOrderSnapshot.empty) {
+                    employeeNextOrder = nextOrderSnapshot.docs[0].data();
+                }
+            } catch (error) { console.error("Erro ao buscar pedido da próxima semana:", error); showToast("Erro ao buscar pedido da próxima semana.", "error");}
+            displayCurrentWeekOrder();
+            createMenuHTML();
+            validateForm();
         }
 
-        function loadAndDisplayMenu() {
-            onSnapshot(menuDocRef, (docSnap) => {
-                weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
-                createMenuHTML();
-                renderOrdersTable(allOrders); 
+        function displayCurrentWeekOrder() {
+            const displayDiv = document.getElementById('current-week-order-display');
+            if (!displayDiv) return;
+
+            displayDiv.innerHTML = ''; // Clear previous content
+            const titleH2 = document.createElement('h2');
+            titleH2.className = 'text-xl font-bold text-gray-800 mb-3';
+            titleH2.textContent = '🗓️ Seu Pedido para a Semana Atual:';
+            displayDiv.appendChild(titleH2);
+
+            if (!currentWeeklyMenu || currentWeeklyMenu.length === 0) {
+                const p = document.createElement('p');
+                p.className = 'text-gray-500';
+                p.textContent = 'Cardápio da semana atual não disponível.';
+                displayDiv.appendChild(p);
+                return;
+            }
+            if (!employeeCurrentOrder) {
+                const p = document.createElement('p');
+                p.className = 'text-gray-500';
+                p.textContent = 'Nenhum pedido encontrado para a semana atual.';
+                displayDiv.appendChild(p);
+                return;
+            }
+
+            const summaryContainer = document.createElement('div');
+            summaryContainer.className = 'space-y-3';
+            currentWeeklyMenu.forEach(item => {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'p-3 bg-gray-50 rounded-md';
+
+                const dayP = document.createElement('p');
+                dayP.className = 'font-semibold';
+                dayP.textContent = `${item.day}: `;
+
+                if (item.isHoliday) {
+                    const holidaySpan = document.createElement('span');
+                    holidaySpan.className = 'text-indigo-600';
+                    holidaySpan.textContent = 'Feriado';
+                    dayP.appendChild(holidaySpan);
+                } else {
+                    const dayId = getDayId(item.day);
+                    const choice = employeeCurrentOrder[dayId];
+                    const notes = employeeCurrentOrder[`${dayId}_notes`];
+
+                    const choiceSpan = document.createElement('span');
+                    choiceSpan.className = 'text-blue-700 font-normal';
+                    choiceSpan.textContent = choice || 'Não selecionado';
+                    dayP.appendChild(choiceSpan);
+
+                    if (notes) {
+                        const notesP = document.createElement('p');
+                        notesP.className = 'text-sm text-gray-600 italic';
+                        notesP.textContent = `Anotações: ${notes}`;
+                        dayDiv.appendChild(notesP);
+                    }
+                }
+                dayDiv.insertBefore(dayP, dayDiv.firstChild); // Add dayP before notesP
+                summaryContainer.appendChild(dayDiv);
+            });
+            displayDiv.appendChild(summaryContainer);
+        }
+
+        function createFallbackMenu(weekType = "Próxima Semana") {
+            const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+            const menuName = weekType === "Semana Atual" ? 'Cardápio da semana atual não definido' : 'Cardápio da próxima semana não definido';
+            return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: menuName, emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
+        }
+
+        function loadMenus() {
+            onSnapshot(nextWeekMenuRef, (docSnap) => {
+                console.log("Loading nextWeekMenuRef. Exists:", docSnap.exists());
+                weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu("Próxima Semana");
+                if (document.getElementById('user-view').classList.contains('hidden') === false) createMenuHTML();
+                if (document.getElementById('admin-view').classList.contains('hidden') === false) renderNextWeekOrdersTable();
             }, (error) => {
-                 console.error("Erro ao carregar o cardápio:", error);
-                 showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
-                 weeklyMenu = createFallbackMenu();
-                 createMenuHTML();
-                 renderOrdersTable(allOrders);
+                 console.error("Erro ao carregar o cardápio da próxima semana:", error);
+                 showToast("Erro ao carregar cardápio da próxima semana. Usando padrão.", 'error');
+                 weeklyMenu = createFallbackMenu("Próxima Semana");
+                 if (document.getElementById('user-view').classList.contains('hidden') === false) createMenuHTML();
+                 if (document.getElementById('admin-view').classList.contains('hidden') === false) renderNextWeekOrdersTable();
+            });
+
+            onSnapshot(currentWeekMenuRef, (docSnap) => {
+                console.log("Loading currentWeekMenuRef. Exists:", docSnap.exists());
+                currentWeeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu("Semana Atual");
+                if (document.getElementById('user-view').classList.contains('hidden') === false) displayCurrentWeekOrder();
+                if (document.getElementById('admin-view').classList.contains('hidden') === false) renderCurrentWeekOrdersTable();
+            }, (error) => {
+                 console.error("Erro ao carregar o cardápio da semana atual:", error);
+                 showToast("Erro ao carregar cardápio da semana atual. Usando padrão.", 'error');
+                 currentWeeklyMenu = createFallbackMenu("Semana Atual");
+                 if (document.getElementById('user-view').classList.contains('hidden') === false) displayCurrentWeekOrder();
+                 if (document.getElementById('admin-view').classList.contains('hidden') === false) renderCurrentWeekOrdersTable();
             });
         }
-        
+
         function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
-            if (!menuContainer) return;
-            menuContainer.innerHTML = '';
+            const guidanceSection = document.getElementById('guidanceSection');
+            const guidanceText = document.getElementById('guidanceText');
+            const submitBtnContainer = document.getElementById('submitButtonContainer');
+            if (!menuContainer || !guidanceSection || !guidanceText || !submitBtnContainer) return;
+
+            menuContainer.innerHTML = ''; // Clear before building
+            const isNextOrderLocked = !!employeeNextOrder;
+
+            if (isNextOrderLocked) {
+                guidanceText.textContent = "Seu pedido para a próxima semana já foi registrado e não pode ser alterado. Abaixo suas escolhas:";
+                guidanceSection.classList.remove('hidden'); submitBtnContainer.classList.add('hidden');
+            } else {
+                guidanceText.textContent = "Digite seu RGF e escolha uma opção para cada dia.";
+            }
 
             weeklyMenu.forEach(item => {
-                const dayId = getDayId(item.day);
-                let dayHTML = `<div class="day-section space-y-3">`;
-                
-                let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
-                if (item.isSpecial) {
-                    dayTitleHTML = `<div class="flex items-center gap-3">
-                        <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
-                        <span class="text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1">✨ Almoço Especial</span>
-                    </div>`;
-                }
-                
-                if (item.isHoliday) {
-                    dayHTML += dayTitleHTML;
-                    dayHTML += `
-                        <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
-                            <p class="font-bold">🎊 Feriado</p>
-                            <p>Não haverá refeição neste dia.</p>
-                        </div>`;
-                } else {
-                    const allOptions = [
-                        { ...item.pratoPrincipal, type: 'Prato Principal' },
-                        ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
-                        ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
-                    ];
+                const daySectionDiv = document.createElement('div');
+                daySectionDiv.className = 'day-section space-y-3';
 
-                    dayHTML += dayTitleHTML;
+                let dayTitleEl = document.createElement('h3');
+                dayTitleEl.className = 'text-xl font-bold text-gray-800';
+                dayTitleEl.textContent = item.day;
+
+                if (item.isSpecial) {
+                    const specialDiv = document.createElement('div');
+                    specialDiv.className = 'flex items-center gap-3';
+                    specialDiv.appendChild(dayTitleEl); // Add original h3
+                    const specialSpan = document.createElement('span');
+                    specialSpan.className = 'text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1';
+                    specialSpan.textContent = '✨ Almoço Especial';
+                    specialDiv.appendChild(specialSpan);
+                    daySectionDiv.appendChild(specialDiv);
+                } else {
+                    daySectionDiv.appendChild(dayTitleEl);
+                }
+
+                if (item.isHoliday) {
+                    const holidayDiv = document.createElement('div');
+                    holidayDiv.className = 'bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md';
+                    const pBold = document.createElement('p');
+                    pBold.className = 'font-bold';
+                    pBold.textContent = '🎊 Feriado';
+                    const pNormal = document.createElement('p');
+                    pNormal.textContent = 'Não haverá refeição neste dia.';
+                    holidayDiv.appendChild(pBold);
+                    holidayDiv.appendChild(pNormal);
+                    daySectionDiv.appendChild(holidayDiv);
+                } else {
+                    const allOptions = [ { ...item.pratoPrincipal, type: 'Prato Principal' }, ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []), ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })), ];
+
                     if (item.guarnicao?.name) {
-                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
+                        const guarnicaoDiv = document.createElement('div');
+                        guarnicaoDiv.className = 'text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3';
+                        guarnicaoDiv.textContent = `Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}`;
+                        daySectionDiv.appendChild(guarnicaoDiv);
                     }
-                    
-                    dayHTML += `<div class="space-y-3">`;
+
+                    const optionsContainerDiv = document.createElement('div');
+                    optionsContainerDiv.className = 'space-y-3';
                     allOptions.forEach((option) => {
                         if (option.name) {
-                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
-                                <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
-                                <div class="flex items-center">
-                                    <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
-                                    <div class="flex-grow">
-                                        <p class="font-semibold text-gray-800">${option.name}</p>
-                                        <p class="text-sm text-gray-500">${option.type}</p>
-                                    </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
-                                </div>
-                            </label>`;
+                            const dayId = getDayId(item.day);
+                            const label = document.createElement('label');
+                            label.className = `menu-option-card block p-4 border-2 border-gray-200 rounded-lg ${isNextOrderLocked ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'cursor-pointer transition-transform duration-200'}`;
+
+                            const inputRadio = document.createElement('input');
+                            inputRadio.type = 'radio';
+                            inputRadio.name = dayId;
+                            inputRadio.value = option.name;
+                            inputRadio.className = 'hidden';
+                            if (isNextOrderLocked) inputRadio.disabled = true;
+                            if (isNextOrderLocked && employeeNextOrder[dayId] === option.name) inputRadio.checked = true;
+
+                            const contentDiv = document.createElement('div');
+                            contentDiv.className = 'flex items-center';
+
+                            const emojiSpan = document.createElement('span');
+                            emojiSpan.className = 'text-3xl mr-4';
+                            emojiSpan.textContent = option.emoji || '🍽️';
+
+                            const textDiv = document.createElement('div');
+                            textDiv.className = 'flex-grow';
+                            const pName = document.createElement('p');
+                            pName.className = 'font-semibold text-gray-800';
+                            pName.textContent = option.name;
+                            const pType = document.createElement('p');
+                            pType.className = 'text-sm text-gray-500';
+                            pType.textContent = option.type;
+                            textDiv.appendChild(pName);
+                            textDiv.appendChild(pType);
+
+                            const checkmarkSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            checkmarkSVG.setAttribute('class', `checkmark h-6 w-6 text-blue-600 ${isNextOrderLocked && inputRadio.checked ? 'opacity-100' : 'opacity-0'} transition-opacity`);
+                            checkmarkSVG.setAttribute('fill', 'none');
+                            checkmarkSVG.setAttribute('viewBox', '0 0 24 24');
+                            checkmarkSVG.setAttribute('stroke', 'currentColor');
+                            checkmarkSVG.setAttribute('stroke-width', '3');
+                            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                            path.setAttribute('d', 'M5 13l4 4L19 7');
+                            checkmarkSVG.appendChild(path);
+
+                            contentDiv.appendChild(emojiSpan);
+                            contentDiv.appendChild(textDiv);
+                            contentDiv.appendChild(checkmarkSVG);
+                            label.appendChild(inputRadio);
+                            label.appendChild(contentDiv);
+                            optionsContainerDiv.appendChild(label);
                         }
                     });
-                    dayHTML += `</div>`;
-                    
-                    dayHTML += `<div class="mt-3">
-                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
-                    </div>`;
+                    daySectionDiv.appendChild(optionsContainerDiv);
+
+                    const notesDiv = document.createElement('div');
+                    notesDiv.className = 'mt-3';
+                    const notesTextarea = document.createElement('textarea');
+                    notesTextarea.id = `notes-${getDayId(item.day)}`;
+                    notesTextarea.name = `notes-${getDayId(item.day)}`;
+                    notesTextarea.rows = 2;
+                    notesTextarea.className = `w-full px-3 py-2 border border-gray-300 rounded-lg text-sm ${isNextOrderLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`;
+                    notesTextarea.placeholder = "Anotações? Ex: sem cebola, ponto da carne, etc.";
+                    if (isNextOrderLocked) {
+                        notesTextarea.disabled = true;
+                        notesTextarea.value = (employeeNextOrder && employeeNextOrder[`${getDayId(item.day)}_notes`]) ? employeeNextOrder[`${getDayId(item.day)}_notes`] : '';
+                    }
+                    notesDiv.appendChild(notesTextarea);
+                    daySectionDiv.appendChild(notesDiv);
                 }
-
-                dayHTML += `</div>`;
-                menuContainer.innerHTML += dayHTML;
+                menuContainer.appendChild(daySectionDiv);
             });
-
-            validateForm();
+            if (!isNextOrderLocked) validateForm();
         }
 
         function validateForm() {
@@ -393,57 +639,56 @@
             const guidanceSection = document.getElementById('guidanceSection');
             const guidanceText = document.getElementById('guidanceText');
             const submitBtnContainer = document.getElementById('submitButtonContainer');
-            if (!guidanceSection || !submitBtnContainer) return;
-
+            if (!guidanceSection || !submitBtnContainer || !guidanceText) return;
+            if (employeeNextOrder) { submitBtnContainer.classList.add('hidden'); return; }
             const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
             const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
-
             if (name && rgf && hasAllSelections) {
-                guidanceSection.classList.add('hidden');
-                submitBtnContainer.classList.remove('hidden');
+                guidanceSection.classList.add('hidden'); submitBtnContainer.classList.remove('hidden');
             } else {
-                submitBtnContainer.classList.add('hidden');
-                guidanceSection.classList.remove('hidden');
+                submitBtnContainer.classList.add('hidden'); guidanceSection.classList.remove('hidden');
                 let message = '';
                 if(!rgf) message = 'Digite seu RGF para começar. ';
                 else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
-                else if (!hasAllSelections) {
-                    const missingDays = nonHolidayItems
-                        .filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`))
-                        .map(item => item.day);
+                else if (!hasAllSelections && weeklyMenu.length > 0 && weeklyMenu.some(d => !d.isHoliday && d.pratoPrincipal.name !== 'Cardápio da próxima semana não definido')) {
+                    const missingDays = nonHolidayItems.filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`)).map(item => item.day);
                     if (missingDays.length > 0) message += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
+                } else if (weeklyMenu.length === 0 || weeklyMenu.every(d => d.pratoPrincipal.name === 'Cardápio da próxima semana não definido')) {
+                     message = 'Cardápio da próxima semana ainda não disponível. Tente novamente mais tarde.';
                 }
-                guidanceText.textContent = message || 'Por favor, preencha todos os campos.';
+                guidanceText.textContent = message || 'Por favor, preencha todos os campos e selecione suas opções.';
             }
         }
 
         function openConfirmationModal() {
-            tempOrderData = {
-                employeeName: document.getElementById('employeeName').value.trim(),
-                employeeRGF: document.getElementById('employeeRGF').value.trim(),
-                timestamp: serverTimestamp()
-            };
+            tempOrderData = { employeeName: document.getElementById('employeeName').value.trim(), employeeRGF: document.getElementById('employeeRGF').value.trim(), timestamp: serverTimestamp() };
             const summaryContainer = document.getElementById('confirmation-summary');
-            summaryContainer.innerHTML = '';
-            
+            summaryContainer.innerHTML = ''; // Clear previous
             weeklyMenu.forEach(item => {
                 const dayId = getDayId(item.day);
-                
                 if (!item.isHoliday) {
                     const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
                     if (!choiceInput) return;
                     const choice = choiceInput.value;
                     const notes = document.getElementById(`notes-${dayId}`).value.trim();
-
                     tempOrderData[dayId] = choice;
-                    if(notes) {
-                        tempOrderData[`${dayId}_notes`] = notes;
-                    }
+                    if(notes) tempOrderData[`${dayId}_notes`] = notes;
 
-                    summaryContainer.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${choice} ${notes ? `<span class="text-sm text-gray-500 italic">(${notes})</span>` : ''}</p>`;
+                    const p = document.createElement('p');
+                    const daySpan = document.createElement('span');
+                    daySpan.className = 'font-bold';
+                    daySpan.textContent = `${item.day}: `;
+                    p.appendChild(daySpan);
+                    p.appendChild(document.createTextNode(choice));
+                    if (notes) {
+                        const notesSpan = document.createElement('span');
+                        notesSpan.className = 'text-sm text-gray-500 italic';
+                        notesSpan.textContent = ` (${notes})`;
+                        p.appendChild(notesSpan);
+                    }
+                    summaryContainer.appendChild(p);
                 }
             });
-            
             document.getElementById('confirmation-modal').classList.remove('hidden');
         }
 
@@ -451,12 +696,13 @@
             const button = document.getElementById('submitOrder');
             button.disabled = true; button.textContent = 'A enviar...';
             try {
-                await addDoc(pedidosCollectionRef, tempOrderData);
+                await addDoc(pedidosProximaSemanaCollectionRef, tempOrderData);
                 document.getElementById('confirmation-modal').classList.add('hidden');
                 document.getElementById('form-container').classList.add('hidden');
-                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
+                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido para a próxima semana foi registado com sucesso.`;
                 document.getElementById('success-message').classList.remove('hidden');
-                showToast("Pedido enviado com sucesso!", 'success');
+                showToast("Pedido para próxima semana enviado com sucesso!", 'success');
+                await fetchAndDisplayEmployeeOrders(tempOrderData.employeeRGF);
             } catch (error) {
                 console.error("Erro ao enviar pedido: ", error);
                 showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
@@ -464,7 +710,7 @@
                 button.disabled = false; button.textContent = 'Confirmar e Enviar';
             }
         }
-        
+
         function loadAdminData() {
             onSnapshot(pedidosCollectionRef, (snapshot) => {
                 const latestOrdersMap = new Map();
@@ -473,192 +719,395 @@
                     if (orderData.employeeRGF) {
                         const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
                          if (!latestOrdersMap.has(orderData.employeeRGF) || timestamp > latestOrdersMap.get(orderData.employeeRGF).timestamp) {
-                             latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
+                             latestOrdersMap.set(orderData.employeeRGF, { id: doc.id, ...orderData, timestampMillis: timestamp });
                          }
                     }
                 });
-                
-                allOrders = Array.from(latestOrdersMap.values())
-                    .map(item => item.doc)
-                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
-                renderOrdersTable(allOrders);
+                allOrders = Array.from(latestOrdersMap.values()).sort((a, b) => a.employeeName.localeCompare(b.employeeName));
+                renderCurrentWeekOrdersTable();
                 renderOrderStatus(allOrders);
             }, (error) => {
-                console.error("Erro ao carregar dados do administrador:", error);
-                showToast("Erro ao carregar dados do administrador.", 'error');
+                console.error("Erro ao carregar pedidos da semana atual:", error);
+                showToast("Erro ao carregar pedidos da semana atual.", 'error');
+            });
+
+            onSnapshot(pedidosProximaSemanaCollectionRef, (snapshot) => {
+                const latestOrdersMapNextWeek = new Map();
+                snapshot.forEach(doc => {
+                    const orderData = doc.data();
+                     if (orderData.employeeRGF) {
+                        const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
+                        if (!latestOrdersMapNextWeek.has(orderData.employeeRGF) || timestamp > latestOrdersMapNextWeek.get(orderData.employeeRGF).timestampMillis) {
+                            latestOrdersMapNextWeek.set(orderData.employeeRGF, { id: doc.id, ...orderData, timestampMillis: timestamp });
+                        }
+                    }
+                });
+                allNextWeekOrders = Array.from(latestOrdersMapNextWeek.values()).sort((a,b) => a.employeeName.localeCompare(b.employeeName));
+                renderNextWeekOrdersTable();
+            }, (error) => {
+                console.error("Erro ao carregar pedidos da próxima semana:", error);
+                showToast("Erro ao carregar pedidos da próxima semana.", 'error');
             });
         }
-        
+
         async function renderOrderStatus(orders) {
             const container = document.getElementById('order-status-container');
-            container.innerHTML = '<p class="text-gray-500">A processar...</p>';
+            container.innerHTML = ''; // Clear previous
+            const processingP = document.createElement('p');
+            processingP.className = 'text-gray-500';
+            processingP.textContent = 'A processar...';
+            container.appendChild(processingP);
 
             try {
                 const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
                 const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
-
+                const orderedRGFs = new Set(orders.map(order => order.employeeRGF));
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
                 const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
 
-                let html = `
-                    <div>
-                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
-                    </div>
-                `;
-                container.innerHTML = html;
+                container.innerHTML = ''; // Clear "A processar..."
+
+                const divHaveOrdered = document.createElement('div');
+                const h3HaveOrdered = document.createElement('h3');
+                h3HaveOrdered.className = 'font-semibold text-lg text-green-600 mb-2';
+                h3HaveOrdered.textContent = `✅ Já Pediram (${haveOrdered.length}) (Semana Atual)`;
+                const ulHaveOrdered = document.createElement('ul');
+                ulHaveOrdered.className = 'space-y-1 text-sm';
+                if (haveOrdered.length === 0) {
+                    const li = document.createElement('li');
+                    li.className = 'text-gray-500';
+                    li.textContent = 'Ninguém fez pedido ainda.';
+                    ulHaveOrdered.appendChild(li);
+                } else {
+                    haveOrdered.forEach(e => {
+                        const li = document.createElement('li');
+                        li.className = 'p-2 bg-green-50 rounded-md';
+                        li.textContent = e.nome;
+                        ulHaveOrdered.appendChild(li);
+                    });
+                }
+                divHaveOrdered.appendChild(h3HaveOrdered);
+                divHaveOrdered.appendChild(ulHaveOrdered);
+                container.appendChild(divHaveOrdered);
+
+                const divHaveNotOrdered = document.createElement('div');
+                const h3HaveNotOrdered = document.createElement('h3');
+                h3HaveNotOrdered.className = 'font-semibold text-lg text-red-600 mb-2';
+                h3HaveNotOrdered.textContent = `❌ Ainda Não Pediram (${haveNotOrdered.length}) (Semana Atual)`;
+                const ulHaveNotOrdered = document.createElement('ul');
+                ulHaveNotOrdered.className = 'space-y-1 text-sm';
+                if (haveNotOrdered.length === 0 && allEmployees.length > 0) {
+                     const li = document.createElement('li');
+                    li.className = 'text-gray-500';
+                    li.textContent = 'Todos os funcionários fizeram pedido!';
+                    ulHaveNotOrdered.appendChild(li);
+                } else if (haveNotOrdered.length === 0 && allEmployees.length === 0) {
+                    const li = document.createElement('li');
+                    li.className = 'text-gray-500';
+                    li.textContent = 'Nenhum funcionário cadastrado.';
+                    ulHaveNotOrdered.appendChild(li);
+                }else {
+                    haveNotOrdered.forEach(e => {
+                        const li = document.createElement('li');
+                        li.className = 'p-2 bg-red-50 rounded-md';
+                        li.textContent = e.nome;
+                        ulHaveNotOrdered.appendChild(li);
+                    });
+                }
+                divHaveNotOrdered.appendChild(h3HaveNotOrdered);
+                divHaveNotOrdered.appendChild(ulHaveNotOrdered);
+                container.appendChild(divHaveNotOrdered);
 
             } catch (error) {
                 console.error("Erro ao renderizar status de pedidos:", error);
-                container.innerHTML = '<p class="text-red-500">Falha ao carregar status dos funcionários.</p>';
+                container.innerHTML = '';
+                const pError = document.createElement('p');
+                pError.className = 'text-red-500';
+                pError.textContent = 'Falha ao carregar status dos funcionários.';
+                container.appendChild(pError);
             }
         }
-        
-        function renderOrdersTable(orders) {
-            const container = document.getElementById('ordersTableContainer');
+
+        function renderCurrentWeekOrdersTable() {
+            renderOrdersTable(allOrders, currentWeeklyMenu, 'ordersTableContainer', 'current');
+        }
+
+        function renderNextWeekOrdersTable() {
+            renderOrdersTable(allNextWeekOrders, weeklyMenu, 'nextWeekOrdersTableContainer', 'next');
+        }
+
+        function renderOrdersTable(orders, menuToDisplayAgainst, tableContainerId, orderType) {
+            const container = document.getElementById(tableContainerId);
+            if (!container) return;
+            container.innerHTML = ''; // Clear previous content
+
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
+            const filteredOrders = (orderType === 'current')
+                ? orders.filter(order => order.employeeName.toLowerCase().includes(searchTerm))
+                : orders;
 
-            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
-            
-            let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
-            weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
-            tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+            const menuTypeMsg = menuToDisplayAgainst === currentWeeklyMenu ? 'semana atual' : 'próxima semana';
+            if (!menuToDisplayAgainst || menuToDisplayAgainst.length === 0) {
+                const p = document.createElement('p');
+                p.className = 'text-gray-500 text-center py-4';
+                p.textContent = `Aguardando cardápio (${menuTypeMsg}) para exibição dos pedidos...`;
+                container.appendChild(p);
+                return;
+            }
+            if (filteredOrders.length === 0) {
+                const p = document.createElement('p');
+                p.className = 'text-gray-500 text-center py-4';
+                p.textContent = `Nenhum pedido encontrado para ${menuTypeMsg}.`;
+                container.appendChild(p);
+                return;
+            }
 
-            filteredOrders.forEach(doc => {
-                const order = doc.data();
-                tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
-                weeklyMenu.forEach(dayMenuItem => {
+            const table = document.createElement('table');
+            table.className = 'min-w-full bg-white border';
+            const thead = table.createTHead();
+            const headerRow = thead.insertRow();
+            const headers = ['Funcionário', 'RGF'];
+            menuToDisplayAgainst.forEach(item => headers.push(item.day.substring(0,3)));
+            headers.push('Ações');
+
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.className = 'py-2 px-3 border-b text-left';
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            const tbody = table.createTBody();
+            filteredOrders.forEach(order => {
+                const tr = tbody.insertRow();
+
+                let tdName = tr.insertCell();
+                tdName.className = 'py-2 px-3 border-b font-bold';
+                tdName.textContent = order.employeeName;
+
+                let tdRGF = tr.insertCell();
+                tdRGF.className = 'py-2 px-3 border-b';
+                tdRGF.textContent = order.employeeRGF || 'N/A';
+
+                menuToDisplayAgainst.forEach(dayMenuItem => {
+                    const tdDay = tr.insertCell();
+                    tdDay.className = 'py-2 px-3 border-b';
                     const dayId = getDayId(dayMenuItem.day);
-                    let cellContent = '';
-
                     if (dayMenuItem.isHoliday) {
-                        cellContent = '<span class="text-xs text-indigo-600">Feriado</span>';
+                        const holidaySpan = document.createElement('span');
+                        holidaySpan.className = 'text-xs text-indigo-600';
+                        holidaySpan.textContent = 'Feriado';
+                        tdDay.appendChild(holidaySpan);
                     } else {
                         let choice = order[dayId] || 'N/A';
                         const notes = order[`${dayId}_notes`];
                         const mainDishName = dayMenuItem.pratoPrincipal.name;
                         const optionDishName = dayMenuItem.opcao?.name;
-
                         let reportChoice = choice;
-                        if (choice === mainDishName) {
-                            reportChoice = 'Prato';
-                        } else if (optionDishName && choice === optionDishName) {
-                            reportChoice = 'Opção';
-                        }
-                        
-                        cellContent = reportChoice;
+                        if (choice === mainDishName) reportChoice = 'Prato';
+                        else if (optionDishName && choice === optionDishName) reportChoice = 'Opção';
+
+                        tdDay.textContent = reportChoice; // Set the main choice text
+
                         if (notes) {
-                            cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
+                            tdDay.appendChild(document.createTextNode(' ')); // Add a space
+                            const notesSpan = document.createElement('span');
+                            notesSpan.title = notes;
+                            notesSpan.className = 'cursor-help text-blue-500 font-bold';
+                            notesSpan.textContent = '*';
+                            tdDay.appendChild(notesSpan);
                         }
                     }
-                    tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
                 });
-                tableHTML += `<td class="py-2 px-3 border-b space-x-2"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
+
+                const tdActions = tr.insertCell();
+                tdActions.className = 'py-2 px-3 border-b space-x-2';
+                const editButton = document.createElement('button');
+                editButton.dataset.id = order.id;
+                editButton.dataset.orderType = orderType;
+                editButton.className = 'edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold';
+                editButton.textContent = 'Editar';
+                tdActions.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.dataset.id = order.id;
+                deleteButton.dataset.name = order.employeeName;
+                deleteButton.dataset.orderType = orderType;
+                deleteButton.className = 'delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold';
+                deleteButton.textContent = 'Excluir';
+                tdActions.appendChild(deleteButton);
             });
-            tableHTML += `</tbody></table>`;
-            container.innerHTML = tableHTML;
+            container.appendChild(table);
         }
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            if (allOrders.length === 0 || weeklyMenu.length === 0) {
-                showToast("Não há pedidos ou cardápio para gerar o relatório.", "info");
+            reportContainer.innerHTML = ''; // Clear
+
+            if (allOrders.length === 0 || !currentWeeklyMenu || currentWeeklyMenu.length === 0) {
+                showToast("Não há pedidos ou cardápio da semana atual para gerar o relatório.", "info");
                 return;
             }
-            reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
-            
-            let allDaysHTML = '';
-            weeklyMenu.forEach(dayMenuItem => {
-                if (dayMenuItem.isHoliday) return; 
 
+            const h1 = document.createElement('h1');
+            h1.textContent = 'Regional Quatinga (Semana Atual)';
+            reportContainer.appendChild(h1);
+
+            currentWeeklyMenu.forEach(dayMenuItem => {
+                if (dayMenuItem.isHoliday) return;
                 const dayId = getDayId(dayMenuItem.day);
-                let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
-                
-                const dailyOrders = allOrders
-                    .filter(orderDoc => orderDoc.data()[dayId])
-                    .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
-                
-                dailyOrders.forEach(orderDoc => {
-                    const order = orderDoc.data();
+
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'report-day-section';
+
+                const table = document.createElement('table');
+                table.className = 'report-table';
+                const thead = table.createTHead();
+                const headerRow = thead.insertRow();
+
+                const thRGF = document.createElement('th');
+                thRGF.className = 'rgf-col';
+                thRGF.textContent = 'RGF';
+                headerRow.appendChild(thRGF);
+
+                const thNome = document.createElement('th');
+                thNome.className = 'nome-col';
+                thNome.textContent = 'NOME';
+                headerRow.appendChild(thNome);
+
+                const thPedido = document.createElement('th');
+                thPedido.className = 'pedido-col';
+                thPedido.textContent = dayMenuItem.day;
+                headerRow.appendChild(thPedido);
+
+                const tbody = table.createTBody();
+                const dailyOrders = allOrders.filter(order => order[dayId]).sort((a,b) => a.employeeName.localeCompare(b.employeeName));
+
+                dailyOrders.forEach(order => {
+                    const tr = tbody.insertRow();
+                    const tdRGFContent = tr.insertCell();
+                    tdRGFContent.textContent = order.employeeRGF || 'N/A';
+                    const tdNomeContent = tr.insertCell();
+                    tdNomeContent.textContent = order.employeeName;
+                    const tdPedidoContent = tr.insertCell();
+
                     const choice = order[dayId];
                     const notes = order[`${dayId}_notes`];
-                    
                     const mainDishName = dayMenuItem.pratoPrincipal.name;
                     const optionDishName = dayMenuItem.opcao?.name;
                     let reportChoice = '';
+                    if (choice === mainDishName) reportChoice = 'PRATO';
+                    else if (optionDishName && choice === optionDishName) reportChoice = 'OPÇÃO';
+                    else reportChoice = choice.toUpperCase();
 
-                    if (choice === mainDishName) { reportChoice = 'PRATO'; } 
-                    else if (optionDishName && choice === optionDishName) { reportChoice = 'OPÇÃO'; } 
-                    else { reportChoice = choice.toUpperCase(); }
-                    
-                    let choiceHTML = reportChoice;
-                    if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
-
-                    tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
+                    tdPedidoContent.textContent = reportChoice;
+                    if (notes) {
+                        const notesSpan = document.createElement('span');
+                        notesSpan.style.fontStyle = 'italic';
+                        notesSpan.style.fontWeight = 'normal';
+                        notesSpan.textContent = ` (${notes})`;
+                        tdPedidoContent.appendChild(notesSpan);
+                    }
                 });
-                tableHTML += '</tbody></table></div>';
-                allDaysHTML += tableHTML;
+                sectionDiv.appendChild(table);
+                reportContainer.appendChild(sectionDiv);
             });
-            reportContainer.innerHTML += allDaysHTML;
             window.print();
         }
 
-        async function openOrderEditModal(docId) {
+        async function openOrderEditModal(docId, orderType = 'current') {
             const modal = document.getElementById('edit-order-modal');
             const formContent = document.getElementById('edit-menu-options');
             const employeeNameInput = document.getElementById('edit-order-employeeName');
             const orderIdInput = document.getElementById('edit-order-id');
+            const orderTypeInput = document.getElementById('edit-order-type');
 
             formContent.innerHTML = '<p class="text-center text-gray-500">A carregar...</p>';
             modal.classList.remove('hidden');
 
+            const relevantMenu = orderType === 'current' ? currentWeeklyMenu : weeklyMenu;
+            const collectionName = orderType === 'current' ? "pedidosDaSemana" : "pedidosProximaSemana";
+
+            if (!relevantMenu || relevantMenu.length === 0) {
+                showToast(`Cardápio para ${orderType === 'current' ? 'semana atual' : 'próxima semana'} não carregado. Não é possível editar o pedido.`, "error");
+                modal.classList.add('hidden'); return;
+            }
+
             try {
-                const docSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
+                const docSnap = await getDoc(doc(db, collectionName, docId));
                 if (!docSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
-
                 const orderData = docSnap.data();
-                employeeNameInput.value = orderData.employeeName;
-                orderIdInput.value = docId;
-                formContent.innerHTML = '';
+                employeeNameInput.value = orderData.employeeName; // Safe: input value
+                orderIdInput.value = docId; // Safe: input value
+                orderTypeInput.value = orderType;  // Safe: input value
 
-                weeklyMenu.forEach(item => {
+                formContent.innerHTML = ''; // Clear before building
+
+                relevantMenu.forEach(item => {
                     const dayId = getDayId(item.day);
-                    let dayHTML = `<fieldset class="day-section border p-4 rounded-lg"><legend class="font-bold text-lg text-gray-800 px-2">${item.day}</legend>`;
-                    
+                    const fieldset = document.createElement('fieldset');
+                    fieldset.className = 'day-section border p-4 rounded-lg';
+
+                    const legend = document.createElement('legend');
+                    legend.className = 'font-bold text-lg text-gray-800 px-2';
+                    legend.textContent = item.day;
+                    fieldset.appendChild(legend);
+
                     if(item.isHoliday) {
-                        dayHTML += `<div class="bg-indigo-100 text-indigo-700 p-3 rounded-md text-center">Feriado</div>`;
+                        const holidayDiv = document.createElement('div');
+                        holidayDiv.className = 'bg-indigo-100 text-indigo-700 p-3 rounded-md text-center';
+                        holidayDiv.textContent = 'Feriado';
+                        fieldset.appendChild(holidayDiv);
                     } else {
                         const currentChoice = orderData[dayId];
                         const currentNotes = orderData[`${dayId}_notes`] || '';
                         const allOptions = [ { ...item.pratoPrincipal }, ...(item.opcao?.name ? [{ ...item.opcao }] : []), ...fixedOptions ];
-                        
-                        dayHTML += `<div class="space-y-2 mt-2">`;
+
+                        const optionsDiv = document.createElement('div');
+                        optionsDiv.className = 'space-y-2 mt-2';
                         allOptions.forEach((option, index) => {
                             if (option.name) {
-                                const uniqueId = `edit-${dayId}-${index}`;
-                                const isChecked = (option.name === currentChoice) ? 'checked' : '';
-                                dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
+                                const optionDiv = document.createElement('div');
+                                optionDiv.className = 'flex items-center';
+                                const inputRadio = document.createElement('input');
+                                inputRadio.type = 'radio';
+                                inputRadio.id = `edit-${dayId}-${index}`;
+                                inputRadio.name = dayId;
+                                inputRadio.value = option.name;
+                                inputRadio.className = 'h-4 w-4 text-blue-600 border-gray-300';
+                                inputRadio.required = true;
+                                if (option.name === currentChoice) inputRadio.checked = true;
+
+                                const label = document.createElement('label');
+                                label.htmlFor = inputRadio.id;
+                                label.className = 'ml-3 block text-sm font-medium text-gray-700';
+                                label.textContent = `${option.emoji || ''} ${option.name}`;
+
+                                optionDiv.appendChild(inputRadio);
+                                optionDiv.appendChild(label);
+                                optionsDiv.appendChild(optionDiv);
                             }
                         });
-                        dayHTML += `</div>`;
-                        
-                        dayHTML += `<div class="mt-4">
-                            <label for="edit-notes-${dayId}" class="block text-sm font-medium text-gray-700">Anotações</label>
-                            <textarea id="edit-notes-${dayId}" name="edit-notes-${dayId}" rows="2" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">${currentNotes}</textarea>
-                        </div>`;
+                        fieldset.appendChild(optionsDiv);
+
+                        const notesOuterDiv = document.createElement('div');
+                        notesOuterDiv.className = 'mt-4';
+                        const notesLabel = document.createElement('label');
+                        notesLabel.htmlFor = `edit-notes-${dayId}`;
+                        notesLabel.className = 'block text-sm font-medium text-gray-700';
+                        notesLabel.textContent = 'Anotações';
+                        const notesTextarea = document.createElement('textarea');
+                        notesTextarea.id = `edit-notes-${dayId}`;
+                        notesTextarea.name = `edit-notes-${dayId}`;
+                        notesTextarea.rows = 2;
+                        notesTextarea.className = 'mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm';
+                        notesTextarea.value = currentNotes; // Safe: textarea value
+
+                        notesOuterDiv.appendChild(notesLabel);
+                        notesOuterDiv.appendChild(notesTextarea);
+                        fieldset.appendChild(notesOuterDiv);
                     }
-                    
-                    dayHTML += `</fieldset>`;
-                    formContent.innerHTML += dayHTML;
+                    formContent.appendChild(fieldset);
                 });
             } catch (error) {
                 console.error("Erro ao abrir modal de edição:", error);
@@ -672,22 +1121,28 @@
             const button = event.target.querySelector('button[type="submit"]');
             button.disabled = true; button.textContent = 'A salvar...';
             const docId = document.getElementById('edit-order-id').value;
+            const orderType = document.getElementById('edit-order-type').value;
             const updateData = {};
-            
-            weeklyMenu.forEach(item => {
+
+            const relevantMenu = orderType === 'current' ? currentWeeklyMenu : weeklyMenu;
+            const collectionName = orderType === 'current' ? "pedidosDaSemana" : "pedidosProximaSemana";
+
+            if (!relevantMenu || relevantMenu.length === 0) {
+                 showToast(`Cardápio (${orderType}) não carregado. Não é possível salvar alterações.`, "error");
+                 button.disabled = false; button.textContent = 'Salvar Alterações'; return;
+            }
+
+            relevantMenu.forEach(item => {
                 if (!item.isHoliday) {
                     const dayId = getDayId(item.day);
                     const selectedOption = document.querySelector(`#edit-order-form input[name="${dayId}"]:checked`);
-                    if (selectedOption) { 
-                        updateData[dayId] = selectedOption.value; 
-                    }
+                    if (selectedOption) updateData[dayId] = selectedOption.value;
                     const notes = document.getElementById(`edit-notes-${dayId}`).value.trim();
                     updateData[`${dayId}_notes`] = notes;
                 }
             });
-
             try {
-                await updateDoc(doc(db, "pedidosDaSemana", docId), updateData);
+                await updateDoc(doc(db, collectionName, docId), updateData);
                 showToast("Pedido atualizado com sucesso!", 'success');
                 document.getElementById('edit-order-modal').classList.add('hidden');
             } catch (error) {
@@ -698,11 +1153,13 @@
             }
         }
 
-        function deleteOrder(docId, name) {
-            const message = `Tem a certeza que deseja excluir o pedido de ${name}? Esta ação não pode ser desfeita.`;
+        function deleteOrder(docId, name, orderType = 'current') {
+            const collectionName = orderType === 'current' ? "pedidosDaSemana" : "pedidosProximaSemana";
+            const message = `Tem a certeza que deseja excluir o pedido de ${name} (${orderType === 'current' ? 'semana atual' : 'próxima semana'})? Esta ação não pode ser desfeita.`;
+
             showCustomConfirm(message, async () => {
                 try {
-                    await deleteDoc(doc(db, "pedidosDaSemana", docId));
+                    await deleteDoc(doc(db, collectionName, docId));
                     showToast("Pedido excluído com sucesso.", 'success');
                 } catch (error) {
                     console.error("Erro ao excluir pedido: ", error);
@@ -712,7 +1169,7 @@
         }
 
         const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
-        
+
         document.getElementById('imageUpload').addEventListener('change', function(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -727,128 +1184,234 @@
 
         document.getElementById('processImageBtn').addEventListener('click', async () => {
             if (typeof imageCompression === 'undefined') {
-                showToast('Erro: Biblioteca de compressão não carregou.', 'error');
-                return;
+                showToast('Erro: Biblioteca de compressão não carregou.', 'error'); return;
             }
-
             const loader = document.getElementById('loader'); const button = document.getElementById('processImageBtn'); const confirmationForm = document.getElementById('confirmation-form');
             button.disabled = true; button.textContent = 'A analisar...'; loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
-            const file = document.getElementById('imageUpload').files[0]; 
+            const file = document.getElementById('imageUpload').files[0];
             const options = { maxSizeMB: 1.5, maxWidthOrHeight: 1500, useWebWorker: true };
             try {
                 const compressedFile = await imageCompression(file, options);
                 const base64ImageData = await toBase64(compressedFile);
-                
                 const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado, marque-o. Além disso, determine se o almoço é 'especial' (ex: uma refeição comemorativa, temática ou de maior qualidade) e defina o campo booleano 'isSpecial'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "isSpecial": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🍲"}, "guarnicao": {"name": "Nome", "emoji": "🥗"}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
-
                 const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
                 const apiKey = firebaseConfig.apiKey;
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; 
-
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
                 const result = await response.json();
-                
                 let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
-                
                 textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-                const menuData = JSON.parse(textResponse);
-
-                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
-                
-                displayConfirmationForm(menuData.menu);
-
-            } catch (error) { 
-                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
-            } finally { 
-                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
+                const menuDataFromAI = JSON.parse(textResponse);
+                if (!menuDataFromAI || !Array.isArray(menuDataFromAI.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
+                displayConfirmationForm(menuDataFromAI.menu);
+            } catch (error) {
+                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000);
+            } finally {
+                button.disabled = false; button.textContent = 'Analisar Cardápio da Próxima Semana'; loader.classList.add('hidden');
             }
         });
 
-        function displayConfirmationForm(menuData) {
-            const container = document.getElementById('confirmation-form'); 
-            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
-            
-            menuData.forEach((item, index) => {
-                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4">
-                    <h4 class="font-bold">${item.day}</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                        <div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div>
-                        <div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
-                        <div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
-                    </div>
-                    <div class="mt-3 flex items-center space-x-6">
-                        <label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-indigo-600"> <span class="ml-2 text-sm text-gray-900">Marcar como Feriado</span></label>
-                        <label class="flex items-center"><input type="checkbox" id="special-${index}" ${item.isSpecial ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-purple-600"> <span class="ml-2 text-sm text-gray-900">✨ Almoço Especial</span></label>
-                    </div>
-                    </div>`;
-            });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
-            container.classList.remove('hidden'); 
-            
-            document.getElementById('saveNewMenuBtn').addEventListener('click', () => {
-                const message = "Tem certeza que deseja salvar o novo cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente. Esta ação não pode ser desfeita.";
-                showCustomConfirm(message, () => {
-                    saveNewMenu(menuData);
+        function displayConfirmationForm(menuItemsArray) {
+            const container = document.getElementById('confirmation-form');
+            container.innerHTML = ''; // Clear previous
+            const titleH3 = document.createElement('h3');
+            titleH3.className = 'text-xl font-semibold mb-4';
+            titleH3.textContent = 'Confirme os Dados Extraídos (Próxima Semana)';
+            container.appendChild(titleH3);
+
+            menuItemsArray.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'p-4 bg-gray-50 rounded-lg mb-4';
+
+                const dayH4 = document.createElement('h4');
+                dayH4.className = 'font-bold';
+                dayH4.textContent = item.day;
+                itemDiv.appendChild(dayH4);
+
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'grid grid-cols-1 md:grid-cols-3 gap-2 mt-2';
+
+                const fields = [
+                    { idBase: 'prato', label: 'Prato Principal', value: item.pratoPrincipal.name },
+                    { idBase: 'opcao', label: 'Opção', value: item.opcao.name },
+                    { idBase: 'guarnicao', label: 'Guarnição', value: item.guarnicao.name }
+                ];
+                fields.forEach(field => {
+                    const fieldDiv = document.createElement('div');
+                    const fieldLabel = document.createElement('label');
+                    fieldLabel.className = 'block text-sm font-medium';
+                    fieldLabel.textContent = field.label;
+                    const fieldInput = document.createElement('input');
+                    fieldInput.type = 'text';
+                    fieldInput.id = `${field.idBase}-${index}`;
+                    fieldInput.value = field.value || ''; // Safe: input value
+                    fieldInput.className = 'w-full border rounded p-1';
+                    fieldDiv.appendChild(fieldLabel);
+                    fieldDiv.appendChild(fieldInput);
+                    gridDiv.appendChild(fieldDiv);
                 });
+                itemDiv.appendChild(gridDiv);
+
+                const checksDiv = document.createElement('div');
+                checksDiv.className = 'mt-3 flex items-center space-x-6';
+                const holidayLabel = document.createElement('label');
+                holidayLabel.className = 'flex items-center';
+                const holidayInput = document.createElement('input');
+                holidayInput.type = 'checkbox';
+                holidayInput.id = `holiday-${index}`;
+                if(item.isHoliday) holidayInput.checked = true;
+                holidayInput.className = 'h-4 w-4 rounded border-gray-300 text-indigo-600';
+                const holidaySpan = document.createElement('span');
+                holidaySpan.className = 'ml-2 text-sm text-gray-900';
+                holidaySpan.textContent = 'Marcar como Feriado';
+                holidayLabel.appendChild(holidayInput);
+                holidayLabel.appendChild(holidaySpan);
+                checksDiv.appendChild(holidayLabel);
+
+                const specialLabel = document.createElement('label');
+                specialLabel.className = 'flex items-center';
+                const specialInput = document.createElement('input');
+                specialInput.type = 'checkbox';
+                specialInput.id = `special-${index}`;
+                if(item.isSpecial) specialInput.checked = true;
+                specialInput.className = 'h-4 w-4 rounded border-gray-300 text-purple-600';
+                const specialSpan = document.createElement('span');
+                specialSpan.className = 'ml-2 text-sm text-gray-900';
+                specialSpan.textContent = '✨ Almoço Especial';
+                specialLabel.appendChild(specialInput);
+                specialLabel.appendChild(specialSpan);
+                checksDiv.appendChild(specialLabel);
+                itemDiv.appendChild(checksDiv);
+                container.appendChild(itemDiv);
             });
 
-            document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'text-center mt-4';
+            const saveBtn = document.createElement('button');
+            saveBtn.id = 'saveNewMenuBtn';
+            saveBtn.className = 'w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600';
+            saveBtn.textContent = 'Salvar Cardápio da Próxima Semana';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.id = 'cancelNewMenuBtn';
+            cancelBtn.className = 'w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400';
+            cancelBtn.textContent = 'Cancelar';
+            buttonsDiv.appendChild(saveBtn);
+            buttonsDiv.appendChild(cancelBtn);
+            container.appendChild(buttonsDiv);
+
+            container.classList.remove('hidden');
+
+            saveBtn.addEventListener('click', () => {
+                const message = "Tem certeza que deseja salvar este cardápio para a PRÓXIMA semana? Os pedidos da semana ATUAL NÃO serão afetados por esta ação.";
+                showCustomConfirm(message, () => { saveNewMenuToNextWeek(menuItemsArray); });
+            });
+            cancelBtn.addEventListener('click', () => {
                 container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
-                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
-                showToast("Atualização cancelada.", 'info');
+                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = '';
+                showToast("Atualização do cardápio da próxima semana cancelada.", 'info');
             });
         }
-        
+
+        async function saveNewMenuToNextWeek(menuItemsArrayFromConfirmation) {
+            const button = document.getElementById('saveNewMenuBtn');
+            const cancelButton = document.getElementById('cancelNewMenuBtn');
+            button.disabled = true; cancelButton.disabled = true;
+            button.textContent = 'A salvar para Próxima Semana...';
+            const newNextWeekMenuPayload = menuItemsArrayFromConfirmation.map((item, i) => ({
+                day: item.day,
+                pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: item.pratoPrincipal.emoji || '🍛' },
+                opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: item.opcao.emoji || '🍲' },
+                guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: item.guarnicao.emoji || '🥗' },
+                isHoliday: document.getElementById(`holiday-${i}`).checked,
+                isSpecial: document.getElementById(`special-${i}`).checked,
+            }));
+            try {
+                await setDoc(nextWeekMenuRef, { menu: newNextWeekMenuPayload });
+                showToast('Cardápio da próxima semana atualizado com sucesso!', 'success');
+                document.getElementById('confirmation-form').classList.add('hidden');
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden');
+                document.getElementById('imageUpload').value = '';
+                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+            } catch (error) {
+                console.error("Erro ao salvar o cardápio da próxima semana:", error);
+                showToast("Erro ao salvar o novo cardápio da próxima semana.", 'error');
+            } finally {
+                button.disabled = false; cancelButton.disabled = false;
+                button.textContent = 'Salvar Cardápio da Próxima Semana';
+            }
+        }
+
+        async function promoteNextWeekMenuToCurrent() {
+            const confirmationMessage = "Tem certeza que deseja promover o cardápio da PRÓXIMA semana para ATUAL? O cardápio da próxima semana será reiniciado e os pedidos da próxima semana serão movidos para a semana atual.";
+            showCustomConfirm(confirmationMessage, async () => {
+                const promoteBtn = document.getElementById('promoteMenuBtn');
+                promoteBtn.disabled = true; promoteBtn.textContent = "A promover...";
+                try {
+                    const nextWeekDocSnap = await getDoc(nextWeekMenuRef);
+                    if (!nextWeekDocSnap.exists() || !nextWeekDocSnap.data().menu || nextWeekDocSnap.data().menu.length === 0) {
+                        showToast("Cardápio da próxima semana está vazio ou não existe. Não é possível promover.", "error");
+                        promoteBtn.disabled = false; promoteBtn.textContent = "Promover Cardápio da Próxima Semana para Atual";
+                        return;
+                    }
+                    const menuToPromote = nextWeekDocSnap.data();
+
+                    await setDoc(currentWeekMenuRef, menuToPromote);
+                    showToast("Cardápio da próxima semana promovido para atual com sucesso!", "success");
+
+                    showToast("A iniciar a transição dos pedidos...", "info");
+                    console.log("Starting order transition...");
+                    try {
+                        const nextWeekOrdersSnapshot = await getDocs(pedidosProximaSemanaCollectionRef);
+                        if (!nextWeekOrdersSnapshot.empty) {
+                            const addPromises = [];
+                            nextWeekOrdersSnapshot.docs.forEach(orderDoc => {
+                                addPromises.push(addDoc(pedidosCollectionRef, orderDoc.data()));
+                            });
+                            await Promise.all(addPromises);
+                            console.log(`${addPromises.length} orders successfully copied to pedidosDaSemana.`);
+
+                            const deletePromises = [];
+                            nextWeekOrdersSnapshot.docs.forEach(orderDoc => {
+                                deletePromises.push(deleteDoc(orderDoc.ref));
+                            });
+                            await Promise.all(deletePromises);
+                            console.log(`${deletePromises.length} original orders successfully deleted from pedidosProximaSemana.`);
+                            showToast("Pedidos da próxima semana transitaram para a semana atual com sucesso!", "success");
+                        } else {
+                            showToast("Nenhum pedido encontrado na próxima semana para transitar.", "info");
+                            console.log("No orders in pedidosProximaSemana to transition.");
+                        }
+                        await setDoc(nextWeekMenuRef, { menu: [] });
+                        showToast("Cardápio da próxima semana foi reiniciado.", "info");
+                    } catch (orderError) {
+                        console.error("Erro crítico ao transitar os pedidos:", orderError);
+                        showToast("Erro crítico ao transitar os pedidos! Verifique o console. O cardápio pode ter sido promovido, mas os pedidos não.", "error", 8000);
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Erro ao promover cardápio (etapa de menu):", error);
+                    showToast("Falha ao promover o cardápio. Verifique o console.", "error");
+                } finally {
+                    promoteBtn.disabled = false; promoteBtn.textContent = "Promover Cardápio da Próxima Semana para Atual";
+                }
+            });
+        }
+
         async function clearAllOrders() {
-            console.log("Iniciando a limpeza de todos os pedidos da semana...");
+            console.log("Iniciando a limpeza de todos os pedidos da semana (pedidosDaSemana collection)...");
             const querySnapshot = await getDocs(pedidosCollectionRef);
             const deletionPromises = [];
-            querySnapshot.forEach((doc) => {
-                deletionPromises.push(deleteDoc(doc.ref));
-            });
+            querySnapshot.forEach((doc) => { deletionPromises.push(deleteDoc(doc.ref)); });
             await Promise.all(deletionPromises);
             console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
         }
 
-        async function saveNewMenu(menuData) {
-            const button = document.getElementById('saveNewMenuBtn'); 
-            const cancelButton = document.getElementById('cancelNewMenuBtn');
-            button.disabled = true;
-            cancelButton.disabled = true;
-            button.textContent = 'A salvar...'; 
-
-            const newMenu = menuData.map((item, i) => ({ 
-                day: item.day, 
-                pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
-                opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
-                guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
-                isHoliday: document.getElementById(`holiday-${i}`).checked,
-                isSpecial: document.getElementById(`special-${i}`).checked,
-            })); 
-
-            try { 
-                await setDoc(menuDocRef, { menu: newMenu });
-                await clearAllOrders();
-                showToast('Cardápio atualizado e pedidos zerados!', 'success'); 
-                document.getElementById('confirmation-form').classList.add('hidden'); 
-                document.getElementById('imagePreview').classList.add('hidden');
-                document.getElementById('image-processor-container').classList.add('hidden'); 
-                document.getElementById('imageUpload').value = ''; 
-                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-            } catch (error) { 
-                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
-                showToast("Erro ao salvar o novo cardápio.", 'error'); 
-            } finally { 
-                button.disabled = false; 
-                cancelButton.disabled = false;
-                button.textContent = 'Salvar Novo Cardápio'; 
-            }
-        }
-        
         function handleWhatsAppNotification() {
-            const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
+            const message = `O cardápio da próxima semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank');
@@ -873,14 +1436,19 @@
             document.getElementById('user-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
+            loadMenus();
+            const rgf = localStorage.getItem('employeeRGF');
+            if (rgf) {
+                document.getElementById('employeeRGF').value = rgf;
+                findEmployeeByRGF(rgf);
+            }
         }
 
         function showAdminView() {
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
+            loadMenus();
             loadAdminData();
             loadAndRenderEmployees();
         }
@@ -907,51 +1475,67 @@
         }
 
         async function handleAdminLogout() {
-            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); } 
+            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); }
             catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
         }
 
         function main() {
             const rgfInput = document.getElementById('employeeRGF');
             rgfInput.value = localStorage.getItem('employeeRGF') || '';
-            if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
             rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
             rgfInput.addEventListener('input', validateForm);
-            
+
             document.getElementById('menu').addEventListener('change', validateForm);
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
-            
+
             document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
                 btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
             });
 
             document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
-            
+
             document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
             document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
-            
+
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
                 if (e.target.closest('.edit-employee-btn')) { openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name); }
                 if (e.target.closest('.delete-employee-btn')) { handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name); }
             });
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
-            
-            document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
-            document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
-            
-            document.getElementById('ordersTableContainer').addEventListener('click', function(e) {
-                if (e.target.closest('.edit-order-btn')) { openOrderEditModal(e.target.closest('.edit-order-btn').dataset.id); }
-                if (e.target.closest('.delete-order-btn')) { deleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name); }
+
+            document.getElementById('searchInput').addEventListener('input', () => {
+                renderCurrentWeekOrdersTable();
+                // renderNextWeekOrdersTable(); // Search does not apply to next week for now
             });
+            document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
+            document.getElementById('promoteMenuBtn')?.addEventListener('click', promoteNextWeekMenuToCurrent);
+
+            document.getElementById('admin-view').addEventListener('click', function(e) {
+                const editBtn = e.target.closest('.edit-order-btn');
+                const deleteBtn = e.target.closest('.delete-order-btn');
+
+                if (editBtn) {
+                    const docId = editBtn.dataset.id;
+                    const orderType = editBtn.dataset.orderType;
+                    openOrderEditModal(docId, orderType);
+                }
+                if (deleteBtn) {
+                    const docId = deleteBtn.dataset.id;
+                    const name = deleteBtn.dataset.name;
+                    const orderType = deleteBtn.dataset.orderType;
+                    deleteOrder(docId, name, orderType);
+                }
+            });
+
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
-            
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
         }
-
         main();
     </script>
 </body>
 </html>
+
+[end of index.html]
