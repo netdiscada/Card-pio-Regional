@@ -48,24 +48,11 @@
 <body class="bg-slate-50">
 
     <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
-
+        
         <div id="user-view" class="no-print">
-            <!-- Botões de alternância de visualização de cardápio para usuário -->
-            <div id="nextWeekToggleContainer" class="my-4 text-center hidden">
-                <button id="toggleToNextWeekViewBtn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-sm sm:text-base">
-                    Escolher/Ver Cardápio da Próxima Semana
-                </button>
-            </div>
-            <div id="currentWeekViewInfo" class="my-4 text-center hidden p-3 bg-purple-100 text-purple-700 rounded-md">
-                <p>Você está visualizando/editando o cardápio da <strong>próxima semana</strong>.</p>
-                <button id="switchToCurrentWeekViewBtn" class="mt-2 text-sm text-purple-600 hover:text-purple-800 underline">
-                    Voltar para o cardápio da semana atual
-                </button>
-            </div>
-
             <div id="form-container">
-                <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p id="cardapio-view-title" class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
-
+                <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
+                
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -95,19 +82,7 @@
             <div class="mb-8">
                 <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
-
-            <section class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">⚙️ Controles do Cardápio</h2>
-                <div id="admin-cardapio-status-display" class="mb-4 p-4 bg-slate-100 rounded-md text-sm">
-                    <p>A carregar estado do cardápio...</p>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button id="toggleAtualAbertoBtn" class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600">Alternar Abertura (Atual)</button>
-                    <button id="toggleProximoAbertoBtn" class="bg-teal-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-600">Alternar Abertura (Próximo)</button>
-                </div>
-                 <p class="text-xs text-gray-500 mt-2">Estes botões controlam se os funcionários podem fazer pedidos para o cardápio atual ou para o cardápio da próxima semana.</p>
-            </section>
-
+            
             <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
                 <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -117,7 +92,6 @@
 
             <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
                  <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
-                 <p class="text-gray-600 mb-2">Use para definir o cardápio da <strong>próxima semana</strong>. Ao salvar, ele será copiado para <code class="text-xs bg-gray-200 p-1 rounded">cardapio/proximaSemana</code>.</p>
                 <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
                 <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                 <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
@@ -130,8 +104,6 @@
                         Notificar Funcionários no WhatsApp
                     </button>
                 </div>
-                 <button id="publishNextWeekMenuBtn" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 shadow-md">Publicar Cardápio da Próxima Semana COMO ATUAL</button>
-                 <p class="text-xs text-gray-500 mt-2">Este botão copia o conteúdo de <code class="text-xs bg-gray-200 p-1 rounded">cardapio/proximaSemana</code> para <code class="text-xs bg-gray-200 p-1 rounded">cardapio/semanal</code> e ZERA os pedidos atuais.</p>
             </section>
 
             <section id="employee-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
@@ -154,7 +126,7 @@
 
             <section id="orders-section">
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos (Cardápio Atual)</h2>
+                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
                     <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
                     <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
                 </div>
@@ -171,14 +143,14 @@
 
     <div id="print-report"></div>
     <div id="app-toast"></div>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
+        
         const firebaseConfig = {
-            apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI", // Substitua pela sua chave de API real se necessário
+            apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
             projectId: "cardapio-8ddea",
             storageBucket: "cardapio-8ddea.appspot.com",
@@ -192,79 +164,42 @@
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
         };
-
+        
         const menuDocRef = doc(db, "cardapio", "semanal");
-        const proximoMenuDocRef = doc(db, "cardapio", "proximaSemana");
-        const estadoCardapioDocRef = doc(db, "configuracoes", "estadoCardapio");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
-
+        
         const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
-
-        let weeklyMenu = []; // Cardápio atualmente em vigor (semanal)
-        let proximoWeeklyMenu = []; // Cardápio para a próxima semana
-        let pedidosDoUsuarioLogado = { atual: null, proxima: null }; // Pedidos do usuário logado
-
-        let allOrders = []; // Usado pelo Admin para ver todos os pedidos
-        let tempOrderData = {}; // Usado para submissão de pedido
-        let currentUserID = null;
-        let currentUserRGF = null; // Armazena RGF do usuário logado para buscar seus pedidos
-
-        let estadoCardapio = {
-            cardapioAtualAbertoParaEscolha: false,
-            cardapioProximoAbertoParaEscolha: false,
-            dataPublicacaoProximoCardapio: null,
-            // Adicionar um campo para controlar qual cardápio o usuário está vendo por padrão
-            // Isso será útil para quinta-feira, quando ambos podem estar relevantes.
-            // Por agora, vamos focar em 'visualizandoCardapioProximaSemana' controlado por UI.
-        };
-        // `visualizandoCardapioProximaSemana` controla qual cardápio o usuário está vendo/interagindo na UI.
-        // Esta variável será crucial para a lógica de quinta-feira.
-        let visualizandoCardapioProximaSemana = false;
-
+        let weeklyMenu = [];
+        let allOrders = [];
+        let tempOrderData = {};
+        
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
-
-        function getDiaDaSemanaAtual(timezone = 'America/Sao_Paulo') {
-            // Retorna o número do dia da semana: 0 para Domingo, 1 para Segunda, ..., 4 para Quinta, 6 para Sábado
-            // Usar toLocaleDateString para obter o dia na timezone correta e depois mapear
-            // ou mais simples, assumir que o getDay() do browser está na timezone do usuário, o que é geralmente o caso.
-            return new Date().getDay();
-        }
-
-        function isQuintaFeira() {
-            return getDiaDaSemanaAtual() === 4; // 4 representa Quinta-feira
-        }
 
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.getElementById('app-toast');
             if(!toast) return;
             toast.textContent = message;
-            toast.className = 'show'; // Remove todas as classes de tipo anteriores
-            toast.classList.add(type); // Adiciona a classe do tipo atual
+            toast.className = 'show';
+            toast.classList.add(type);
             setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
         }
-
-        function showCustomConfirm(message, onConfirm, title = "Confirmar Ação", okLabel = "Confirmar", cancelLabel = "Cancelar") {
+        
+        function showCustomConfirm(message, onConfirm) {
             const modal = document.getElementById('custom-confirm-modal');
-            const titleEl = document.getElementById('custom-confirm-title');
             const messageEl = document.getElementById('custom-confirm-message');
             const okBtn = document.getElementById('custom-confirm-ok-btn');
-            const cancelBtn = document.getElementById('custom-confirm-cancel-btn');
-
-            titleEl.textContent = title;
-            messageEl.innerHTML = message; // Usar innerHTML para permitir formatação básica se necessário
-            okBtn.textContent = okLabel;
-            cancelBtn.textContent = cancelLabel;
+            
+            messageEl.textContent = message;
             modal.classList.remove('hidden');
 
-            const newOkBtn = okBtn.cloneNode(true); // Clonar para remover event listeners antigos
+            const newOkBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
-
+            
             newOkBtn.addEventListener('click', () => {
                 onConfirm();
                 modal.classList.add('hidden');
             });
-            // O event listener do cancelBtn já está configurado no main() para fechar o modal
         }
 
         function loadAndRenderEmployees() {
@@ -326,7 +261,7 @@
                 }
             });
         }
-
+        
         function openEmployeeEditModal(rgf, nome) {
             document.getElementById('editEmployeeRGF').value = rgf;
             document.getElementById('editEmployeeName').value = nome;
@@ -348,151 +283,53 @@
                 showToast("Falha ao salvar as alterações do funcionário.", 'error');
             }
         }
-
+        
         async function findEmployeeByRGF(rgf) {
             const nameInput = document.getElementById('employeeName');
-            currentUserRGF = rgf.trim(); // Armazena o RGF para buscar pedidos depois
-            if (!currentUserRGF) {
-                nameInput.value = '';
-                nameInput.placeholder = 'Preenchido automaticamente';
-                pedidosDoUsuarioLogado = { atual: null, proxima: null }; // Limpa pedidos se RGF for removido
-                validateForm();
-                return;
-            }
+            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; validateForm(); return; }
             try {
-                const docSnap = await getDoc(doc(db, "funcionarios", currentUserRGF));
+                const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
                 } else {
                     nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
                 }
-                // Após encontrar funcionário (ou não), buscar seus pedidos
-                await loadUserPedidos();
-                validateForm(); // Valida o formulário que pode depender dos pedidos carregados
+                validateForm();
             } catch (error) {
                 console.error("Erro ao buscar funcionário:", error);
                 nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
                 showToast("Erro ao buscar funcionário.", 'error');
-                 pedidosDoUsuarioLogado = { atual: null, proxima: null };
-                validateForm();
             }
         }
-
-        async function loadUserPedidos() {
-            if (!currentUserID || !currentUserRGF) {
-                pedidosDoUsuarioLogado = { atual: null, proxima: null };
-                return;
-            }
-
-            // Busca pedido para o cardápio atual
-            const qAtual = query(pedidosCollectionRef,
-                                 orderBy("timestamp", "desc"),
-                                 where("userId", "==", currentUserID),
-                                 where("employeeRGF", "==", currentUserRGF),
-                                 where("referenciaCardapio", "==", "atual")
-                                 // limit(1) // Pega apenas o mais recente se houver múltiplos (embora não devesse)
-                                 );
-            // Busca pedido para o cardápio da próxima semana
-            const qProxima = query(pedidosCollectionRef,
-                                   orderBy("timestamp", "desc"),
-                                   where("userId", "==", currentUserID),
-                                   where("employeeRGF", "==", currentUserRGF),
-                                   where("referenciaCardapio", "==", "proxima")
-                                   // limit(1)
-                                   );
-            try {
-                const [snapshotAtual, snapshotProxima] = await Promise.all([getDocs(qAtual), getDocs(qProxima)]);
-
-                pedidosDoUsuarioLogado.atual = snapshotAtual.empty ? null : { id: snapshotAtual.docs[0].id, ...snapshotAtual.docs[0].data() };
-                pedidosDoUsuarioLogado.proxima = snapshotProxima.empty ? null : { id: snapshotProxima.docs[0].id, ...snapshotProxima.docs[0].data() };
-
-                // console.log("Pedidos do usuário carregados:", pedidosDoUsuarioLogado);
-                // Após carregar os pedidos, a UI do cardápio precisa ser atualizada para refletir as escolhas ou o estado bloqueado.
-                // A função createMenuHTML será responsável por isso.
-                renderCurrentViewBasedOnState(); // Re-renderiza o menu com os pedidos carregados
-
-            } catch (error) {
-                console.error("Erro ao buscar pedidos do usuário:", error);
-                showToast("Erro ao buscar seus pedidos salvos.", "error");
-                pedidosDoUsuarioLogado = { atual: null, proxima: null };
-                renderCurrentViewBasedOnState(); // Tenta renderizar mesmo assim
-            }
-        }
-
+        
         function createFallbackMenu() {
             const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
             return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
         }
 
-        // Ajustado para aceitar qual referência de menu carregar e se está aberto
-        function loadAndDisplayMenu(menuToLoadRef = menuDocRef, escolhasEstaoAbertas = false) {
-            const menuContainer = document.getElementById('menu');
-            menuContainer.innerHTML = '<div class="text-center text-gray-500">A carregar o cardápio...</div>';
-
-            onSnapshot(menuToLoadRef, (docSnap) => {
-                const menuData = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
-
-                if (menuToLoadRef.path === proximoMenuDocRef.path) { // Comparar path para robustez
-                    proximoWeeklyMenu = menuData;
-                } else {
-                    weeklyMenu = menuData;
-                }
-
-                createMenuHTML(visualizandoCardapioProximaSemana ? proximoWeeklyMenu : weeklyMenu, escolhasEstaoAbertas);
-
-                if (auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID) {
-                    renderOrdersTable(allOrders); // Admin vê pedidos do cardápio atual
-                }
+        function loadAndDisplayMenu() {
+            onSnapshot(menuDocRef, (docSnap) => {
+                weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
+                createMenuHTML();
+                renderOrdersTable(allOrders); 
             }, (error) => {
-                 console.error("Erro ao carregar o cardápio:", error, menuToLoadRef.path);
+                 console.error("Erro ao carregar o cardápio:", error);
                  showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
-                 const fallbackMenu = createFallbackMenu();
-                 if (menuToLoadRef.path === proximoMenuDocRef.path) {
-                    proximoWeeklyMenu = fallbackMenu;
-                } else {
-                    weeklyMenu = fallbackMenu;
-                }
-                 createMenuHTML(fallbackMenu, false);
-                 if (auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID) {
-                    renderOrdersTable(allOrders);
-                 }
+                 weeklyMenu = createFallbackMenu();
+                 createMenuHTML();
+                 renderOrdersTable(allOrders);
             });
         }
-
-        // Ajustado para desabilitar inputs e mostrar escolhas salvas
-        function createMenuHTML(menuItemsToDisplay, escolhasEstaoAbertas) {
+        
+        function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
             if (!menuContainer) return;
             menuContainer.innerHTML = '';
-            const isAdmin = auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID;
-            const pedidoDoUsuarioParaEsteCardapio = visualizandoCardapioProximaSemana ? pedidosDoUsuarioLogado.proxima : pedidosDoUsuarioLogado.atual;
 
-            if (!escolhasEstaoAbertas && !isAdmin && !pedidoDoUsuarioParaEsteCardapio) {
-                const statusMsg = visualizandoCardapioProximaSemana ?
-                    "As escolhas para o cardápio da próxima semana estão encerradas e você não possui um pedido salvo." :
-                    "As escolhas para o cardápio desta semana estão encerradas e você não possui um pedido salvo.";
-                menuContainer.innerHTML = `<div class="text-center p-6 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md">
-                                               <p class="font-semibold">${statusMsg}</p>
-                                               <p class="mt-2 text-sm">Consulte o administrador para mais informações.</p>
-                                           </div>`;
-                validateForm();
-                return;
-            }
-
-            if (menuItemsToDisplay.length === 0 || menuItemsToDisplay.every(d => d.pratoPrincipal.name === 'Cardápio não definido')) {
-                 menuContainer.innerHTML = `<div class="text-center p-6 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-md">
-                                               <p class="font-semibold">O cardápio ainda não foi definido para este período.</p>
-                                               <p class="mt-2 text-sm">Por favor, volte mais tarde.</p>
-                                           </div>`;
-                validateForm();
-                return;
-            }
-
-
-            menuItemsToDisplay.forEach(item => {
+            weeklyMenu.forEach(item => {
                 const dayId = getDayId(item.day);
-                let dayHTML = `<div class="day-section space-y-3 p-4 rounded-lg ${!escolhasEstaoAbertas && pedidoDoUsuarioParaEsteCardapio ? 'bg-slate-100' : ''}">`;
-
+                let dayHTML = `<div class="day-section space-y-3">`;
+                
                 let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
                 if (item.isSpecial) {
                     dayTitleHTML = `<div class="flex items-center gap-3">
@@ -500,64 +337,55 @@
                         <span class="text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1">✨ Almoço Especial</span>
                     </div>`;
                 }
-
+                
                 if (item.isHoliday) {
                     dayHTML += dayTitleHTML;
-                    dayHTML += `<div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md"><p class="font-bold">🎊 Feriado</p><p>Não haverá refeição neste dia.</p></div>`;
+                    dayHTML += `
+                        <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
+                            <p class="font-bold">🎊 Feriado</p>
+                            <p>Não haverá refeição neste dia.</p>
+                        </div>`;
                 } else {
-                    const userChoiceForDay = pedidoDoUsuarioParaEsteCardapio ? pedidoDoUsuarioParaEsteCardapio[dayId] : null;
-                    const userNotesForDay = pedidoDoUsuarioParaEsteCardapio ? pedidoDoUsuarioParaEsteCardapio[`${dayId}_notes`] || '' : '';
-                    const canEditThisDay = escolhasEstaoAbertas || isAdmin;
+                    const allOptions = [
+                        { ...item.pratoPrincipal, type: 'Prato Principal' },
+                        ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
+                        ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
+                    ];
 
                     dayHTML += dayTitleHTML;
                     if (item.guarnicao?.name) {
                         dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
                     }
-
-                    if (!canEditThisDay && userChoiceForDay) { // Mostrar apenas a escolha feita, não os inputs
-                        dayHTML += `<div class="p-4 border-2 border-green-300 bg-green-50 rounded-lg">
-                                        <p class="font-semibold text-gray-800">Sua escolha: <span class="text-green-700 font-bold">${userChoiceForDay}</span></p>
-                                        ${userNotesForDay ? `<p class="text-sm text-gray-600 mt-1">Anotações: <span class="italic">${userNotesForDay}</span></p>` : ''}
-                                    </div>`;
-                    } else if (!canEditThisDay && !userChoiceForDay) { // Escolhas fechadas e sem pedido salvo para este dia
-                         dayHTML += `<div class="p-4 border-2 border-gray-300 bg-gray-50 rounded-lg">
-                                        <p class="font-semibold text-gray-600">Escolha não realizada ou período encerrado.</p>
-                                    </div>`;
-                    } else { // Escolhas abertas ou admin vendo
-                        const allOptions = [
-                            { ...item.pratoPrincipal, type: 'Prato Principal' },
-                            ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
-                            ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
-                        ];
-                        dayHTML += `<div class="space-y-3">`;
-                        allOptions.forEach((option) => {
-                            if (option.name) {
-                                const isChecked = userChoiceForDay === option.name;
-                                dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
-                                    <input type="radio" name="${dayId}" value="${option.name}" class="hidden" ${isChecked ? 'checked' : ''}>
-                                    <div class="flex items-center">
-                                        <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
-                                        <div class="flex-grow">
-                                            <p class="font-semibold text-gray-800">${option.name}</p>
-                                            <p class="text-sm text-gray-500">${option.type}</p>
-                                        </div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                    
+                    dayHTML += `<div class="space-y-3">`;
+                    allOptions.forEach((option) => {
+                        if (option.name) {
+                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
+                                <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
+                                <div class="flex items-center">
+                                    <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
+                                    <div class="flex-grow">
+                                        <p class="font-semibold text-gray-800">${option.name}</p>
+                                        <p class="text-sm text-gray-500">${option.type}</p>
                                     </div>
-                                </label>`;
-                            }
-                        });
-                        dayHTML += `</div>`;
-                        dayHTML += `<div class="mt-3">
-                            <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc.">${userNotesForDay}</textarea>
-                        </div>`;
-                    }
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </label>`;
+                        }
+                    });
+                    dayHTML += `</div>`;
+                    
+                    dayHTML += `<div class="mt-3">
+                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                    </div>`;
                 }
+
                 dayHTML += `</div>`;
                 menuContainer.innerHTML += dayHTML;
             });
+
             validateForm();
         }
-
 
         function validateForm() {
             const name = document.getElementById('employeeName')?.value.trim();
@@ -567,105 +395,43 @@
             const submitBtnContainer = document.getElementById('submitButtonContainer');
             if (!guidanceSection || !submitBtnContainer) return;
 
-            const menuItemsParaValidar = visualizandoCardapioProximaSemana ? proximoWeeklyMenu : weeklyMenu;
-             // Se não há itens no menu (ex: fallback ou não carregado), não há o que validar.
-            if (!menuItemsParaValidar || menuItemsParaValidar.length === 0 || menuItemsParaValidar.every(d => d.pratoPrincipal.name === 'Cardápio não definido')) {
-                submitBtnContainer.classList.add('hidden');
-                guidanceSection.classList.remove('hidden');
-                guidanceText.textContent = 'Cardápio ainda não disponível ou não carregado.';
-                return;
-            }
+            const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
+            const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
 
-            const nonHolidayItems = menuItemsParaValidar.filter(item => !item.isHoliday);
-            const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => {
-                const dayId = getDayId(item.day);
-                return document.querySelector(`input[name="${dayId}"]:checked`);
-            });
-
-            const escolhasAtualmenteAbertas = visualizandoCardapioProximaSemana ?
-                                              (estadoCardapio.cardapioProximoAbertoParaEscolha || false) :
-                                              (estadoCardapio.cardapioAtualAbertoParaEscolha || false);
-
-            const isAdmin = auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID;
-            const pedidoExistente = visualizandoCardapioProximaSemana ? pedidosDoUsuarioLogado.proxima : pedidosDoUsuarioLogado.atual;
-
-            // Lógica para mostrar o botão de submissão
-            // Usuário normal: precisa de nome, RGF, todas as seleções E escolhas abertas.
-            // Admin: pode ver o botão para testar, mesmo que fechado para usuários.
-            if (name && rgf && hasAllSelections && (escolhasAtualmenteAbertas || isAdmin)) {
+            if (name && rgf && hasAllSelections) {
                 guidanceSection.classList.add('hidden');
                 submitBtnContainer.classList.remove('hidden');
-                document.getElementById('openConfirmationModal').textContent = pedidoExistente ? 'Revisar e Atualizar Pedido' : 'Revisar e Finalizar Pedido';
-
-                if (!escolhasAtualmenteAbertas && isAdmin) {
-                     guidanceText.innerHTML = '<strong>Modo Admin:</strong> Escolhas fechadas para usuários. Você pode submeter/atualizar para teste.';
-                     guidanceSection.classList.remove('hidden');
-                     guidanceSection.className = 'bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md mb-6'; // Reset classes
-                }
             } else {
                 submitBtnContainer.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
-                guidanceSection.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6'; // Reset classes
-
                 let message = '';
-                if (!currentUserID && !(auth.currentUser && auth.currentUser.isAnonymous)) message = 'A autenticar... Por favor, aguarde. ';
-                else if (!rgf) message = 'Digite seu RGF para começar. ';
-                else if (!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
-                else if (!escolhasAtualmenteAbertas && !isAdmin) {
-                    if (pedidoExistente) {
-                        message = visualizandoCardapioProximaSemana ?
-                                  'As escolhas para o <strong>cardápio da próxima semana</strong> estão encerradas. Seu pedido já foi registrado.' :
-                                  'As escolhas para o <strong>cardápio desta semana</strong> estão encerradas. Seu pedido já foi registrado.';
-                        guidanceSection.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6';
-                    } else {
-                        message = visualizandoCardapioProximaSemana ?
-                                  'As escolhas para o <strong>cardápio da próxima semana</strong> estão encerradas.' :
-                                  'As escolhas para o <strong>cardápio desta semana</strong> estão encerradas.';
-                    }
-                } else if (!hasAllSelections) {
+                if(!rgf) message = 'Digite seu RGF para começar. ';
+                else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
+                else if (!hasAllSelections) {
                     const missingDays = nonHolidayItems
                         .filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`))
                         .map(item => item.day);
                     if (missingDays.length > 0) message += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
                 }
-                guidanceText.innerHTML = message || 'Por favor, preencha todos os campos e verifique se as escolhas estão abertas.';
+                guidanceText.textContent = message || 'Por favor, preencha todos os campos.';
             }
         }
 
-
         function openConfirmationModal() {
-            if (!currentUserID) {
-                showToast("Você precisa estar autenticado para enviar um pedido. Aguarde ou recarregue.", 'error');
-                return;
-            }
-
-            const escolhasAtualmenteAbertas = visualizandoCardapioProximaSemana ?
-                                              (estadoCardapio.cardapioProximoAbertoParaEscolha || false) :
-                                              (estadoCardapio.cardapioAtualAbertoParaEscolha || false);
-            const isAdmin = auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID;
-
-            if (!escolhasAtualmenteAbertas && !isAdmin) {
-                showToast("As escolhas estão encerradas no momento.", 'error');
-                return;
-            }
-
-            const menuAtualOuProximo = visualizandoCardapioProximaSemana ? proximoWeeklyMenu : weeklyMenu;
-
             tempOrderData = {
                 employeeName: document.getElementById('employeeName').value.trim(),
                 employeeRGF: document.getElementById('employeeRGF').value.trim(),
-                timestamp: serverTimestamp(),
-                userId: currentUserID,
-                referenciaCardapio: visualizandoCardapioProximaSemana ? "proxima" : "atual"
+                timestamp: serverTimestamp()
             };
             const summaryContainer = document.getElementById('confirmation-summary');
             summaryContainer.innerHTML = '';
-
-            menuAtualOuProximo.forEach(item => {
+            
+            weeklyMenu.forEach(item => {
                 const dayId = getDayId(item.day);
+                
                 if (!item.isHoliday) {
                     const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
-                    if (!choiceInput) return; // Deveria ser prevenido por validateForm
+                    if (!choiceInput) return;
                     const choice = choiceInput.value;
                     const notes = document.getElementById(`notes-${dayId}`).value.trim();
 
@@ -673,97 +439,65 @@
                     if(notes) {
                         tempOrderData[`${dayId}_notes`] = notes;
                     }
+
                     summaryContainer.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${choice} ${notes ? `<span class="text-sm text-gray-500 italic">(${notes})</span>` : ''}</p>`;
                 }
             });
+            
             document.getElementById('confirmation-modal').classList.remove('hidden');
         }
 
         async function submitOrder() {
             const button = document.getElementById('submitOrder');
             button.disabled = true; button.textContent = 'A enviar...';
-
-            if (!currentUserID) {
-                showToast("Autenticação perdida. Recarregue a página.", 'error');
-                button.disabled = false; button.textContent = 'Confirmar e Enviar';
-                return;
-            }
-            tempOrderData.userId = currentUserID; // Garantir que está aqui
-            tempOrderData.referenciaCardapio = visualizandoCardapioProximaSemana ? "proxima" : "atual"; // Garantir
-
-            const escolhasAtualmenteAbertas = visualizandoCardapioProximaSemana ?
-                                             (estadoCardapio.cardapioProximoAbertoParaEscolha || false) :
-                                             (estadoCardapio.cardapioAtualAbertoParaEscolha || false);
-            const isAdmin = auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID;
-
-            if (!escolhasAtualmenteAbertas && !isAdmin) {
-                showToast("As escolhas foram encerradas enquanto você revisava o pedido.", 'error');
-                document.getElementById('confirmation-modal').classList.add('hidden');
-                button.disabled = false; button.textContent = 'Confirmar e Enviar';
-                validateForm();
-                return;
-            }
-
             try {
-                const pedidoExistente = visualizandoCardapioProximaSemana ? pedidosDoUsuarioLogado.proxima : pedidosDoUsuarioLogado.atual;
-
-                if (pedidoExistente && pedidoExistente.id) { // Se existe um pedido, atualiza
-                    const pedidoRef = doc(db, "pedidosDaSemana", pedidoExistente.id);
-                    await updateDoc(pedidoRef, tempOrderData);
-                    showToast("Pedido atualizado com sucesso!", 'success');
-                } else { // Senão, cria um novo
-                    await addDoc(pedidosCollectionRef, tempOrderData);
-                    showToast("Pedido enviado com sucesso!", 'success');
-                }
-
+                await addDoc(pedidosCollectionRef, tempOrderData);
                 document.getElementById('confirmation-modal').classList.add('hidden');
                 document.getElementById('form-container').classList.add('hidden');
-                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido (${tempOrderData.referenciaCardapio}) foi ${pedidoExistente ? 'atualizado' : 'registado'} com sucesso.`;
+                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
                 document.getElementById('success-message').classList.remove('hidden');
-
-                // Recarregar os pedidos do usuário para refletir a mudança
-                await loadUserPedidos();
-                // A UI do cardápio será atualizada por createMenuHTML chamado por loadUserPedidos -> renderCurrentViewBasedOnState
-
+                showToast("Pedido enviado com sucesso!", 'success');
             } catch (error) {
-                console.error("Erro ao enviar/atualizar pedido: ", error);
-                if (error.code === 'permission-denied') {
-                    showToast("Erro de permissão. Verifique se as escolhas ainda estão abertas ou se você tem permissão para editar.", 'error');
-                } else {
-                    showToast("Ocorreu um erro ao processar o seu pedido.", 'error');
-                }
+                console.error("Erro ao enviar pedido: ", error);
+                showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
             } finally {
                 button.disabled = false; button.textContent = 'Confirmar e Enviar';
             }
         }
-
+        
         function loadAdminData() {
-            // Focar em pedidos do cardápio ATUAL para a tabela principal do admin
-            const q = query(pedidosCollectionRef, where("referenciaCardapio", "==", "atual"), orderBy("employeeName"));
-            onSnapshot(q, (snapshot) => {
-                // A lógica de `latestOrdersMap` precisa ser ajustada se quisermos mostrar o último pedido
-                // independentemente de ser 'atual' ou 'proximo' em algum lugar, ou se a tabela é estritamente 'atual'.
-                // Por agora, a query já filtra por 'atual'.
-                allOrders = snapshot.docs; // Simplificado, pois já filtramos e ordenamos na query.
-                                        // Se a regra de "último pedido por RGF" for importante aqui, precisará de pós-processamento.
+            onSnapshot(pedidosCollectionRef, (snapshot) => {
+                const latestOrdersMap = new Map();
+                snapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    if (orderData.employeeRGF) {
+                        const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
+                         if (!latestOrdersMap.has(orderData.employeeRGF) || timestamp > latestOrdersMap.get(orderData.employeeRGF).timestamp) {
+                             latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
+                         }
+                    }
+                });
+                
+                allOrders = Array.from(latestOrdersMap.values())
+                    .map(item => item.doc)
+                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
 
-                renderOrdersTable(allOrders); // Passa os pedidos filtrados (apenas 'atual')
-                renderOrderStatus(allOrders); // O status também será baseado nos pedidos para o cardápio 'atual'
+                renderOrdersTable(allOrders);
+                renderOrderStatus(allOrders);
             }, (error) => {
-                console.error("Erro ao carregar dados do administrador (pedidos atuais):", error);
-                showToast("Erro ao carregar pedidos atuais do administrador.", 'error');
+                console.error("Erro ao carregar dados do administrador:", error);
+                showToast("Erro ao carregar dados do administrador.", 'error');
             });
         }
-
-        async function renderOrderStatus(orders) { // orders aqui são os pedidos para o cardápio atual
+        
+        async function renderOrderStatus(orders) {
             const container = document.getElementById('order-status-container');
             container.innerHTML = '<p class="text-gray-500">A processar...</p>';
 
             try {
                 const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
                 const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                // Considera apenas pedidos para o cardápio atual para o status
+                
                 const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
 
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
@@ -771,12 +505,12 @@
 
                 let html = `
                     <div>
-                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (Semana Atual) (${haveOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda para esta semana.</li>'}</ul>
+                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (Semana Atual) (${haveNotOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido para esta semana!</li>'}</ul>
+                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
                     </div>
                 `;
                 container.innerHTML = html;
@@ -786,27 +520,23 @@
                 container.innerHTML = '<p class="text-red-500">Falha ao carregar status dos funcionários.</p>';
             }
         }
-
-        function renderOrdersTable(ordersToRender) { // ordersToRender são os pedidos do cardápio atual
+        
+        function renderOrdersTable(orders) {
             const container = document.getElementById('ordersTableContainer');
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filteredOrders = ordersToRender.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
+            const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            // O cardápio usado para as colunas da tabela deve ser o 'weeklyMenu' (cardápio atual)
-            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio atual...</p>'; return; }
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado para o cardápio atual.</p>'; return; }
-
+            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
+            
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
             weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
 
             filteredOrders.forEach(doc => {
                 const order = doc.data();
-                // Garante que estamos processando um pedido referente ao cardápio 'atual'
-                if (order.referenciaCardapio !== "atual") return;
-
                 tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
-                weeklyMenu.forEach(dayMenuItem => { // Usar weeklyMenu (atual) para as colunas
+                weeklyMenu.forEach(dayMenuItem => {
                     const dayId = getDayId(dayMenuItem.day);
                     let cellContent = '';
 
@@ -824,7 +554,7 @@
                         } else if (optionDishName && choice === optionDishName) {
                             reportChoice = 'Opção';
                         }
-
+                        
                         cellContent = reportChoice;
                         if (notes) {
                             cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
@@ -840,37 +570,36 @@
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            // Usar 'allOrders' que são os pedidos do cardápio atual, e 'weeklyMenu'
             if (allOrders.length === 0 || weeklyMenu.length === 0) {
-                showToast("Não há pedidos (do cardápio atual) ou cardápio atual para gerar o relatório.", "info");
+                showToast("Não há pedidos ou cardápio para gerar o relatório.", "info");
                 return;
             }
-            reportContainer.innerHTML = '<h1>Regional Quatinga - Cardápio Atual</h1>';
-
+            reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
+            
             let allDaysHTML = '';
-            weeklyMenu.forEach(dayMenuItem => { // Baseado no weeklyMenu (atual)
-                if (dayMenuItem.isHoliday) return;
+            weeklyMenu.forEach(dayMenuItem => {
+                if (dayMenuItem.isHoliday) return; 
 
                 const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
-
-                const dailyOrders = allOrders // allOrders já são filtrados para 'atual'
+                
+                const dailyOrders = allOrders
                     .filter(orderDoc => orderDoc.data()[dayId])
                     .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
+                
                 dailyOrders.forEach(orderDoc => {
                     const order = orderDoc.data();
                     const choice = order[dayId];
                     const notes = order[`${dayId}_notes`];
-
+                    
                     const mainDishName = dayMenuItem.pratoPrincipal.name;
                     const optionDishName = dayMenuItem.opcao?.name;
                     let reportChoice = '';
 
-                    if (choice === mainDishName) { reportChoice = 'PRATO'; }
-                    else if (optionDishName && choice === optionDishName) { reportChoice = 'OPÇÃO'; }
+                    if (choice === mainDishName) { reportChoice = 'PRATO'; } 
+                    else if (optionDishName && choice === optionDishName) { reportChoice = 'OPÇÃO'; } 
                     else { reportChoice = choice.toUpperCase(); }
-
+                    
                     let choiceHTML = reportChoice;
                     if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
 
@@ -901,42 +630,33 @@
                 orderIdInput.value = docId;
                 formContent.innerHTML = '';
 
-                // Determinar qual cardápio usar para o modal de edição
-                const menuParaEdicao = orderData.referenciaCardapio === "proxima" ? proximoWeeklyMenu : weeklyMenu;
-                if (!menuParaEdicao || menuParaEdicao.length === 0) {
-                    showToast("Cardápio correspondente ao pedido não carregado.", "error");
-                    modal.classList.add('hidden');
-                    return;
-                }
-
-
-                menuParaEdicao.forEach(item => {
+                weeklyMenu.forEach(item => {
                     const dayId = getDayId(item.day);
                     let dayHTML = `<fieldset class="day-section border p-4 rounded-lg"><legend class="font-bold text-lg text-gray-800 px-2">${item.day}</legend>`;
-
+                    
                     if(item.isHoliday) {
                         dayHTML += `<div class="bg-indigo-100 text-indigo-700 p-3 rounded-md text-center">Feriado</div>`;
                     } else {
                         const currentChoice = orderData[dayId];
                         const currentNotes = orderData[`${dayId}_notes`] || '';
                         const allOptions = [ { ...item.pratoPrincipal }, ...(item.opcao?.name ? [{ ...item.opcao }] : []), ...fixedOptions ];
-
+                        
                         dayHTML += `<div class="space-y-2 mt-2">`;
                         allOptions.forEach((option, index) => {
                             if (option.name) {
                                 const uniqueId = `edit-${dayId}-${index}`;
                                 const isChecked = (option.name === currentChoice) ? 'checked' : '';
-                                dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="edit-${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
+                                dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
                             }
                         });
                         dayHTML += `</div>`;
-
+                        
                         dayHTML += `<div class="mt-4">
                             <label for="edit-notes-${dayId}" class="block text-sm font-medium text-gray-700">Anotações</label>
                             <textarea id="edit-notes-${dayId}" name="edit-notes-${dayId}" rows="2" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">${currentNotes}</textarea>
                         </div>`;
                     }
-
+                    
                     dayHTML += `</fieldset>`;
                     formContent.innerHTML += dayHTML;
                 });
@@ -947,57 +667,31 @@
             }
         }
 
-        async function saveOrderChanges(event) { // Admin editando um pedido
+        async function saveOrderChanges(event) {
             event.preventDefault();
             const button = event.target.querySelector('button[type="submit"]');
             button.disabled = true; button.textContent = 'A salvar...';
             const docId = document.getElementById('edit-order-id').value;
-
-            const orderDocSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
-            if(!orderDocSnap.exists()) {
-                 showToast("Pedido original não encontrado para edição.", 'error');
-                 button.disabled = false; button.textContent = 'Salvar Alterações';
-                 return;
-            }
-            const orderDataOriginal = orderDocSnap.data();
-            const menuParaEdicao = orderDataOriginal.referenciaCardapio === "proxima" ? proximoWeeklyMenu : weeklyMenu;
-
-            const updateData = {
-                // Manter os campos originais que não são de dias específicos, como RGF, Nome, userId, referenciaCardapio, timestamp
-                employeeName: orderDataOriginal.employeeName,
-                employeeRGF: orderDataOriginal.employeeRGF,
-                userId: orderDataOriginal.userId,
-                referenciaCardapio: orderDataOriginal.referenciaCardapio,
-                timestamp: orderDataOriginal.timestamp, // Manter timestamp original ou atualizar? Por ora, manter.
-                                                        // Se atualizar, usar serverTimestamp()
-            };
-
-            menuParaEdicao.forEach(item => {
+            const updateData = {};
+            
+            weeklyMenu.forEach(item => {
                 if (!item.isHoliday) {
                     const dayId = getDayId(item.day);
-                    const selectedOption = document.querySelector(`#edit-order-form input[name="edit-${dayId}"]:checked`);
-                    if (selectedOption) {
-                        updateData[dayId] = selectedOption.value;
-                    } else { // Se nada estiver selecionado para um dia, remover a escolha (ou manter a original?)
-                        // Para garantir que não salve undefined, podemos remover o campo ou deixar como estava.
-                        // Se a intenção é limpar a escolha, precisamos lidar com isso.
-                        // Por ora, se não houver seleção, a escolha anterior (se houver) será mantida implicitamente
-                        // a menos que a regra seja limpar. Vamos assumir que uma escolha é obrigatória se não feriado.
-                        // Se um campo de dia não estiver em updateData, ele não será alterado no Firestore.
-                        // Se quisermos permitir limpar uma escolha, devemos explicitamente setar para null ou string vazia.
-                        // Para este caso, a regra de 'required' no input deve garantir uma seleção.
+                    const selectedOption = document.querySelector(`#edit-order-form input[name="${dayId}"]:checked`);
+                    if (selectedOption) { 
+                        updateData[dayId] = selectedOption.value; 
                     }
                     const notes = document.getElementById(`edit-notes-${dayId}`).value.trim();
-                    updateData[`${dayId}_notes`] = notes; // Salva mesmo que vazia para limpar notas anteriores
+                    updateData[`${dayId}_notes`] = notes;
                 }
             });
 
             try {
                 await updateDoc(doc(db, "pedidosDaSemana", docId), updateData);
-                showToast("Pedido atualizado com sucesso pelo admin!", 'success');
+                showToast("Pedido atualizado com sucesso!", 'success');
                 document.getElementById('edit-order-modal').classList.add('hidden');
             } catch (error) {
-                console.error("Erro ao salvar alterações do pedido (admin):", error);
+                console.error("Erro ao salvar alterações do pedido:", error);
                 showToast("Falha ao salvar as alterações do pedido.", 'error');
             } finally {
                 button.disabled = false; button.textContent = 'Salvar Alterações';
@@ -1018,7 +712,7 @@
         }
 
         const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
-
+        
         document.getElementById('imageUpload').addEventListener('change', function(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -1039,44 +733,44 @@
 
             const loader = document.getElementById('loader'); const button = document.getElementById('processImageBtn'); const confirmationForm = document.getElementById('confirmation-form');
             button.disabled = true; button.textContent = 'A analisar...'; loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
-            const file = document.getElementById('imageUpload').files[0];
+            const file = document.getElementById('imageUpload').files[0]; 
             const options = { maxSizeMB: 1.5, maxWidthOrHeight: 1500, useWebWorker: true };
             try {
                 const compressedFile = await imageCompression(file, options);
                 const base64ImageData = await toBase64(compressedFile);
-
+                
                 const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado, marque-o. Além disso, determine se o almoço é 'especial' (ex: uma refeição comemorativa, temática ou de maior qualidade) e defina o campo booleano 'isSpecial'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "isSpecial": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🍲"}, "guarnicao": {"name": "Nome", "emoji": "🥗"}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
 
                 const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
-                const apiKey = firebaseConfig.apiKey; // Usar a chave de API do Firebase config
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                const apiKey = firebaseConfig.apiKey;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; 
 
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { const errText = await response.text(); throw new Error(`API Error (${response.status}): ${errText}`); }
+                if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
                 const result = await response.json();
-
+                
                 let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
-
+                
                 textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-                const menuDataFromAI = JSON.parse(textResponse); // Renomeada para evitar conflito
+                const menuData = JSON.parse(textResponse);
 
-                if (!menuDataFromAI || !Array.isArray(menuDataFromAI.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
+                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
+                
+                displayConfirmationForm(menuData.menu);
 
-                displayConfirmationForm(menuDataFromAI.menu); // Passa menuDataFromAI.menu
-
-            } catch (error) {
-                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000);
-            } finally {
-                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden');
+            } catch (error) { 
+                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
+            } finally { 
+                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
             }
         });
 
-        function displayConfirmationForm(menuDataToConfirm) { // Renomeada para evitar conflito
-            const container = document.getElementById('confirmation-form');
-            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos (para Próxima Semana)</h3>';
-
-            menuDataToConfirm.forEach((item, index) => {
+        function displayConfirmationForm(menuData) {
+            const container = document.getElementById('confirmation-form'); 
+            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
+            
+            menuData.forEach((item, index) => {
                 container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4">
                     <h4 class="font-bold">${item.day}</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
@@ -1090,137 +784,69 @@
                     </div>
                     </div>`;
             });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Cardápio da Próxima Semana</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
-            container.classList.remove('hidden');
-
+            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
+            container.classList.remove('hidden'); 
+            
             document.getElementById('saveNewMenuBtn').addEventListener('click', () => {
-                // Salva em /cardapio/proximaSemana, não mexe nos pedidos ainda.
-                const message = "Tem certeza que deseja salvar este cardápio para a PRÓXIMA SEMANA? Os pedidos atuais NÃO serão afetados agora.";
+                const message = "Tem certeza que deseja salvar o novo cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente. Esta ação não pode ser desfeita.";
                 showCustomConfirm(message, () => {
-                    saveNextWeekMenu(menuDataToConfirm); // Passa menuDataToConfirm
-                }, "Confirmar Cardápio da Próxima Semana");
+                    saveNewMenu(menuData);
+                });
             });
 
             document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
                 container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
-                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = '';
-                showToast("Atualização do cardápio da próxima semana cancelada.", 'info');
+                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+                showToast("Atualização cancelada.", 'info');
             });
         }
-
-        async function clearAllOrders() { // Usado ao publicar novo cardápio semanal
-            console.log("Iniciando a limpeza de todos os pedidos da semana (referência: atual)...");
-            const q = query(pedidosCollectionRef, where("referenciaCardapio", "==", "atual"));
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
-                console.log("Nenhum pedido 'atual' para excluir.");
-                return 0;
-            }
-
-            const batch = writeBatch(db);
+        
+        async function clearAllOrders() {
+            console.log("Iniciando a limpeza de todos os pedidos da semana...");
+            const querySnapshot = await getDocs(pedidosCollectionRef);
+            const deletionPromises = [];
             querySnapshot.forEach((doc) => {
-                batch.delete(doc.ref);
+                deletionPromises.push(deleteDoc(doc.ref));
             });
-            await batch.commit();
-            console.log(`${querySnapshot.size} pedidos 'atuais' foram excluídos com sucesso.`);
-            return querySnapshot.size;
+            await Promise.all(deletionPromises);
+            console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
         }
 
-        // Salva o menu extraído pela IA em /cardapio/proximaSemana
-        async function saveNextWeekMenu(menuDataFromForm) { // Renomeada e recebe o menu do formulário de confirmação
-            const button = document.getElementById('saveNewMenuBtn');
+        async function saveNewMenu(menuData) {
+            const button = document.getElementById('saveNewMenuBtn'); 
             const cancelButton = document.getElementById('cancelNewMenuBtn');
-            button.disabled = true; cancelButton.disabled = true;
-            button.textContent = 'A salvar para próxima semana...';
+            button.disabled = true;
+            cancelButton.disabled = true;
+            button.textContent = 'A salvar...'; 
 
-            const newMenuForNextWeek = menuDataFromForm.map((item, i) => ({
-                day: item.day,
-                pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' },
-                opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' },
+            const newMenu = menuData.map((item, i) => ({ 
+                day: item.day, 
+                pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
+                opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
                 guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
                 isHoliday: document.getElementById(`holiday-${i}`).checked,
                 isSpecial: document.getElementById(`special-${i}`).checked,
-            }));
+            })); 
 
-            try {
-                await setDoc(proximoMenuDocRef, { menu: newMenuForNextWeek });
-                showToast('Cardápio da próxima semana salvo com sucesso!', 'success');
-                document.getElementById('confirmation-form').classList.add('hidden');
+            try { 
+                await setDoc(menuDocRef, { menu: newMenu });
+                await clearAllOrders();
+                showToast('Cardápio atualizado e pedidos zerados!', 'success'); 
+                document.getElementById('confirmation-form').classList.add('hidden'); 
                 document.getElementById('imagePreview').classList.add('hidden');
-                document.getElementById('image-processor-container').classList.add('hidden');
-                document.getElementById('imageUpload').value = '';
-                // Não mostrar notificação do WhatsApp ainda, só quando for publicado como atual.
-                // document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-            } catch (error) {
-                console.error("Erro ao salvar o cardápio da próxima semana:", error);
-                showToast("Erro ao salvar o cardápio da próxima semana.", 'error');
-            } finally {
-                button.disabled = false; cancelButton.disabled = false;
-                button.textContent = 'Salvar Cardápio da Próxima Semana';
+                document.getElementById('image-processor-container').classList.add('hidden'); 
+                document.getElementById('imageUpload').value = ''; 
+                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+            } catch (error) { 
+                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
+                showToast("Erro ao salvar o novo cardápio.", 'error'); 
+            } finally { 
+                button.disabled = false; 
+                cancelButton.disabled = false;
+                button.textContent = 'Salvar Novo Cardápio'; 
             }
         }
-
-        // Nova função para o Admin: Publicar o cardápio da próxima semana como o atual
-        async function publishNextWeekMenuAsCurrent() {
-            const button = document.getElementById('publishNextWeekMenuBtn');
-            button.disabled = true; button.textContent = 'A publicar...';
-
-            try {
-                const proximoMenuSnap = await getDoc(proximoMenuDocRef);
-                if (!proximoMenuSnap.exists() || !proximoMenuSnap.data().menu || proximoMenuSnap.data().menu.length === 0) {
-                    showToast("Nenhum cardápio da próxima semana para publicar. Defina um primeiro.", "error");
-                    button.disabled = false; button.textContent = 'Publicar Cardápio da Próxima Semana COMO ATUAL';
-                    return;
-                }
-
-                const newCurrentMenu = proximoMenuSnap.data().menu;
-
-                // 1. Limpar pedidos da semana atual (referenciaCardapio == "atual")
-                const numDeleted = await clearAllOrders();
-                showToast(`${numDeleted} pedidos da semana anterior (atual) foram zerados.`, 'info');
-
-                // 2. Migrar pedidos da PRÓXIMA SEMANA para ATUAL
-                const qProximaPedidos = query(pedidosCollectionRef, where("referenciaCardapio", "==", "proxima"));
-                const proximaPedidosSnap = await getDocs(qProximaPedidos);
-                const batch = writeBatch(db);
-                let migradosCount = 0;
-                proximaPedidosSnap.forEach(pedidoDoc => {
-                    batch.update(doc(db, "pedidosDaSemana", pedidoDoc.id), { referenciaCardapio: "atual" });
-                    migradosCount++;
-                });
-                await batch.commit();
-                if (migradosCount > 0) {
-                    showToast(`${migradosCount} pedidos da próxima semana foram migrados para a semana atual.`, 'info');
-                }
-
-                // 3. Copiar /cardapio/proximaSemana para /cardapio/semanal
-                await setDoc(menuDocRef, { menu: newCurrentMenu });
-                showToast('Cardápio da próxima semana publicado como atual!', 'success');
-
-                // 4. Limpar /cardapio/proximaSemana após publicação
-                await setDoc(proximoMenuDocRef, { menu: createFallbackMenu() });
-                showToast('Cardápio da próxima semana foi limpo.', 'info');
-
-                // 5. Atualizar estado
-                await updateDoc(estadoCardapioDocRef, {
-                    cardapioAtualAbertoParaEscolha: true,
-                    cardapioProximoAbertoParaEscolha: false,
-                    // dataPublicacaoProximoCardapio: serverTimestamp() // Opcional
-                });
-                showToast('Estado do cardápio atualizado: Atual aberto, Próximo fechado.', 'info');
-
-                const wnC = document.getElementById('whatsapp-notification-container');
-                if(wnC) wnC.classList.remove('hidden');
-
-            } catch (error) {
-                console.error("Erro ao publicar cardápio da próxima semana:", error);
-                showToast("Erro ao publicar o novo cardápio semanal.", 'error');
-            } finally {
-                button.disabled = false; button.textContent = 'Publicar Cardápio da Próxima Semana COMO ATUAL';
-            }
-        }
-
+        
         function handleWhatsAppNotification() {
             const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
             const encodedMessage = encodeURIComponent(message);
@@ -1229,239 +855,34 @@
             showToast('Abra o WhatsApp para enviar a notificação.', 'info');
         }
 
-        // --- Funções de Controle de Estado do Cardápio (Admin) ---
-        async function toggleCardapioAtualAberto() {
-            const newState = !estadoCardapio.cardapioAtualAbertoParaEscolha;
-            try {
-                await updateDoc(estadoCardapioDocRef, { cardapioAtualAbertoParaEscolha: newState });
-                showToast(`Escolhas para cardápio ATUAL ${newState ? 'ABERTAS' : 'FECHADAS'}.`, 'success');
-            } catch (e) {
-                showToast("Erro ao atualizar estado do cardápio atual.", "error");
-                console.error("Erro ao mudar estado cardapioAtualAbertoParaEscolha:", e);
-            }
-        }
-
-        async function toggleCardapioProximoAberto() {
-            const newState = !estadoCardapio.cardapioProximoAbertoParaEscolha;
-            try {
-                await updateDoc(estadoCardapioDocRef, { cardapioProximoAbertoParaEscolha: newState });
-                showToast(`Escolhas para cardápio PRÓXIMO ${newState ? 'ABERTAS' : 'FECHADAS'}.`, 'success');
-            } catch (e) {
-                showToast("Erro ao atualizar estado do cardápio próximo.", "error");
-                console.error("Erro ao mudar estado cardapioProximoAbertoParaEscolha:", e);
-            }
-        }
-
-
-        // --- Lógica de Autenticação e Inicialização ---
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUserID = user.uid;
-                // console.log("Usuário autenticado:", currentUserID, "Anônimo:", user.isAnonymous);
-
-                // Sempre ouvir o estado do cardápio e os cardápios primeiro
-                listenToCardapiosAndEstado().then(async () => {
-                    // Depois de obter o estado e os cardápios, carregar dados específicos da visão
-                    if (user.uid === APP_CONFIG.ADMIN_UID) {
-                        showAdminView();
-                    } else {
-                        showUserView();
-                        const rgfStorage = localStorage.getItem('employeeRGF');
-                        if (rgfStorage) {
-                            document.getElementById('employeeRGF').value = rgfStorage;
-                            await findEmployeeByRGF(rgfStorage);
-                        } else {
-                           pedidosDoUsuarioLogado = { atual: null, proxima: null };
-                           renderCurrentViewBasedOnState();
-                        }
-                    }
-                });
-
-            } else { // Nenhum usuário logado
-                currentUserID = null;
-                currentUserRGF = null;
-                pedidosDoUsuarioLogado = { atual: null, proxima: null };
-                signInAnonymously(auth)
-                    .then((anonUser) => {
-                        // O onAuthStateChanged será chamado novamente com o usuário anônimo.
-                    })
-                    .catch((error) => {
+            if (user && user.uid === APP_CONFIG.ADMIN_UID) {
+                showAdminView();
+            } else {
+                if (!auth.currentUser) {
+                    signInAnonymously(auth).catch((error) => {
                         console.error("Erro no login anónimo:", error);
-                        showToast("Não foi possível conectar-se ao sistema. Algumas funcionalidades estarão desabilitadas.", "error");
-                        // Tenta carregar dados públicos mesmo sem login anônimo completo
-                        listenToCardapiosAndEstado().then(() => {
-                             showUserView();
-                             renderCurrentViewBasedOnState();
-                        });
+                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
                     });
+                }
+                showUserView();
             }
         });
-
-        // Renomeada para refletir que carrega mais do que apenas o estado
-        async function listenToCardapiosAndEstado() {
-            const estadoPromise = new Promise(async (resolve, reject) => {
-                const snap = await getDoc(estadoCardapioDocRef);
-                if (!snap.exists()) {
-                    console.warn("Documento /configuracoes/estadoCardapio não encontrado. Tentando criar com valores padrão.");
-                    try {
-                        await setDoc(estadoCardapioDocRef, {
-                            cardapioAtualAbertoParaEscolha: true,
-                            cardapioProximoAbertoParaEscolha: false,
-                            dataPublicacaoProximoCardapio: null
-                            // Adicionar outros campos padrão se necessário
-                        });
-                        console.log("Documento de estado do cardápio criado com valores padrão.");
-                        // Recarrega o estado após criação
-                         const newSnap = await getDoc(estadoCardapioDocRef);
-                         if (newSnap.exists()) estadoCardapio = newSnap.data();
-                    } catch (e) {
-                        console.error("Falha ao criar documento de estado do cardápio:", e);
-                        // Mantém o estado padrão em memória se a criação falhar
-                         estadoCardapio = { cardapioAtualAbertoParaEscolha: false, cardapioProximoAbertoParaEscolha: false, dataPublicacaoProximoCardapio: null };
-                    }
-                } else {
-                    estadoCardapio = snap.data();
-                }
-            };
-
-            await ensureEstadoExists(); // Garante que existe antes de tentar ouvir
-
-            return new Promise((resolve) => {
-                onSnapshot(estadoCardapioDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        estadoCardapio = docSnap.data();
-                        // console.log("Estado do cardápio atualizado via onSnapshot:", estadoCardapio);
-                    } else {
-                        // Isso não deveria acontecer se ensureEstadoExists funcionou, mas como fallback:
-                        console.warn("/configuracoes/estadoCardapio desapareceu. Usando padrão.");
-                        estadoCardapio = { cardapioAtualAbertoParaEscolha: false, cardapioProximoAbertoParaEscolha: false, dataPublicacaoProximoCardapio: null };
-                    }
-
-                    // Atualiza UI com base no novo estado
-                    if (auth.currentUser) { // Só atualiza se houver um usuário (admin ou comum)
-                        if (auth.currentUser.uid === APP_CONFIG.ADMIN_UID) {
-                            updateAdminUIBasedOnState();
-                        } else {
-                            renderCurrentViewBasedOnState();
-                        }
-                    } else { // Se não houver usuário (ex: durante logout antes do login anônimo)
-                         renderCurrentViewBasedOnState(); // Mostra cardápio como se fosse usuário comum (provavelmente bloqueado)
-                    }
-                    resolve();
-                }, (error) => {
-                    console.error("Erro ao ouvir estado do cardápio:", error);
-                    showToast("Erro ao verificar o estado do cardápio.", "error");
-                    estadoCardapio = { cardapioAtualAbertoParaEscolha: false, cardapioProximoAbertoParaEscolha: false, dataPublicacaoProximoCardapio: null };
-                     if (auth.currentUser && auth.currentUser.uid !== APP_CONFIG.ADMIN_UID) renderCurrentViewBasedOnState();
-                     else if (auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID) updateAdminUIBasedOnState();
-                     else renderCurrentViewBasedOnState();
-                    resolve(); // Resolve mesmo em erro para não bloquear a cadeia de promises
-                });
-            });
-        }
-
-        function renderCurrentViewBasedOnState() {
-            // Esta função é chamada quando o estado do cardápio muda ou o usuário loga.
-            // Ela decide qual cardápio (atual ou próximo) mostrar e se está aberto para escolhas.
-            // A variável `visualizandoCardapioProximaSemana` será usada mais tarde para permitir ao usuário alternar.
-            // Por enquanto, ela é sempre `false` para o usuário comum, focando no cardápio atual.
-            // O admin pode ter uma maneira de alternar isso para teste ou gerenciamento.
-
-            // TODO: Adicionar UI para o usuário (se permitido na quinta) escolher ver/pedir para próxima semana.
-            // Por agora, usuário sempre vê o 'atual' (weeklyMenu)
-            // E as escolhas são baseadas em `estadoCardapio.cardapioAtualAbertoParaEscolha`
-
-            let menuRefParaCarregar = visualizandoCardapioProximaSemana ? proximoMenuDocRef : menuDocRef;
-            let escolhasAbertasParaViewAtual = visualizandoCardapioProximaSemana ?
-                                              (estadoCardapio.cardapioProximoAbertoParaEscolha || false) :
-                                              (estadoCardapio.cardapioAtualAbertoParaEscolha || false);
-
-            // Carrega o cardápio (semanal ou proximaSemana) e passa o estado de abertura
-            loadAndDisplayMenu(menuRefParaCarregar, escolhasAbertasParaViewAtual);
-            // validateForm será chamado dentro de createMenuHTML -> loadAndDisplayMenu
-        }
-
-        function updateAdminUIBasedOnState() {
-            const statusContainer = document.getElementById('admin-cardapio-status-display');
-            if (statusContainer) {
-                statusContainer.innerHTML = `
-                    <p>Cardápio ATUAL Aberto para Escolhas: <strong class="${estadoCardapio.cardapioAtualAbertoParaEscolha ? 'text-green-600' : 'text-red-600'}">${estadoCardapio.cardapioAtualAbertoParaEscolha ? 'SIM' : 'NÃO'}</strong></p>
-                    <p>Cardápio PRÓXIMA SEMANA Aberto para Escolhas: <strong class="${estadoCardapio.cardapioProximoAbertoParaEscolha ? 'text-green-600' : 'text-red-600'}">${estadoCardapio.cardapioProximoAbertoParaEscolha ? 'SIM' : 'NÃO'}</strong></p>
-                `;
-            }
-            // O admin geralmente gerencia o cardápio atual e o próximo, então ambos podem ser carregados.
-            // A tabela de pedidos (renderOrdersTable) deve continuar mostrando os pedidos do cardápio ATUAL.
-            loadAndDisplayMenu(menuDocRef, true); // Para visualização e edição de pedidos do cardápio atual. Admin sempre vê habilitado.
-            // Poderíamos adicionar uma visualização do cardápio da próxima semana para o admin também, se necessário.
-            // Ex: loadAndDisplayMenu(proximoMenuDocRef, true, 'admin-proximo-menu-container');
-            loadAdminData(); // Recarrega dados dos pedidos (baseado no cardápio atual pela query)
-            loadAndRenderEmployees();
-        }
-
 
         function showUserView() {
             document.getElementById('user-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-
-            // A renderização do cardápio e validação do formulário agora dependem do estadoCardapio
-            // que é carregado por listenToEstadoCardapio.
-            // Se estadoCardapio já foi carregado, renderiza. Senão, listenToEstadoCardapio fará.
-            // A chamada para renderCurrentViewBasedOnState ou findEmployeeByRGF é feita agora no onAuthStateChanged.
-            document.getElementById('form-container').classList.remove('hidden'); // Garante que o form seja visível inicialmente
-            document.getElementById('success-message').classList.add('hidden'); // Esconde msg de sucesso
-            const rgfInput = document.getElementById('employeeRGF');
-    if (rgfInput) {
-                rgfInput.readOnly = false;
-                rgfInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-            }
-    // A renderização efetiva ocorre via renderCurrentViewBasedOnState, chamada por onAuthStateChanged/listenToEstadoCardapio
-}
-
-function renderCurrentViewBasedOnState() {
-    let menuRefParaCarregar = visualizandoCardapioProximaSemana ? proximoMenuDocRef : menuDocRef;
-    let escolhasAbertasParaViewAtual = visualizandoCardapioProximaSemana ?
-                                      (estadoCardapio.cardapioProximoAbertoParaEscolha || false) :
-                                      (estadoCardapio.cardapioAtualAbertoParaEscolha || false);
-
-    const pedidoDoUsuarioParaEsteCardapio = visualizandoCardapioProximaSemana ? pedidosDoUsuarioLogado.proxima : pedidosDoUsuarioLogado.atual;
-    const formContainer = document.getElementById('form-container'); // Já definido no escopo global, mas ok redeclarar localmente se preferir
-    const successMessage = document.getElementById('success-message');
-    const isAdmin = auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID;
-    const employeeRGFInput = document.getElementById('employeeRGF');
-
-    successMessage.classList.add('hidden'); // Esconde mensagem de sucesso ao re-renderizar
-
-    if (!escolhasAbertasParaViewAtual && pedidoDoUsuarioParaEsteCardapio && !isAdmin) {
-        // Escolhas fechadas, pedido existe, não é admin: Modo "visualização de pedido"
-        if(formContainer) formContainer.classList.remove('hidden');
-        if(employeeRGFInput) {
-            employeeRGFInput.readOnly = true;
-            employeeRGFInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            loadAndDisplayMenu(); 
         }
-    } else {
-        if(formContainer) formContainer.classList.remove('hidden');
-        if(employeeRGFInput) {
-            employeeRGFInput.readOnly = false;
-            employeeRGFInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-        }
-    }
-
-    loadAndDisplayMenu(menuRefParaCarregar, escolhasAbertasParaViewAtual);
-    // validateForm será chamado dentro de createMenuHTML que é chamado por loadAndDisplayMenu
-        }
-
 
         function showAdminView() {
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-
-            // A atualização da UI do admin também depende do estado do cardápio
-    // Garante que estadoCardapio não é o objeto vazio inicial antes de tentar usá-lo.
-    if (estadoCardapio && estadoCardapio.hasOwnProperty('cardapioAtualAbertoParaEscolha')) {
-                updateAdminUIBasedOnState();
-            }
+            loadAndDisplayMenu(); 
+            loadAdminData();
+            loadAndRenderEmployees();
         }
 
         async function handleAdminLogin(e) {
@@ -1472,18 +893,13 @@ function renderCurrentViewBasedOnState() {
             btn.disabled = true; btn.textContent = 'Entrando...';
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged vai lidar com a troca de view e carregamento de dados
                 if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) {
-                    await signOut(auth); // Faz logout se não for o admin UID esperado
+                    await signOut(auth);
                     showToast("Credenciais válidas, mas este usuário não é um administrador.", 'error');
-                     // onAuthStateChanged será chamado novamente após o signOut, voltando para anônimo/user view.
-                } else {
-                    showToast("Login de administrador bem-sucedido!", 'success');
-                    // onAuthStateChanged já foi/será acionado e chamará showAdminView após listenToEstadoCardapio
                 }
             } catch (error) {
                 console.error("Erro no login de administrador:", error);
-                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
+                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
                 showToast(msg, 'error', 5000);
             } finally {
                 btn.disabled = false; btn.textContent = 'Entrar';
@@ -1491,92 +907,48 @@ function renderCurrentViewBasedOnState() {
         }
 
         async function handleAdminLogout() {
-            try {
-                await signOut(auth);
-                showToast("Logout de administrador bem-sucedido!", 'info');
-                // onAuthStateChanged vai lidar com a transição para a visão de usuário/login anônimo.
-            }
+            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); } 
             catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
         }
 
         function main() {
             const rgfInput = document.getElementById('employeeRGF');
-            // O valor do RGF e a chamada a findEmployeeByRGF agora são tratados principalmente
-            // dentro do onAuthStateChanged e showUserView para garantir que currentUserID e estadoCardapio estejam disponíveis.
-
-            rgfInput.addEventListener('blur', (e) => {
-                localStorage.setItem('employeeRGF', e.target.value);
-                if(auth.currentUser && auth.currentUser.uid !== APP_CONFIG.ADMIN_UID) { // Só busca se for usuário normal
-                    findEmployeeByRGF(e.target.value);
-                }
-            });
-            rgfInput.addEventListener('input', validateForm); // Validação visual imediata
-
-            document.getElementById('menu').addEventListener('change', validateForm); // Para os radio buttons
-             // Para textareas de anotações, validar no input ou blur também
-            document.getElementById('menu').addEventListener('input', (event) => {
-                if (event.target.tagName === 'TEXTAREA') {
-                    validateForm();
-                }
-            });
-
+            rgfInput.value = localStorage.getItem('employeeRGF') || '';
+            if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
+            rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
+            rgfInput.addEventListener('input', validateForm);
+            
+            document.getElementById('menu').addEventListener('change', validateForm);
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
-
+            
             document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
                 btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
             });
 
             document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
-
+            
             document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
-            document.getElementById('switchToUserFromAdmin').addEventListener('click', async () => {
-                // Ao mudar de admin para usuário, precisamos simular um logout não-admin
-                // A forma mais simples é chamar signOut e deixar onAuthStateChanged lidar com o login anônimo e user view.
-                // No entanto, se o admin só quer *ver* como usuário, isso é mais complexo.
-                // Por agora, vamos assumir que ele volta para a tela de login anônima.
-                // Se quisermos manter o admin logado mas ver como user, teríamos que mudar a lógica de showUserView
-                // para não depender de !isAdmin.
-                // Para uma troca simples de visualização sem mudar o auth state:
-                visualizandoCardapioProximaSemana = false; // Resetar para cardápio atual na visão de usuário
-                showUserView();
-                // Será necessário recarregar os dados do usuário se o admin estava logado e tinha RGF diferente
-                const rgfStorage = localStorage.getItem('employeeRGF');
-                if (rgfStorage && currentUserID !== APP_CONFIG.ADMIN_UID) { // Se não for mais admin
-                     findEmployeeByRGF(rgfStorage);
-                } else if (currentUserID !== APP_CONFIG.ADMIN_UID) {
-                     pedidosDoUsuarioLogado = { atual: null, proxima: null }; // Limpa se não há RGF
-                     renderCurrentViewBasedOnState();
-                }
-            });
-
+            document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
+            
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
                 if (e.target.closest('.edit-employee-btn')) { openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name); }
                 if (e.target.closest('.delete-employee-btn')) { handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name); }
             });
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
-
-            document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders)); // allOrders são os pedidos atuais
+            
+            document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
             document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
-
+            
             document.getElementById('ordersTableContainer').addEventListener('click', function(e) {
                 if (e.target.closest('.edit-order-btn')) { openOrderEditModal(e.target.closest('.edit-order-btn').dataset.id); }
                 if (e.target.closest('.delete-order-btn')) { deleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name); }
             });
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
-
+            
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
-            document.getElementById('publishNextWeekMenuBtn').addEventListener('click', () => {
-                const message = "Tem certeza que deseja publicar o cardápio da PRÓXIMA SEMANA como o cardápio ATUAL? <br><br><strong>Esta ação irá:</strong><br>1. Copiar o cardápio de 'proximaSemana' para 'semanal'.<br>2. <strong>APAGAR PERMANENTEMENTE</strong> todos os pedidos feitos para o cardápio atual.<br>3. Normalmente, abriria as escolhas para este novo cardápio atual e fecharia as da próxima (que agora está vazia ou é a antiga).<br><br>Esta ação não pode ser desfeita em relação aos pedidos apagados.";
-                showCustomConfirm(message, publishNextWeekMenuAsCurrent, "Confirmar Publicação de Novo Cardápio Semanal", "Publicar e Apagar Pedidos Antigos");
-            });
-
-            // Botões de controle de estado do cardápio para Admin
-            document.getElementById('toggleAtualAbertoBtn').addEventListener('click', toggleCardapioAtualAberto);
-            document.getElementById('toggleProximoAbertoBtn').addEventListener('click', toggleCardapioProximoAberto);
-
         }
 
         main();
