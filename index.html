@@ -82,18 +82,21 @@
             <div class="mb-8">
                 <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
-            
-            <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
-                <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <p class="text-gray-500">A carregar status dos pedidos...</p>
-                </div>
-            </section>
 
+            <div id="admin-menu-controls-container"></div>
+            
             <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
                  <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
                 <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
-                <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                <!-- Adicionado seletor de alvo do menu aqui -->
+                <div id="menu-target-selector" class="mt-4 hidden">
+                    <label for="menuTargetType" class="block text-sm font-medium text-gray-700">Salvar cardápio para:</label>
+                    <select id="menuTargetType" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="atual">Semana Atual (Substitui o atual, pedidos anteriores da semana atual são mantidos)</option>
+                        <option value="proxima" selected>Próxima Semana (Permite escolha na Quinta-feira)</option>
+                    </select>
+                </div>
+                <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mt-2"/>
                 <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
                 <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio</button></div>
                 <div id="loader" class="hidden mx-auto my-4 loader"></div>
@@ -103,6 +106,13 @@
                         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                         Notificar Funcionários no WhatsApp
                     </button>
+                </div>
+            </section>
+            
+            <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
+                <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <p class="text-gray-500">A carregar status dos pedidos...</p>
                 </div>
             </section>
 
@@ -126,7 +136,7 @@
 
             <section id="orders-section">
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
+                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos (Semana Atual)</h2>
                     <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
                     <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
                 </div>
@@ -146,11 +156,11 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         const firebaseConfig = {
-            apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
+            apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI", // Substitua pela sua chave de API
             authDomain: "cardapio-8ddea.firebaseapp.com",
             projectId: "cardapio-8ddea",
             storageBucket: "cardapio-8ddea.appspot.com",
@@ -162,38 +172,48 @@
         const auth = getAuth(app);
 
         const APP_CONFIG = {
-            ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
+            ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2', // UID do Admin
         };
         
         const menuDocRef = doc(db, "cardapio", "semanal");
+        const proximoMenuDocRef = doc(db, "cardapio", "proximaSemana");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
+        const configDocRef = doc(db, "configuracoes", "semana");
         
         const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
-        let weeklyMenu = [];
-        let allOrders = [];
+        let weeklyMenu = []; 
+        let proximoWeeklyMenu = null; 
+        let allOrders = []; // Armazena objetos de pedido {id: ..., ...dados}
         let tempOrderData = {};
-        
+        let cardapioBloqueadoGlobal = false; 
+        let diaDeEscolhaGlobal = 4; // Quinta-feira (0-Dom, 1-Seg, ..., 6-Sab)
+
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
 
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.getElementById('app-toast');
             if(!toast) return;
             toast.textContent = message;
-            toast.className = 'show';
+            toast.className = 'show'; // Remove classes anteriores de tipo
             toast.classList.add(type);
             setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
         }
         
-        function showCustomConfirm(message, onConfirm) {
+        function showCustomConfirm(title, message, onConfirm, confirmButtonText = "Confirmar", confirmButtonClass = "bg-red-600 hover:bg-red-700") {
             const modal = document.getElementById('custom-confirm-modal');
+            const titleEl = document.getElementById('custom-confirm-title');
             const messageEl = document.getElementById('custom-confirm-message');
             const okBtn = document.getElementById('custom-confirm-ok-btn');
             
+            titleEl.textContent = title;
             messageEl.textContent = message;
+            okBtn.textContent = confirmButtonText;
+            // Limpa classes antigas do botão de confirmação antes de adicionar novas
+            okBtn.className = `px-6 py-2 text-white font-bold rounded-lg ${confirmButtonClass}`;
             modal.classList.remove('hidden');
 
-            const newOkBtn = okBtn.cloneNode(true);
+            const newOkBtn = okBtn.cloneNode(true); // Clona para remover event listeners antigos
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
             
             newOkBtn.addEventListener('click', () => {
@@ -226,7 +246,7 @@
                 container.innerHTML = tableHTML;
             }, (error) => {
                  console.error("Erro ao carregar funcionários:", error);
-                 showToast("Falha ao carregar funcionários. Verifique o console para mais detalhes.", "error");
+                 showToast("Falha ao carregar funcionários.", "error");
             });
         }
 
@@ -250,8 +270,7 @@
         }
 
         function handleDeleteEmployee(rgf, name) {
-            const message = `Tem a certeza que deseja excluir o funcionário ${name} (RGF: ${rgf})? Esta ação não pode ser desfeita.`;
-            showCustomConfirm(message, async () => {
+            showCustomConfirm("Excluir Funcionário", `Tem a certeza que deseja excluir o funcionário ${name} (RGF: ${rgf})? Esta ação não pode ser desfeita.`, async () => {
                 try {
                     await deleteDoc(doc(db, "funcionarios", rgf));
                     showToast("Funcionário excluído com sucesso.", 'success');
@@ -286,7 +305,7 @@
         
         async function findEmployeeByRGF(rgf) {
             const nameInput = document.getElementById('employeeName');
-            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; validateForm(); return; }
+            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; await updateDisplayedMenuAndForm(); return; }
             try {
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
@@ -294,41 +313,185 @@
                 } else {
                     nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
                 }
-                validateForm();
+                await updateDisplayedMenuAndForm();
             } catch (error) {
                 console.error("Erro ao buscar funcionário:", error);
                 nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
                 showToast("Erro ao buscar funcionário.", 'error');
+                await updateDisplayedMenuAndForm();
             }
         }
         
-        function createFallbackMenu() {
+        function createFallbackMenu(weekType = "atual") {
             const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-            return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
+            const message = weekType === "proxima" ? "Cardápio da próxima semana não definido" : "Cardápio atual não definido";
+            return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: message, emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
         }
 
-        function loadAndDisplayMenu() {
-            onSnapshot(menuDocRef, (docSnap) => {
-                weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
-                createMenuHTML();
-                renderOrdersTable(allOrders); 
+        function listenToConfigChanges() {
+            onSnapshot(configDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const configData = docSnap.data();
+                    cardapioBloqueadoGlobal = configData.cardapioBloqueado || false;
+                    diaDeEscolhaGlobal = configData.diaDeEscolha !== undefined ? configData.diaDeEscolha : 4; 
+                } else {
+                    setDoc(configDocRef, { cardapioBloqueado: false, diaDeEscolha: 4, ultimaAtualizacaoCardapio: serverTimestamp() })
+                        .then(() => { cardapioBloqueadoGlobal = false; diaDeEscolhaGlobal = 4; })
+                        .catch(err => console.error("Erro ao criar config inicial:", err));
+                }
+                updateDisplayedMenuAndForm(); // Atualiza a UI do usuário
+                if (document.getElementById('admin-view').offsetParent !== null) { // Se admin view está visível
+                    updateAdminControls(); // Atualiza controles do admin
+                }
             }, (error) => {
-                 console.error("Erro ao carregar o cardápio:", error);
-                 showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
-                 weeklyMenu = createFallbackMenu();
-                 createMenuHTML();
-                 renderOrdersTable(allOrders);
+                console.error("Erro ao ouvir configurações:", error);
+                showToast("Erro ao carregar configurações do sistema.", "error");
+                cardapioBloqueadoGlobal = true; 
+                updateDisplayedMenuAndForm();
+                if (document.getElementById('admin-view').offsetParent !== null) {
+                    updateAdminControls();
+                }
             });
         }
         
-        function createMenuHTML() {
+        async function loadMenus() {
+            try {
+                const [menuAtualSnap, proximoMenuSnap, pedidosSnap] = await Promise.all([
+                    getDoc(menuDocRef),
+                    getDoc(proximoMenuDocRef),
+                    getDocs(query(pedidosCollectionRef, orderBy("timestamp", "desc")))
+                ]);
+
+                weeklyMenu = (menuAtualSnap.exists() && menuAtualSnap.data().menu?.length > 0) 
+                    ? menuAtualSnap.data().menu 
+                    : createFallbackMenu("atual");
+
+                proximoWeeklyMenu = (proximoMenuSnap.exists() && proximoMenuSnap.data().menu?.length > 0)
+                    ? proximoMenuSnap.data().menu
+                    : null;
+
+                const latestOrdersMap = new Map();
+                pedidosSnap.forEach(doc => {
+                    const orderData = doc.data();
+                    if (orderData.employeeRGF && !latestOrdersMap.has(orderData.employeeRGF)) {
+                        // Armazena o objeto de dados completo junto com o ID do documento
+                        latestOrdersMap.set(orderData.employeeRGF, {id: doc.id, ...orderData});
+                    }
+                });
+                allOrders = Array.from(latestOrdersMap.values())
+                    .sort((a, b) => a.employeeName.localeCompare(b.employeeName));
+
+                await updateDisplayedMenuAndForm(); 
+                if (document.getElementById('admin-view').offsetParent !== null) { 
+                    renderOrdersTable(allOrders); 
+                    renderOrderStatus(allOrders);
+                    updateAdminControls(); // Garante que os controles do admin sejam atualizados com o estado dos cardápios
+                }
+            } catch (error) {
+                console.error("Erro ao carregar cardápios/pedidos:", error);
+                showToast("Erro grave ao carregar dados.", 'error');
+                weeklyMenu = createFallbackMenu("atual");
+                proximoWeeklyMenu = null;
+                allOrders = [];
+                await updateDisplayedMenuAndForm();
+            }
+        }
+
+        async function updateDisplayedMenuAndForm() {
+            const rgf = document.getElementById('employeeRGF')?.value.trim();
             const menuContainer = document.getElementById('menu');
-            if (!menuContainer) return;
+            const guidanceSection = document.getElementById('guidanceSection');
+            const guidanceText = document.getElementById('guidanceText');
+            const submitBtnContainer = document.getElementById('submitButtonContainer');
+            const formContainer = document.getElementById('form-container');
+            const successMessage = document.getElementById('success-message');
+            
+            if (!menuContainer || !guidanceSection || !guidanceText || !submitBtnContainer || !formContainer || !successMessage) return;
+
+            formContainer.classList.remove('hidden'); 
+            successMessage.classList.add('hidden'); 
+            menuContainer.innerHTML = ''; 
+
+            const today = new Date();
+            const currentDayOfWeek = today.getDay(); 
+            let menuParaEscolha = weeklyMenu; 
+            let mostrarCardapioVisualizacao = weeklyMenu; 
+            let podeFazerPedido = !cardapioBloqueadoGlobal;
+            let isProximoCardapioModeParaEscolha = false;
+            let mensagemGuia = "";
+
+            if (currentDayOfWeek === diaDeEscolhaGlobal) {
+                if (proximoWeeklyMenu) {
+                    menuParaEscolha = proximoWeeklyMenu;
+                    podeFazerPedido = true; 
+                    isProximoCardapioModeParaEscolha = true;
+                    mensagemGuia = "Escolha seu cardápio para a PRÓXIMA SEMANA.";
+                    // Se for quinta, e o cardápio atual estiver bloqueado, mostramos o pedido da semana atual.
+                    // Se não estiver bloqueado, o usuário ainda poderia estar fazendo/vendo pedidos para a semana atual (ex: para sexta).
+                    // A lógica principal de exibição de pedido feito é para o cardápio da semana corrente.
+                } else {
+                    mensagemGuia = "O cardápio da próxima semana ainda não está disponível. Faça/veja seu pedido para a semana atual abaixo.";
+                }
+            }
+            
+            if (cardapioBloqueadoGlobal && !isProximoCardapioModeParaEscolha) { // Se não é modo de escolha próxima semana e está bloqueado
+                 mensagemGuia = "O período para escolher o cardápio desta semana encerrou ou o cardápio ainda não foi liberado.";
+            }
+
+            guidanceText.textContent = mensagemGuia;
+            if (mensagemGuia) guidanceSection.classList.remove('hidden');
+            else guidanceSection.classList.add('hidden');
+
+
+            if (rgf && podeFazerPedido) {
+                createMenuHTML(menuParaEscolha, true, null, isProximoCardapioModeParaEscolha);
+                validateForm(menuParaEscolha, isProximoCardapioModeParaEscolha);
+            } else if (rgf && !podeFazerPedido) { 
+                const pedidoDoUsuario = allOrders.find(order => order.employeeRGF === rgf && (order.referenteAoCardapio === "semanaAtual" || !order.referenteAoCardapio) );
+                createMenuHTML(mostrarCardapioVisualizacao, false, pedidoDoUsuario || null, false);
+                submitBtnContainer.classList.add('hidden');
+                // Mensagem de guia já foi definida acima, aqui adicionamos se tem pedido ou não.
+                const existingGuidance = guidanceText.textContent;
+                guidanceText.textContent = existingGuidance + (pedidoDoUsuario ? " Veja suas escolhas abaixo." : (existingGuidance.includes("encerrou") ? " Você não fez um pedido para esta semana." : ""));
+                if(guidanceText.textContent) guidanceSection.classList.remove('hidden');
+
+            } else { 
+                createMenuHTML(weeklyMenu, false, null, false); 
+                guidanceText.textContent = 'Digite seu RGF para começar.';
+                guidanceSection.classList.remove('hidden');
+                submitBtnContainer.classList.add('hidden');
+            }
+        }
+        
+        function createMenuHTML(menuData, inputsEnabled, userOrderData = null, isProximoCardapioMode = false) {
+            const menuContainer = document.getElementById('menu');
+            if (!menuContainer || !menuData) {
+                 menuContainer.innerHTML = '<div class="text-center text-gray-500">Cardápio indisponível.</div>';
+                 return;
+            }
             menuContainer.innerHTML = '';
 
-            weeklyMenu.forEach(item => {
+            if (isProximoCardapioMode && inputsEnabled) {
+                const infoProximo = document.createElement('div');
+                infoProximo.className = 'mb-4 p-3 bg-blue-100 text-blue-700 rounded-md text-sm font-semibold';
+                infoProximo.textContent = 'Você está escolhendo o cardápio para a PRÓXIMA SEMANA.';
+                menuContainer.appendChild(infoProximo);
+            } else if (!inputsEnabled && userOrderData) {
+                 const infoVisualizacao = document.createElement('div');
+                infoVisualizacao.className = 'mb-4 p-3 bg-green-100 text-green-700 rounded-md text-sm font-semibold';
+                infoVisualizacao.textContent = 'Visualizando seu pedido para esta semana.';
+                menuContainer.appendChild(infoVisualizacao);
+            } else if (!inputsEnabled && !userOrderData && cardapioBloqueadoGlobal && !isProximoCardapioMode) {
+                 const infoBloqueadoSemPedido = document.createElement('div');
+                infoBloqueadoSemPedido.className = 'mb-4 p-3 bg-orange-100 text-orange-700 rounded-md text-sm font-semibold';
+                infoBloqueadoSemPedido.textContent = 'O cardápio está bloqueado e você não possui um pedido registrado para esta semana.';
+                menuContainer.appendChild(infoBloqueadoSemPedido);
+            }
+
+
+            menuData.forEach(item => {
                 const dayId = getDayId(item.day);
-                let dayHTML = `<div class="day-section space-y-3">`;
+                let dayHTML = `<div class="day-section space-y-3 py-4 ${!inputsEnabled ? 'opacity-80' : ''}">`;
                 
                 let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
                 if (item.isSpecial) {
@@ -340,11 +503,7 @@
                 
                 if (item.isHoliday) {
                     dayHTML += dayTitleHTML;
-                    dayHTML += `
-                        <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
-                            <p class="font-bold">🎊 Feriado</p>
-                            <p>Não haverá refeição neste dia.</p>
-                        </div>`;
+                    dayHTML += `<div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md"><p class="font-bold">🎊 Feriado</p><p>Não haverá refeição neste dia.</p></div>`;
                 } else {
                     const allOptions = [
                         { ...item.pratoPrincipal, type: 'Prato Principal' },
@@ -360,85 +519,126 @@
                     dayHTML += `<div class="space-y-3">`;
                     allOptions.forEach((option) => {
                         if (option.name) {
-                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
-                                <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
+                            const isChecked = userOrderData && userOrderData[dayId] === option.name;
+                            const isDisabled = !inputsEnabled;
+                            dayHTML += `<label class="menu-option-card block p-4 border-2 ${isChecked && !inputsEnabled ? 'border-green-500 bg-green-50' : 'border-gray-200'} rounded-lg ${inputsEnabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'} transition-transform duration-200">
+                                <input type="radio" name="${dayId}" value="${option.name}" class="hidden" ${isDisabled ? 'disabled' : ''} ${isChecked ? 'checked' : ''}>
                                 <div class="flex items-center">
                                     <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
                                     <div class="flex-grow">
                                         <p class="font-semibold text-gray-800">${option.name}</p>
                                         <p class="text-sm text-gray-500">${option.type}</p>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                    ${inputsEnabled || isChecked ? `<svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 ${isChecked && !inputsEnabled ? 'text-green-600 opacity-100' : (isChecked ? 'text-blue-600 opacity-100' : 'text-blue-600 opacity-0') } transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>` : ''}
                                 </div>
                             </label>`;
                         }
                     });
                     dayHTML += `</div>`;
                     
+                    const notesValue = (userOrderData && userOrderData[`${dayId}_notes`]) ? userOrderData[`${dayId}_notes`] : '';
                     dayHTML += `<div class="mt-3">
-                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc." ${!inputsEnabled ? 'readonly' : ''}>${notesValue}</textarea>
                     </div>`;
                 }
-
                 dayHTML += `</div>`;
                 menuContainer.innerHTML += dayHTML;
             });
-
-            validateForm();
+            
+            if (inputsEnabled) {
+                validateForm(menuData, isProximoCardapioMode);
+            } else {
+                document.getElementById('submitButtonContainer').classList.add('hidden');
+            }
         }
 
-        function validateForm() {
+        function validateForm(menuUsadoParaValidacao, isProximoMode) {
             const name = document.getElementById('employeeName')?.value.trim();
             const rgf = document.getElementById('employeeRGF')?.value.trim();
             const guidanceSection = document.getElementById('guidanceSection');
             const guidanceText = document.getElementById('guidanceText');
             const submitBtnContainer = document.getElementById('submitButtonContainer');
-            if (!guidanceSection || !submitBtnContainer) return;
+            
+            if (!guidanceSection || !submitBtnContainer || !menuUsadoParaValidacao) return;
 
-            const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
+            const nonHolidayItems = menuUsadoParaValidacao.filter(item => !item.isHoliday);
             const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
+            
+            let canProceed = name && rgf && hasAllSelections;
+            
+            if (isProximoMode) { 
+                // Se está no modo de pedir para próxima semana, cardapioBloqueadoGlobal (que é para o atual) não impede
+            } else { 
+                canProceed = canProceed && !cardapioBloqueadoGlobal;
+            }
 
-            if (name && rgf && hasAllSelections) {
-                guidanceSection.classList.add('hidden');
+            if (canProceed) {
+                // Se não for o modo "próxima semana" OU se for e a mensagem de guia já estiver lá, esconde.
+                if (!isProximoMode || (isProximoMode && guidanceText.textContent.includes("PRÓXIMA SEMANA"))) {
+                     // Não esconde a mensagem de "PRÓXIMA SEMANA" se for o caso
+                } else {
+                    guidanceSection.classList.add('hidden');
+                }
                 submitBtnContainer.classList.remove('hidden');
             } else {
                 submitBtnContainer.classList.add('hidden');
-                guidanceSection.classList.remove('hidden');
-                let message = '';
-                if(!rgf) message = 'Digite seu RGF para começar. ';
-                else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
+                // A mensagem de guia principal (próxima semana, bloqueado) já foi definida em updateDisplayedMenuAndForm.
+                // Aqui, adicionamos mensagens de erro de formulário se necessário.
+                let formErrorMessage = '';
+                if(!rgf) formErrorMessage = 'Digite seu RGF para começar. ';
+                else if(!name) formErrorMessage = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
                 else if (!hasAllSelections) {
                     const missingDays = nonHolidayItems
                         .filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`))
                         .map(item => item.day);
-                    if (missingDays.length > 0) message += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
+                    if (missingDays.length > 0) formErrorMessage += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
                 }
-                guidanceText.textContent = message || 'Por favor, preencha todos os campos.';
+
+                if(formErrorMessage) {
+                    let currentGuidance = guidanceText.textContent;
+                    // Evita duplicar mensagens se a guia principal já cobre o erro
+                    if (!currentGuidance.includes(formErrorMessage.trim())) {
+                         guidanceText.textContent = (currentGuidance && !currentGuidance.includes("Escolha seu cardápio para a PRÓXIMA SEMANA") ? currentGuidance + " " : "") + formErrorMessage;
+                    }
+                    guidanceSection.classList.remove('hidden');
+                } else if (!guidanceText.textContent) { // Se não há mensagem de guia principal nem erro de formulário
+                    guidanceText.textContent = 'Por favor, preencha todos os campos.';
+                    guidanceSection.classList.remove('hidden');
+                }
             }
         }
 
         function openConfirmationModal() {
-            tempOrderData = {
-                employeeName: document.getElementById('employeeName').value.trim(),
-                employeeRGF: document.getElementById('employeeRGF').value.trim(),
-                timestamp: serverTimestamp()
-            };
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const employeeRGF = document.getElementById('employeeRGF').value.trim();
+            tempOrderData = { employeeName, employeeRGF, timestamp: serverTimestamp() };
+            
             const summaryContainer = document.getElementById('confirmation-summary');
             summaryContainer.innerHTML = '';
+
+            const today = new Date();
+            const currentDayOfWeek = today.getDay();
+            const isChoosingForNextWeek = (currentDayOfWeek === diaDeEscolhaGlobal && proximoWeeklyMenu);
+            const menuSendoConfirmado = isChoosingForNextWeek ? proximoWeeklyMenu : weeklyMenu;
+            tempOrderData.referenteAoCardapio = isChoosingForNextWeek ? "proximaSemana" : "semanaAtual";
+
+
+            if (isChoosingForNextWeek) {
+                summaryContainer.innerHTML += `<p class="text-sm text-blue-600 font-semibold mb-3">Você está confirmando o pedido para a PRÓXIMA SEMANA.</p>`;
+            } else {
+                 summaryContainer.innerHTML += `<p class="text-sm text-gray-600 font-semibold mb-3">Você está confirmando o pedido para a SEMANA ATUAL.</p>`;
+            }
             
-            weeklyMenu.forEach(item => {
+            menuSendoConfirmado.forEach(item => {
                 const dayId = getDayId(item.day);
-                
                 if (!item.isHoliday) {
                     const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
-                    if (!choiceInput) return;
+                    if (!choiceInput) return; 
                     const choice = choiceInput.value;
                     const notes = document.getElementById(`notes-${dayId}`).value.trim();
 
                     tempOrderData[dayId] = choice;
-                    if(notes) {
-                        tempOrderData[`${dayId}_notes`] = notes;
-                    }
+                    if(notes) tempOrderData[`${dayId}_notes`] = notes;
 
                     summaryContainer.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${choice} ${notes ? `<span class="text-sm text-gray-500 italic">(${notes})</span>` : ''}</p>`;
                 }
@@ -450,67 +650,165 @@
         async function submitOrder() {
             const button = document.getElementById('submitOrder');
             button.disabled = true; button.textContent = 'A enviar...';
+
             try {
+                const q = query(pedidosCollectionRef, 
+                                where("employeeRGF", "==", tempOrderData.employeeRGF),
+                                where("referenteAoCardapio", "==", tempOrderData.referenteAoCardapio)
+                              );
+                const existingOrdersSnap = await getDocs(q);
+                const deletePromises = [];
+                existingOrdersSnap.forEach(doc => {
+                    deletePromises.push(deleteDoc(doc.ref));
+                });
+                await Promise.all(deletePromises);
+
                 await addDoc(pedidosCollectionRef, tempOrderData);
                 document.getElementById('confirmation-modal').classList.add('hidden');
                 document.getElementById('form-container').classList.add('hidden');
-                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
+                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido (${tempOrderData.referenteAoCardapio === 'proximaSemana' ? 'para a próxima semana' : 'para a semana atual'}) foi registado com sucesso.`;
                 document.getElementById('success-message').classList.remove('hidden');
                 showToast("Pedido enviado com sucesso!", 'success');
+                loadMenus(); 
             } catch (error) {
                 console.error("Erro ao enviar pedido: ", error);
-                showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
+                showToast("Ocorreu um erro ao enviar o seu pedido. Verifique se o período de escolha está aberto e tente novamente.", 'error', 5000);
             } finally {
                 button.disabled = false; button.textContent = 'Confirmar e Enviar';
             }
         }
         
-        function loadAdminData() {
-            onSnapshot(pedidosCollectionRef, (snapshot) => {
-                const latestOrdersMap = new Map();
-                snapshot.forEach(doc => {
-                    const orderData = doc.data();
-                    if (orderData.employeeRGF) {
-                        const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
-                         if (!latestOrdersMap.has(orderData.employeeRGF) || timestamp > latestOrdersMap.get(orderData.employeeRGF).timestamp) {
-                             latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
-                         }
-                    }
-                });
-                
-                allOrders = Array.from(latestOrdersMap.values())
-                    .map(item => item.doc)
-                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
+        async function toggleCardapioLock(lock) {
+            try {
+                await updateDoc(configDocRef, { cardapioBloqueado: lock });
+                showToast(`Cardápio ATUAL ${lock ? 'BLOQUEADO' : 'DESBLOQUEADO'} para pedidos.`, 'success');
+                // A UI será atualizada pelo listener em `listenToConfigChanges`
+            } catch (error) {
+                console.error("Erro ao alterar bloqueio do cardápio:", error);
+                showToast("Falha ao alterar o estado do cardápio.", 'error');
+            }
+        }
 
-                renderOrdersTable(allOrders);
-                renderOrderStatus(allOrders);
-            }, (error) => {
-                console.error("Erro ao carregar dados do administrador:", error);
-                showToast("Erro ao carregar dados do administrador.", 'error');
-            });
+        async function promoverCardapioProximaSemana() {
+            showCustomConfirm(
+                "Promover Cardápio da Próxima Semana",
+                "Tem certeza? O cardápio da 'Próxima Semana' se tornará o 'Semanal Atual'. O cardápio 'Semanal Atual' anterior será substituído. Pedidos da 'Próxima Semana' serão migrados para 'Semana Atual'. O cardápio da 'Próxima Semana' será limpo. O novo cardápio atual ficará DESBLOQUEADO.",
+                async () => {
+                    try {
+                        const proximoSnap = await getDoc(proximoMenuDocRef);
+                        if (!proximoSnap.exists() || !proximoSnap.data().menu || proximoSnap.data().menu.length === 0) {
+                            showToast("Não há cardápio da próxima semana para promover ou está vazio.", "error");
+                            return;
+                        }
+
+                        const novoMenuAtualConteudo = proximoSnap.data();
+                        
+                        // 1. Define o cardápio da próxima semana como o atual
+                        await setDoc(menuDocRef, novoMenuAtualConteudo);
+                        
+                        // 2. Limpa o cardápio da próxima semana
+                        await deleteDoc(proximoMenuDocRef); 
+                        
+                        // 3. Atualiza pedidos que eram 'proximaSemana' para 'semanaAtual'
+                        const qPedidosProxima = query(pedidosCollectionRef, where("referenteAoCardapio", "==", "proximaSemana"));
+                        const pedidosProximaSnap = await getDocs(qPedidosProxima);
+                        const updatePromises = [];
+                        pedidosProximaSnap.forEach(doc => {
+                            updatePromises.push(updateDoc(doc.ref, { referenteAoCardapio: "semanaAtual" }));
+                        });
+                        await Promise.all(updatePromises);
+
+                        // 4. Desbloqueia o cardápio e atualiza timestamp
+                        await updateDoc(configDocRef, { 
+                            cardapioBloqueado: false, 
+                            ultimaAtualizacaoCardapio: serverTimestamp() 
+                        });
+
+                        showToast("Cardápio promovido e sistema atualizado!", "success");
+                        loadMenus(); // Recarrega tudo
+                    } catch (error) {
+                        console.error("Erro ao promover cardápio:", error);
+                        showToast("Falha ao promover o cardápio: " + error.message, "error", 7000);
+                    }
+                },
+                "Sim, Promover Agora",
+                "bg-green-600 hover:bg-green-700"
+            );
+        }
+
+        function updateAdminControls() {
+            const adminView = document.getElementById('admin-view');
+            if (!adminView || adminView.classList.contains('hidden')) return;
+
+            let controlsHTML = `<div class="my-4 p-4 border rounded-lg bg-gray-50">`;
+            controlsHTML += `<h3 class="text-lg font-semibold mb-3">Controles do Cardápio:</h3>`;
+            
+            if (cardapioBloqueadoGlobal) {
+                controlsHTML += `<button id="unlockMenuBtn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 mr-2 mb-2">Desbloquear Cardápio ATUAL</button>`;
+            } else {
+                controlsHTML += `<button id="lockMenuBtn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 mr-2 mb-2">Bloquear Cardápio ATUAL</button>`;
+            }
+
+            if (proximoWeeklyMenu && proximoWeeklyMenu.length > 0) {
+                 controlsHTML += `<button id="promoteNextWeekMenuBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 mb-2">Promover Cardápio da Próxima Semana para Atual</button>`;
+            } else {
+                 controlsHTML += `<p class="text-sm text-gray-600 inline-block ml-2 mb-2">Nenhum cardápio "Próxima Semana" para promover.</p>`;
+            }
+            controlsHTML += `</div>`;
+            
+            const existingControlsContainer = document.getElementById('admin-menu-controls-container');
+            if (existingControlsContainer) {
+                existingControlsContainer.innerHTML = controlsHTML;
+            } else { // Deveria existir, mas como fallback
+                const menuUpdaterSection = document.getElementById('menu-updater-section');
+                if (menuUpdaterSection) {
+                    const div = document.createElement('div');
+                    div.id = 'admin-menu-controls-container';
+                    div.innerHTML = controlsHTML;
+                    menuUpdaterSection.parentNode.insertBefore(div, menuUpdaterSection);
+                }
+            }
+
+            const lockBtn = document.getElementById('lockMenuBtn');
+            if (lockBtn) lockBtn.addEventListener('click', () => toggleCardapioLock(true));
+            
+            const unlockBtn = document.getElementById('unlockMenuBtn');
+            if (unlockBtn) unlockBtn.addEventListener('click', () => toggleCardapioLock(false));
+
+            const promoteBtn = document.getElementById('promoteNextWeekMenuBtn');
+            if (promoteBtn) promoteBtn.addEventListener('click', promoverCardapioProximaSemana);
+        }
+
+
+        function loadAdminData() {
+            loadAndRenderEmployees(); 
+            updateAdminControls(); 
+            // loadMenus() já é chamado globalmente e lida com renderOrdersTable e renderOrderStatus
         }
         
-        async function renderOrderStatus(orders) {
+        async function renderOrderStatus(currentOrders) { 
             const container = document.getElementById('order-status-container');
+            if(!container) return;
             container.innerHTML = '<p class="text-gray-500">A processar...</p>';
 
             try {
                 const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
                 const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
-                const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
+                const ordersForCurrentWeek = currentOrders.filter(o => o.referenteAoCardapio === "semanaAtual" || !o.referenteAoCardapio);
+                const orderedRGFs = new Set(ordersForCurrentWeek.map(order => order.employeeRGF));
 
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
                 const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
 
                 let html = `
                     <div>
-                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
+                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (Semana Atual: ${haveOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido para a semana atual ainda.</li>'}</ul>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
+                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (Semana Atual: ${haveNotOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido para a semana atual!</li>'}</ul>
                     </div>
                 `;
                 container.innerHTML = html;
@@ -521,22 +819,28 @@
             }
         }
         
-        function renderOrdersTable(orders) {
+        function renderOrdersTable(currentAllOrders) { 
             const container = document.getElementById('ordersTableContainer');
+            if(!container) return;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
+            
+            const filteredOrders = currentAllOrders.filter(order => 
+                (order.employeeName.toLowerCase().includes(searchTerm)) &&
+                (order.referenteAoCardapio === "semanaAtual" || !order.referenteAoCardapio) 
+            );
 
-            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
+            const menuParaTabela = weeklyMenu; 
+
+            if (!menuParaTabela || menuParaTabela.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Cardápio atual não definido.</p>'; return; }
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido para a semana atual encontrado.</p>'; return; }
             
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
-            weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
+            menuParaTabela.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
 
-            filteredOrders.forEach(doc => {
-                const order = doc.data();
+            filteredOrders.forEach(order => { 
                 tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
-                weeklyMenu.forEach(dayMenuItem => {
+                menuParaTabela.forEach(dayMenuItem => {
                     const dayId = getDayId(dayMenuItem.day);
                     let cellContent = '';
 
@@ -549,20 +853,15 @@
                         const optionDishName = dayMenuItem.opcao?.name;
 
                         let reportChoice = choice;
-                        if (choice === mainDishName) {
-                            reportChoice = 'Prato';
-                        } else if (optionDishName && choice === optionDishName) {
-                            reportChoice = 'Opção';
-                        }
+                        if (choice === mainDishName) { reportChoice = 'Prato'; } 
+                        else if (optionDishName && choice === optionDishName) { reportChoice = 'Opção'; }
                         
                         cellContent = reportChoice;
-                        if (notes) {
-                            cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
-                        }
+                        if (notes) { cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`; }
                     }
                     tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
                 });
-                tableHTML += `<td class="py-2 px-3 border-b space-x-2"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
+                tableHTML += `<td class="py-2 px-3 border-b space-x-2"><button data-id="${order.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${order.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
             });
             tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
@@ -570,8 +869,10 @@
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            if (allOrders.length === 0 || weeklyMenu.length === 0) {
-                showToast("Não há pedidos ou cardápio para gerar o relatório.", "info");
+            const ordersForReport = allOrders.filter(o => o.referenteAoCardapio === "semanaAtual" || !o.referenteAoCardapio);
+
+            if (ordersForReport.length === 0 || weeklyMenu.length === 0) {
+                showToast("Não há pedidos da semana atual ou cardápio atual para gerar o relatório.", "info");
                 return;
             }
             reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
@@ -583,12 +884,11 @@
                 const dayId = getDayId(dayMenuItem.day);
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
                 
-                const dailyOrders = allOrders
-                    .filter(orderDoc => orderDoc.data()[dayId])
-                    .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
+                const dailyOrders = ordersForReport
+                    .filter(order => order[dayId]) 
+                    .sort((a,b) => a.employeeName.localeCompare(b.employeeName));
                 
-                dailyOrders.forEach(orderDoc => {
-                    const order = orderDoc.data();
+                dailyOrders.forEach(order => {
                     const choice = order[dayId];
                     const notes = order[`${dayId}_notes`];
                     
@@ -622,15 +922,25 @@
             modal.classList.remove('hidden');
 
             try {
-                const docSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
-                if (!docSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
+                const orderSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
+                if (!orderSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
 
-                const orderData = docSnap.data();
+                const orderData = orderSnap.data();
                 employeeNameInput.value = orderData.employeeName;
-                orderIdInput.value = docId;
+                orderIdInput.value = docId; 
                 formContent.innerHTML = '';
 
-                weeklyMenu.forEach(item => {
+                // Edição é sempre baseada no cardápio ATUAL (weeklyMenu)
+                // Se o pedido for referenteAoCardapio === "proximaSemana", o admin não deveria conseguir editá-lo por esta interface
+                // ou a interface deveria ser mais esperta. Por simplicidade, assume-se edição de pedido da semana ATUAL.
+                if (orderData.referenteAoCardapio === "proximaSemana") {
+                     showToast("Não é possível editar um pedido feito para a próxima semana através desta interface.", "info", 5000);
+                     modal.classList.add('hidden');
+                     return;
+                }
+                const menuParaEdicao = weeklyMenu; 
+
+                menuParaEdicao.forEach(item => {
                     const dayId = getDayId(item.day);
                     let dayHTML = `<fieldset class="day-section border p-4 rounded-lg"><legend class="font-bold text-lg text-gray-800 px-2">${item.day}</legend>`;
                     
@@ -646,7 +956,7 @@
                             if (option.name) {
                                 const uniqueId = `edit-${dayId}-${index}`;
                                 const isChecked = (option.name === currentChoice) ? 'checked' : '';
-                                dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
+                                dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="edit-radio-${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
                             }
                         });
                         dayHTML += `</div>`;
@@ -656,13 +966,12 @@
                             <textarea id="edit-notes-${dayId}" name="edit-notes-${dayId}" rows="2" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">${currentNotes}</textarea>
                         </div>`;
                     }
-                    
                     dayHTML += `</fieldset>`;
                     formContent.innerHTML += dayHTML;
                 });
             } catch (error) {
                 console.error("Erro ao abrir modal de edição:", error);
-                showToast("Não foi possível carregar os dados do pedido.", 'error');
+                showToast("Não foi possível carregar os dados do pedido para edição.", 'error');
                 modal.classList.add('hidden');
             }
         }
@@ -671,18 +980,20 @@
             event.preventDefault();
             const button = event.target.querySelector('button[type="submit"]');
             button.disabled = true; button.textContent = 'A salvar...';
-            const docId = document.getElementById('edit-order-id').value;
+            const docId = document.getElementById('edit-order-id').value; 
             const updateData = {};
             
-            weeklyMenu.forEach(item => {
+            weeklyMenu.forEach(item => { 
                 if (!item.isHoliday) {
                     const dayId = getDayId(item.day);
-                    const selectedOption = document.querySelector(`#edit-order-form input[name="${dayId}"]:checked`);
+                    const selectedOption = document.querySelector(`#edit-order-form input[name="edit-radio-${dayId}"]:checked`);
                     if (selectedOption) { 
                         updateData[dayId] = selectedOption.value; 
+                    } else {
+                        updateData[dayId] = null; 
                     }
                     const notes = document.getElementById(`edit-notes-${dayId}`).value.trim();
-                    updateData[`${dayId}_notes`] = notes;
+                    updateData[`${dayId}_notes`] = notes; 
                 }
             });
 
@@ -690,6 +1001,7 @@
                 await updateDoc(doc(db, "pedidosDaSemana", docId), updateData);
                 showToast("Pedido atualizado com sucesso!", 'success');
                 document.getElementById('edit-order-modal').classList.add('hidden');
+                loadMenus(); 
             } catch (error) {
                 console.error("Erro ao salvar alterações do pedido:", error);
                 showToast("Falha ao salvar as alterações do pedido.", 'error');
@@ -699,11 +1011,11 @@
         }
 
         function deleteOrder(docId, name) {
-            const message = `Tem a certeza que deseja excluir o pedido de ${name}? Esta ação não pode ser desfeita.`;
-            showCustomConfirm(message, async () => {
+             showCustomConfirm("Excluir Pedido", `Tem a certeza que deseja excluir o pedido de ${name} (ID: ${docId})? Esta ação não pode ser desfeita.`, async () => {
                 try {
                     await deleteDoc(doc(db, "pedidosDaSemana", docId));
                     showToast("Pedido excluído com sucesso.", 'success');
+                    loadMenus(); 
                 } catch (error) {
                     console.error("Erro ao excluir pedido: ", error);
                     showToast("Falha ao excluir o pedido.", 'error');
@@ -721,14 +1033,14 @@
                 document.getElementById('imagePreview').classList.remove('hidden');
                 document.getElementById('image-processor-container').classList.remove('hidden');
                 document.getElementById('whatsapp-notification-container').classList.add('hidden');
+                document.getElementById('menu-target-selector').classList.remove('hidden'); 
             }
             reader.readAsDataURL(file);
         });
 
         document.getElementById('processImageBtn').addEventListener('click', async () => {
             if (typeof imageCompression === 'undefined') {
-                showToast('Erro: Biblioteca de compressão não carregou.', 'error');
-                return;
+                showToast('Erro: Biblioteca de compressão não carregou.', 'error'); return;
             }
 
             const loader = document.getElementById('loader'); const button = document.getElementById('processImageBtn'); const confirmationForm = document.getElementById('confirmation-form');
@@ -742,11 +1054,11 @@
                 const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado, marque-o. Além disso, determine se o almoço é 'especial' (ex: uma refeição comemorativa, temática ou de maior qualidade) e defina o campo booleano 'isSpecial'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "isSpecial": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🍲"}, "guarnicao": {"name": "Nome", "emoji": "🥗"}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
 
                 const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
-                const apiKey = firebaseConfig.apiKey;
+                const apiKey = firebaseConfig.apiKey; 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; 
 
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
+                if (!response.ok) { const errText = await response.text(); throw new Error(`API Error (${response.status}): ${errText}`); }
                 const result = await response.json();
                 
                 let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -788,38 +1100,35 @@
             container.classList.remove('hidden'); 
             
             document.getElementById('saveNewMenuBtn').addEventListener('click', () => {
-                const message = "Tem certeza que deseja salvar o novo cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente. Esta ação não pode ser desfeita.";
-                showCustomConfirm(message, () => {
-                    saveNewMenu(menuData);
-                });
+                const targetMenuType = document.getElementById('menuTargetType').value; 
+                let message = "";
+                let confirmBtnClass = "bg-green-500 hover:bg-green-600";
+                if (targetMenuType === "atual") {
+                    message = "Tem certeza que deseja salvar este como o cardápio ATUAL? O cardápio atual existente será substituído. Pedidos da 'Semana Atual' serão MANTIDOS. O cardápio atual ficará DESBLOQUEADO.";
+                    confirmBtnClass = "bg-orange-500 hover:bg-orange-600"; // Laranja para ação mais "destrutiva" no cardápio atual
+                } else { 
+                    message = "Tem certeza que deseja salvar este como o cardápio da PRÓXIMA SEMANA? O cardápio da próxima semana existente (se houver) será substituído.";
+                }
+
+                showCustomConfirm("Confirmar Novo Cardápio", message, () => {
+                    saveNewMenu(menuData, targetMenuType);
+                }, "Sim, Salvar", confirmBtnClass);
             });
 
             document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
                 container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
                 document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+                document.getElementById('menu-target-selector').classList.add('hidden');
                 showToast("Atualização cancelada.", 'info');
             });
         }
         
-        async function clearAllOrders() {
-            console.log("Iniciando a limpeza de todos os pedidos da semana...");
-            const querySnapshot = await getDocs(pedidosCollectionRef);
-            const deletionPromises = [];
-            querySnapshot.forEach((doc) => {
-                deletionPromises.push(deleteDoc(doc.ref));
-            });
-            await Promise.all(deletionPromises);
-            console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
-        }
-
-        async function saveNewMenu(menuData) {
+        async function saveNewMenu(menuData, targetMenuType) {
             const button = document.getElementById('saveNewMenuBtn'); 
             const cancelButton = document.getElementById('cancelNewMenuBtn');
-            button.disabled = true;
-            cancelButton.disabled = true;
-            button.textContent = 'A salvar...'; 
+            button.disabled = true; cancelButton.disabled = true; button.textContent = 'A salvar...'; 
 
-            const newMenu = menuData.map((item, i) => ({ 
+            const newMenuPayload = menuData.map((item, i) => ({ 
                 day: item.day, 
                 pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
                 opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
@@ -828,61 +1137,87 @@
                 isSpecial: document.getElementById(`special-${i}`).checked,
             })); 
 
-            try { 
-                await setDoc(menuDocRef, { menu: newMenu });
-                await clearAllOrders();
-                showToast('Cardápio atualizado e pedidos zerados!', 'success'); 
+            try {
+                let menuRefToUpdate = targetMenuType === "proxima" ? proximoMenuDocRef : menuDocRef;
+                let successMessage = `Cardápio ${targetMenuType === "proxima" ? "da próxima semana" : "atual"} atualizado!`;
+                
+                await setDoc(menuRefToUpdate, { menu: newMenuPayload, atualizadoEm: serverTimestamp() });
+                
+                if (targetMenuType === "atual") {
+                    await updateDoc(configDocRef, { 
+                        cardapioBloqueado: false, // Desbloqueia ao atualizar o cardápio atual
+                        ultimaAtualizacaoCardapio: serverTimestamp() 
+                    });
+                    successMessage += " Cardápio atual DESBLOQUEADO.";
+                }
+
+                showToast(successMessage, 'success'); 
                 document.getElementById('confirmation-form').classList.add('hidden'); 
                 document.getElementById('imagePreview').classList.add('hidden');
                 document.getElementById('image-processor-container').classList.add('hidden'); 
                 document.getElementById('imageUpload').value = ''; 
+                document.getElementById('menu-target-selector').classList.add('hidden');
                 document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+                
+                loadMenus(); // Recarrega os cardápios para refletir as mudanças
+
             } catch (error) { 
-                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
-                showToast("Erro ao salvar o novo cardápio.", 'error'); 
+                console.error("Erro ao salvar o cardápio:", error); 
+                showToast("Erro ao salvar o novo cardápio: " + error.message, 'error', 7000); 
             } finally { 
-                button.disabled = false; 
-                cancelButton.disabled = false;
-                button.textContent = 'Salvar Novo Cardápio'; 
+                button.disabled = false; cancelButton.disabled = false; button.textContent = 'Salvar Novo Cardápio'; 
             }
         }
         
         function handleWhatsAppNotification() {
-            const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
+            let message;
+            const today = new Date();
+            const currentDayOfWeek = today.getDay();
+
+            if (currentDayOfWeek === diaDeEscolhaGlobal && proximoWeeklyMenu && proximoWeeklyMenu.length > 0) {
+                message = `Já escolheu o seu cardápio para a PRÓXIMA SEMANA? ✨ O prazo é hoje! Faça seu pedido: ${window.location.href}`;
+            } else if (proximoWeeklyMenu && proximoWeeklyMenu.length > 0) {
+                 message = `O cardápio da PRÓXIMA SEMANA já está disponível para escolha! ✨ Confira e faça seu pedido até Quinta-Feira: ${window.location.href}`;
+            }
+            else { // Se não há próximo cardápio, ou não é dia de escolha, notifica sobre o atual (se recém atualizado)
+                message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
+            }
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
             window.open(whatsappUrl, '_blank');
             showToast('Abra o WhatsApp para enviar a notificação.', 'info');
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user && user.uid === APP_CONFIG.ADMIN_UID) {
                 showAdminView();
             } else {
-                if (!auth.currentUser) {
-                    signInAnonymously(auth).catch((error) => {
-                        console.error("Erro no login anónimo:", error);
-                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
-                    });
+                if (!auth.currentUser) { // Garante login anônimo se não houver usuário
+                    try { await signInAnonymously(auth); } 
+                    catch (error) { console.error("Erro login anónimo:", error); showToast("Falha na conexão.", "error");}
                 }
                 showUserView();
             }
+            // Estas são chamadas após a lógica de auth para garantir que o contexto (usuário/admin) esteja definido
+            listenToConfigChanges(); // Inicia ouvindo as configurações, que por sua vez atualiza a UI
+            loadMenus(); // Carga inicial dos cardápios e pedidos
         });
+
 
         function showUserView() {
             document.getElementById('user-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
+            // updateDisplayedMenuAndForm() é chamado por loadMenus() e listenToConfigChanges()
         }
 
         function showAdminView() {
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
-            loadAdminData();
-            loadAndRenderEmployees();
+            loadAdminData(); // Carrega dados específicos do admin (funcionários, etc.)
+            // loadMenus() já é chamado globalmente e cuidará de renderizar tabelas e status de pedidos
+            // updateAdminControls() será chamado por listenToConfigChanges ou loadMenus
         }
 
         async function handleAdminLogin(e) {
@@ -894,12 +1229,13 @@
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) {
-                    await signOut(auth);
-                    showToast("Credenciais válidas, mas este usuário não é um administrador.", 'error');
+                    await signOut(auth); 
+                    showToast("Credenciais válidas, mas não é administrador.", 'error');
                 }
+                // Se for admin, onAuthStateChanged tratará de mostrar a view correta.
             } catch (error) {
-                console.error("Erro no login de administrador:", error);
-                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
+                console.error("Erro login admin:", error);
+                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') ? "Email ou senha incorretos." : "Erro no login.";
                 showToast(msg, 'error', 5000);
             } finally {
                 btn.disabled = false; btn.textContent = 'Entrar';
@@ -907,18 +1243,39 @@
         }
 
         async function handleAdminLogout() {
-            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); } 
-            catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
+            try { await signOut(auth); showToast("Logout bem-sucedido.", 'info'); } 
+            catch (error) { console.error("Erro logout:", error); showToast("Erro ao sair.", 'error'); }
+            // onAuthStateChanged tratará de mostrar a view de usuário.
         }
 
         function main() {
             const rgfInput = document.getElementById('employeeRGF');
             rgfInput.value = localStorage.getItem('employeeRGF') || '';
-            if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
-            rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
-            rgfInput.addEventListener('input', validateForm);
+            // A chamada inicial para findEmployeeByRGF será feita após loadMenus garantir que allOrders está populado
             
-            document.getElementById('menu').addEventListener('change', validateForm);
+            rgfInput.addEventListener('blur', (e) => { 
+                localStorage.setItem('employeeRGF', e.target.value); 
+                findEmployeeByRGF(e.target.value); 
+            });
+            rgfInput.addEventListener('input', () => { // Validação dinâmica ao digitar RGF
+                const today = new Date();
+                const currentDayOfWeek = today.getDay();
+                const isProximoMode = (currentDayOfWeek === diaDeEscolhaGlobal && proximoWeeklyMenu !== null);
+                const menuParaValidar = isProximoMode ? proximoWeeklyMenu : weeklyMenu;
+                // Só valida se pode fazer pedido (não bloqueado OU é modo próximo)
+                if ((!cardapioBloqueadoGlobal && !isProximoMode) || isProximoMode) {
+                    validateForm(menuParaValidar, isProximoMode);
+                }
+            });
+            
+            document.getElementById('menu').addEventListener('change', () => { // Validação ao mudar opção no menu
+                const today = new Date();
+                const currentDayOfWeek = today.getDay();
+                const isProximoMode = (currentDayOfWeek === diaDeEscolhaGlobal && proximoWeeklyMenu !== null);
+                const menuParaValidar = isProximoMode ? proximoWeeklyMenu : weeklyMenu;
+                validateForm(menuParaValidar, isProximoMode);
+            });
+
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
             
@@ -930,7 +1287,15 @@
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
             
             document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
-            document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
+            document.getElementById('switchToUserFromAdmin').addEventListener('click', () => { 
+                // Não faz signOut, apenas muda a view. onAuthStateChanged mantém o estado de admin se logado.
+                // Para um logout completo, o admin usaria o botão "Sair do Painel".
+                // Se o objetivo é apenas ver como usuário, esta abordagem é ok.
+                // Para realmente "virar" usuário anônimo, precisaria de signOut e signInAnonymously.
+                // Por simplicidade, apenas mostra a user view.
+                showUserView(); 
+                updateDisplayedMenuAndForm(); // Garante que a view de usuário seja renderizada corretamente
+            });
             
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
@@ -949,8 +1314,19 @@
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
             
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
-        }
 
+            // A inicialização de listenToConfigChanges e loadMenus é feita no onAuthStateChanged.
+            // Se o RGF já estiver no localStorage, findEmployeeByRGF será chamado após loadMenus ter populado allOrders.
+            if(rgfInput.value) {
+                // Adia a chamada para findEmployeeByRGF até que os menus e pedidos estejam carregados
+                const checkDataLoaded = setInterval(() => {
+                    if (weeklyMenu.length > 0 || proximoWeeklyMenu) { // Checa se algum cardápio foi carregado
+                        clearInterval(checkDataLoaded);
+                        findEmployeeByRGF(rgfInput.value);
+                    }
+                }, 200);
+            }
+        }
         main();
     </script>
 </body>
