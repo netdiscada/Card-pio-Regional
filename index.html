@@ -43,6 +43,30 @@
         #app-toast.success { background-color: #22c55e; }
         #app-toast.error { background-color: #ef4444; }
         #app-toast.info { background-color: #3b82f6; }
+        html {
+            color-scheme: dark light;
+        }
+        body {
+            background-color: #18181b;
+            color: #f3f4f6;
+            transition: background 0.3s, color 0.3s;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #18181b;
+                color: #f3f4f6;
+            }
+            .bg-white { background-color: #23232a !important; }
+            .text-gray-800 { color: #f3f4f6 !important; }
+            .text-gray-700 { color: #e5e7eb !important; }
+            .text-gray-500 { color: #a1a1aa !important; }
+            .border-gray-200 { border-color: #27272a !important; }
+            .shadow-sm { box-shadow: 0 2px 8px 0 rgba(0,0,0,0.25) !important; }
+        }
+        .dark {
+            background-color: #18181b !important;
+            color: #f3f4f6 !important;
+        }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -51,7 +75,13 @@
         
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
+                <header class="text-center mb-8">
+                    <div id="auto-image-container" class="flex justify-center mb-4">
+                        <img id="auto-image" src="" alt="Imagem IA" class="rounded-xl shadow-lg max-h-40 object-cover bg-gray-200 dark:bg-gray-700" style="display:none;" loading="lazy" />
+                    </div>
+                    <h1 class="font-brand text-5xl text-blue-600 dark:text-blue-300">Delícias Urbanas</h1>
+                    <p class="mt-2 text-md text-gray-500 dark:text-gray-300">O seu cardápio da semana está servido!</p>
+                </header>
                 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
@@ -950,6 +980,30 @@
             
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
         }
+
+        // --- IA: Busca automática de imagem para o header ---
+        (async function setAutoImage() {
+          const img = document.getElementById('auto-image');
+          if (!img) return;
+          try {
+            // Unsplash API para imagens livres de uso
+            const query = 'restaurante comida cardápio';
+            const url = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&orientation=landscape&client_id=YOUR_UNSPLASH_ACCESS_KEY&content_filter=high`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Erro ao buscar imagem');
+            const data = await res.json();
+            // Escolhe a menor imagem de boa qualidade
+            const src = data.urls.small || data.urls.regular || data.urls.thumb;
+            img.src = src;
+            img.alt = data.alt_description || 'Imagem IA';
+            img.style.display = 'block';
+          } catch (e) {
+            // fallback: imagem padrão
+            img.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80';
+            img.alt = 'Comida';
+            img.style.display = 'block';
+          }
+        })();
 
         main();
     </script>
