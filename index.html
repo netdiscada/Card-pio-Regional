@@ -43,6 +43,22 @@
         #app-toast.success { background-color: #22c55e; }
         #app-toast.error { background-color: #ef4444; }
         #app-toast.info { background-color: #3b82f6; }
+
+        /* ---- Dark mode (default) ---- */
+        :root { color-scheme: dark; }
+        body, body.bg-slate-50 { background-color: #1f2937; color: #d1d5db; }
+        .bg-white { background-color: #262626 !important; }
+        .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500 { color: #e5e7eb !important; }
+        .border-gray-200, .border-gray-300 { border-color: #374151 !important; }
+        .bg-yellow-100 { background-color: #4b5563 !important; }
+        .text-yellow-700 { color: #fbbf24 !important; }
+        .bg-blue-100 { background-color: #1e3a8a !important; }
+        .text-blue-600 { color: #60a5fa !important; }
+        .bg-indigo-100 { background-color: #4338ca !important; }
+        .text-indigo-700 { color: #a5b4fc !important; }
+        .bg-purple-200 { background-color: #6d28d9 !important; }
+        .text-purple-800 { color: #c4b5fd !important; }
+        /* ---- end dark mode ---- */
     </style>
 </head>
 <body class="bg-slate-50">
@@ -360,10 +376,11 @@
                     dayHTML += `<div class="space-y-3">`;
                     allOptions.forEach((option) => {
                         if (option.name) {
+                            const imageUrl = `https://source.unsplash.com/80x80/?${encodeURIComponent(option.name)},food`;
                             dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
                                 <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
                                 <div class="flex items-center">
-                                    <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
+                                    <img src="${imageUrl}" alt="${option.name}" class="w-12 h-12 mr-4 rounded object-cover" loading="lazy"/>
                                     <div class="flex-grow">
                                         <p class="font-semibold text-gray-800">${option.name}</p>
                                         <p class="text-sm text-gray-500">${option.type}</p>
