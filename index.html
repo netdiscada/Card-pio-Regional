@@ -10,46 +10,96 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
-        /* Modo Escuro como Padrão */
+        /* Tema Futurista com Cores Vivas */
         :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #64748b;
-            --accent-primary: #3b82f6;
-            --accent-secondary: #1d4ed8;
-            --border-color: #475569;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --error-color: #ef4444;
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --bg-card: #0f3460;
+            --text-primary: #ffffff;
+            --text-secondary: #e94560;
+            --text-muted: #533483;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #ff006e;
+            --accent-tertiary: #8338ec;
+            --border-color: #533483;
+            --success-color: #00f5ff;
+            --warning-color: #ffbe0b;
+            --error-color: #ff006e;
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff006e;
+            --neon-purple: #8338ec;
+            --neon-green: #00f5ff;
         }
         
         body { 
             font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, var(--bg-primary) 0%, #1e293b 100%);
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
             color: var(--text-primary);
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Efeito de partículas no fundo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, var(--neon-blue) 0%, transparent 50%),
+                radial-gradient(circle at 80% 40%, var(--neon-pink) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, var(--neon-purple) 0%, transparent 50%);
+            opacity: 0.03;
+            z-index: -1;
+            animation: pulse 4s ease-in-out infinite alternate;
         }
         
         .font-brand { 
             font-family: 'Lobster Two', cursive; 
-            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink), var(--neon-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 0 30px var(--neon-blue);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px var(--neon-blue)); }
+            to { filter: drop-shadow(0 0 20px var(--neon-pink)); }
         }
         
         /* Cards e Containers */
         .bg-white {
-            background: var(--bg-secondary) !important;
+            background: var(--bg-card) !important;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 212, 255, 0.1),
+                0 4px 16px rgba(255, 0, 110, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px !important;
         }
         
         .bg-slate-50 {
             background: var(--bg-primary) !important;
+        }
+        
+        /* Mobile-first responsive design */
+        .container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        @media (min-width: 640px) {
+            .container {
+                padding-left: 1.5rem !important;
+                padding-right: 1.5rem !important;
+            }
         }
         
         /* Inputs e Forms */
@@ -68,13 +118,15 @@
             color: var(--text-muted) !important;
         }
         
-        /* Menu Cards */
+        /* Menu Cards - Otimizado para Mobile */
         .menu-option-card {
-            background: var(--bg-secondary);
+            background: var(--bg-card);
             border: 2px solid var(--border-color);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
         }
         
         .menu-option-card:before {
@@ -84,7 +136,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
             transition: left 0.5s;
         }
         
@@ -93,10 +145,26 @@
         }
         
         .menu-option-card:has(input:checked) { 
-            border-color: var(--accent-primary); 
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-color: var(--neon-blue); 
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 110, 0.1));
             transform: scale(1.02); 
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.3),
+                0 0 40px rgba(255, 0, 110, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 640px) {
+            .menu-option-card {
+                padding: 0.75rem !important;
+            }
+            
+            .menu-option-card .flex {
+                flex-direction: row;
+                align-items: center;
+                gap: 0.75rem;
+            }
         }
         
         .menu-option-card:has(input:checked) .checkmark { opacity: 1; }
@@ -115,19 +183,29 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Dish Images */
+        /* Dish Images - Mobile Optimized */
         .dish-image {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            border: 2px solid var(--neon-blue);
             transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
         }
         
         .dish-image:hover {
-            transform: scale(1.1);
-            border-color: var(--accent-primary);
+            transform: scale(1.05);
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.5);
+        }
+        
+        @media (min-width: 640px) {
+            .dish-image {
+                width: 80px;
+                height: 80px;
+                border-radius: 12px;
+            }
         }
         
         .image-loading {
@@ -222,14 +300,46 @@
              animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
          }
          
-         @keyframes pulse {
-             0%, 100% {
-                 opacity: 1;
-             }
-             50% {
-                 opacity: .5;
-             }
-         }
+                 @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+        
+        /* Floating particles animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(120deg); }
+            66% { transform: translateY(5px) rotate(240deg); }
+        }
+        
+        .floating-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            z-index: -1;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .floating-particle:nth-child(2) {
+            background: var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
+            animation-delay: -2s;
+            animation-duration: 8s;
+        }
+        
+        .floating-particle:nth-child(3) {
+            background: var(--neon-purple);
+            box-shadow: 0 0 10px var(--neon-purple);
+            animation-delay: -4s;
+            animation-duration: 10s;
+        }
         .no-print { }
         
         /* Modals */
@@ -269,21 +379,29 @@
         
         /* Buttons */
         .bg-blue-500, .bg-blue-600 {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+            background: linear-gradient(135deg, var(--neon-blue), var(--accent-primary)) !important;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3) !important;
         }
         
         .bg-green-500, .bg-green-600 {
-            background: linear-gradient(135deg, var(--success-color), #059669) !important;
+            background: linear-gradient(135deg, var(--neon-green), var(--success-color)) !important;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3) !important;
         }
         
         .bg-red-500, .bg-red-600 {
-            background: linear-gradient(135deg, var(--error-color), #dc2626) !important;
+            background: linear-gradient(135deg, var(--neon-pink), var(--error-color)) !important;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.3) !important;
+        }
+        
+        .bg-purple-600, .bg-purple-700 {
+            background: linear-gradient(135deg, var(--neon-purple), var(--accent-tertiary)) !important;
+            box-shadow: 0 0 20px rgba(131, 56, 236, 0.3) !important;
         }
         
         .bg-yellow-100 {
-            background: rgba(245, 158, 11, 0.1) !important;
+            background: rgba(255, 190, 11, 0.1) !important;
             border-color: var(--warning-color) !important;
-            color: #fbbf24 !important;
+            color: var(--warning-color) !important;
         }
         
         /* Tables */
@@ -341,24 +459,51 @@
     </style>
 </head>
 <body class="bg-slate-50">
+    <!-- Floating particles for futuristic effect -->
+    <div class="floating-particle" style="top: 10%; left: 10%;"></div>
+    <div class="floating-particle" style="top: 20%; left: 80%;"></div>
+    <div class="floating-particle" style="top: 60%; left: 15%;"></div>
+    <div class="floating-particle" style="top: 80%; left: 70%;"></div>
+    <div class="floating-particle" style="top: 40%; left: 90%;"></div>
+    <div class="floating-particle" style="top: 70%; left: 5%;"></div>
 
     <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
         
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
+                <header class="text-center mb-6 px-2">
+                    <h1 class="font-brand text-3xl sm:text-5xl">Delícias Urbanas</h1>
+                    <p class="mt-2 text-sm sm:text-md" style="color: var(--text-secondary)">O seu cardápio da semana está servido!</p>
+                </header>
                 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div><label for="employeeRGF" class="block text-sm font-medium text-gray-700">Seu RGF</label><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
-                        <div><label for="employeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div>
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+                    <h2 class="block text-lg font-semibold mb-2" style="color: var(--text-primary)">👤 1. Identificação</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="employeeRGF" class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">Seu RGF</label>
+                            <input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 rounded-lg text-sm sm:text-base">
+                        </div>
+                        <div>
+                            <label for="employeeName" class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">Nome Completo</label>
+                            <input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 rounded-lg text-sm sm:text-base" readonly>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
-                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
-                <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">🍽️ 2. Escolha os seus pratos</h2>
+                    <div id="menu" class="space-y-6">
+                        <div class="text-center" style="color: var(--text-muted)">A carregar o cardápio...</div>
+                    </div>
+                </div>
+                <div id="guidanceSection" class="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border-l-4 border-yellow-400 p-4 rounded-md mb-6" style="border-left-color: var(--warning-color)">
+                    <p id="guidanceText" class="font-semibold" style="color: var(--warning-color)">Digite seu RGF e escolha uma opção para cada dia.</p>
+                </div>
+                <div id="submitButtonContainer" class="hidden text-center">
+                    <button id="openConfirmationModal" class="w-full sm:w-auto text-white font-bold text-lg px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105" style="background: linear-gradient(135deg, var(--neon-green), var(--success-color)); box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);">
+                        ✨ Revisar e Finalizar Pedido
+                    </button>
+                </div>
             </div>
             <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
             <footer class="text-center mt-10">
@@ -669,12 +814,11 @@
             onSnapshot(menuDocRef, async (docSnap) => {
                 weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
                 
-                // Buscar imagens automaticamente se necessário (silenciosamente)
+                // Buscar imagens automaticamente se necessário (apenas para pratos principais e opções)
                 const needsImages = weeklyMenu.some(dayMenu => 
                     !dayMenu.isHoliday && (
                         (dayMenu.pratoPrincipal?.name && !dayMenu.pratoPrincipal.image) ||
-                        (dayMenu.opcao?.name && !dayMenu.opcao.image) ||
-                        (dayMenu.guarnicao?.name && !dayMenu.guarnicao.image)
+                        (dayMenu.opcao?.name && !dayMenu.opcao.image)
                     )
                 );
                 
@@ -711,22 +855,22 @@
 
             weeklyMenu.forEach(item => {
                 const dayId = getDayId(item.day);
-                let dayHTML = `<div class="day-section space-y-3">`;
+                let dayHTML = `<div class="day-section space-y-3 p-3 rounded-lg" style="background: var(--bg-tertiary); border: 1px solid var(--border-color);">`;
                 
-                let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
+                let dayTitleHTML = `<h3 class="text-lg sm:text-xl font-bold" style="color: var(--text-primary)">${item.day}</h3>`;
                 if (item.isSpecial) {
-                    dayTitleHTML = `<div class="flex items-center gap-3">
-                        <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
-                        <span class="text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1">✨ Almoço Especial</span>
+                    dayTitleHTML = `<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                        <h3 class="text-lg sm:text-xl font-bold" style="color: var(--text-primary)">${item.day}</h3>
+                        <span class="text-xs sm:text-sm font-semibold rounded-full px-3 py-1 self-start" style="color: var(--neon-purple); background: rgba(131, 56, 236, 0.2); border: 1px solid var(--neon-purple);">✨ Almoço Especial</span>
                     </div>`;
                 }
                 
                 if (item.isHoliday) {
                     dayHTML += dayTitleHTML;
                     dayHTML += `
-                        <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
-                            <p class="font-bold">🎊 Feriado</p>
-                            <p>Não haverá refeição neste dia.</p>
+                        <div class="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border-l-4 p-4 rounded-md" style="border-left-color: var(--neon-purple);">
+                            <p class="font-bold text-sm sm:text-base" style="color: var(--neon-purple)">🎊 Feriado</p>
+                            <p class="text-xs sm:text-sm" style="color: var(--text-secondary)">Não haverá refeição neste dia.</p>
                         </div>`;
                 } else {
                     const allOptions = [
@@ -737,7 +881,7 @@
 
                     dayHTML += dayTitleHTML;
                     if (item.guarnicao?.name) {
-                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
+                        dayHTML += `<div class="text-xs sm:text-sm font-semibold rounded-full inline-block px-3 py-1 mb-3" style="color: var(--neon-blue); background: rgba(0, 212, 255, 0.1); border: 1px solid var(--neon-blue);">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
                     }
                     
                     dayHTML += `<div class="space-y-3">`;
@@ -748,15 +892,15 @@
                                  <span class="text-3xl mr-4" style="display: none;">${option.emoji || '🍽️'}</span>` :
                                 `<span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>`;
                             
-                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
+                            dayHTML += `<label class="menu-option-card block p-3 sm:p-4 cursor-pointer transition-all duration-200">
                                 <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
-                                <div class="flex items-center">
+                                <div class="flex items-center gap-3">
                                     ${imageHTML}
-                                    <div class="flex-grow">
-                                        <p class="font-semibold text-gray-800">${option.name}</p>
-                                        <p class="text-sm text-gray-500">${option.type}</p>
+                                    <div class="flex-grow min-w-0">
+                                        <p class="font-semibold text-sm sm:text-base truncate" style="color: var(--text-primary)">${option.name}</p>
+                                        <p class="text-xs sm:text-sm" style="color: var(--text-secondary)">${option.type}</p>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-5 w-5 sm:h-6 sm:w-6 opacity-0 transition-opacity flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" style="color: var(--neon-blue);"><path d="M5 13l4 4L19 7" /></svg>
                                 </div>
                             </label>`;
                         }
@@ -764,7 +908,7 @@
                     dayHTML += `</div>`;
                     
                     dayHTML += `<div class="mt-3">
-                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 rounded-lg text-xs sm:text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc." style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);"></textarea>
                     </div>`;
                 }
 
@@ -884,21 +1028,21 @@
 
             try {
                 const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
-                const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, rgf: doc.id, ...doc.data() }));
                 
                 const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
 
-                const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
-                const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
+                const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.rgf));
+                const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.rgf));
 
                 let html = `
-                    <div>
-                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
+                    <div class="bg-gradient-to-r from-green-900/20 to-green-800/20 p-4 rounded-lg border border-green-500/30">
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--neon-green)">✅ Já Pediram (${haveOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-900/30 rounded-md border border-green-500/20 text-green-300">${e.nome}</li>`).join('') || '<li class="text-gray-400">Ninguém fez pedido ainda.</li>'}</ul>
                     </div>
-                    <div>
-                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
+                    <div class="bg-gradient-to-r from-red-900/20 to-red-800/20 p-4 rounded-lg border border-red-500/30">
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--neon-pink)">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-900/30 rounded-md border border-red-500/20 text-red-300">${e.nome}</li>`).join('') || '<li class="text-gray-400">Todos os funcionários fizeram pedido!</li>'}</ul>
                     </div>
                 `;
                 container.innerHTML = html;
@@ -1263,7 +1407,8 @@
                     return imageCache[cacheKey];
                 }
                 
-                const searchQuery = `${style} ${dishName} delicious meal`;
+                // Busca otimizada para comida brasileira
+                const searchQuery = `${dishName} comida brasileira prato delicioso`;
                 const sizeParam = quality === 'small' ? 'small' : quality === 'large' ? 'large' : 'medium';
                 
                 // Simulando busca de imagem (em produção, usar API real como Unsplash, Pexels, etc.)
@@ -1295,15 +1440,18 @@
                     }
                 }
                 
-                // Usar imagens de fallback com diferentes URLs baseadas no nome do prato
-                const imageVariations = [
-                    'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b',
-                    'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445',
-                    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-                    'https://images.unsplash.com/photo-1565958011703-44f9829ba187',
-                    'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe',
-                    'https://images.unsplash.com/photo-1565299507177-b0ac66763828',
-                    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1'
+                // Usar imagens de fallback de comida brasileira
+                const brazilianFoodImages = [
+                    'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b', // Feijoada
+                    'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445', // Arroz e feijão
+                    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', // Carne
+                    'https://images.unsplash.com/photo-1565958011703-44f9829ba187', // Frango
+                    'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe', // Peixe
+                    'https://images.unsplash.com/photo-1565299507177-b0ac66763828', // Salada
+                    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1', // Massa
+                    'https://images.unsplash.com/photo-1574484284002-952d92456975', // Coxinha
+                    'https://images.unsplash.com/photo-1571091718767-18b5b1457add', // Pão de açúcar
+                    'https://images.unsplash.com/photo-1563379091339-03246963d321'  // Açaí
                 ];
                 
                 const hashCode = dishName.split('').reduce((a, b) => {
@@ -1311,8 +1459,8 @@
                     return a & a;
                 }, 0);
                 
-                const imageIndex = Math.abs(hashCode) % imageVariations.length;
-                const baseUrl = imageVariations[imageIndex];
+                const imageIndex = Math.abs(hashCode) % brazilianFoodImages.length;
+                const baseUrl = brazilianFoodImages[imageIndex];
                 const sizeQuery = quality === 'small' ? 'w=150&h=150' : 
                                 quality === 'large' ? 'w=500&h=500' : 'w=300&h=300';
                 
@@ -1361,10 +1509,10 @@
             let processedDishes = 0;
             let newImagesFound = 0;
             
-            // Contar total de pratos que precisam de imagens
+            // Contar total de pratos que precisam de imagens (apenas pratos principais e opções)
             weeklyMenu.forEach(dayMenu => {
                 if (!dayMenu.isHoliday) {
-                    ['pratoPrincipal', 'opcao', 'guarnicao'].forEach(key => {
+                    ['pratoPrincipal', 'opcao'].forEach(key => {
                         if (dayMenu[key]?.name && !dayMenu[key].image) {
                             totalDishes++;
                         }
@@ -1385,8 +1533,7 @@
                 
                 const dishes = [
                     { key: 'pratoPrincipal', dish: dayMenu.pratoPrincipal },
-                    { key: 'opcao', dish: dayMenu.opcao },
-                    { key: 'guarnicao', dish: dayMenu.guarnicao }
+                    { key: 'opcao', dish: dayMenu.opcao }
                 ];
                 
                 for (const { key, dish } of dishes) {
@@ -1439,11 +1586,11 @@
             localStorage.removeItem('dishImageCache');
             imageCache = {};
             
-            // Limpar imagens do cardápio atual
+            // Limpar imagens do cardápio atual (apenas pratos principais e opções)
             if (weeklyMenu) {
                 weeklyMenu.forEach(dayMenu => {
                     if (!dayMenu.isHoliday) {
-                        ['pratoPrincipal', 'opcao', 'guarnicao'].forEach(key => {
+                        ['pratoPrincipal', 'opcao'].forEach(key => {
                             if (dayMenu[key]) {
                                 delete dayMenu[key].image;
                                 delete dayMenu[key].imageAlt;
