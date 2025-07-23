@@ -403,7 +403,7 @@
 
             <section id="ai-image-search-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🤖 Busca Automática de Imagens (IA)</h2>
-                <p class="text-gray-600 mb-4">A IA buscará automaticamente imagens de alta qualidade para cada prato do cardápio.</p>
+                <p class="text-gray-600 mb-4">A IA busca automaticamente imagens de alta qualidade sempre que o cardápio é atualizado.</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
@@ -425,30 +425,33 @@
                     </div>
                 </div>
                 
-                <div class="text-center">
-                    <button id="searchImagesBtn" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 mx-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 mr-2 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                         </svg>
-                        Buscar Imagens Automaticamente
-                    </button>
+                        <p class="font-semibold">🤖 Sistema Automático Ativo</p>
+                        <div id="ai-status-indicator" class="ml-2 hidden">
+                            <div class="flex items-center">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                <span class="ml-2 text-xs">Buscando...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-1 text-sm">As imagens são buscadas automaticamente quando você atualiza o cardápio. As configurações acima serão aplicadas.</p>
                 </div>
                 
                 <div id="image-search-progress" class="hidden mt-4">
                     <div class="progress-bar-container mb-2">
                         <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
                     </div>
-                    <p id="progress-text" class="text-sm text-gray-400 text-center">Iniciando busca...</p>
+                    <p id="progress-text" class="text-sm text-gray-400 text-center">Buscando imagens automaticamente...</p>
                 </div>
                 
-                <div id="image-results" class="hidden mt-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Imagens Encontradas:</h3>
-                    <div id="image-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-                    <div class="text-center mt-4">
-                        <button id="applyImagesBtn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">
-                            Aplicar Imagens ao Cardápio
-                        </button>
-                    </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <button id="clearImageCache" class="text-xs text-gray-500 hover:text-red-600 underline">
+                        🗑️ Limpar cache de imagens (forçar nova busca)
+                    </button>
                 </div>
             </section>
 
@@ -663,8 +666,33 @@
         }
 
         function loadAndDisplayMenu() {
-            onSnapshot(menuDocRef, (docSnap) => {
+            onSnapshot(menuDocRef, async (docSnap) => {
                 weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
+                
+                // Buscar imagens automaticamente se necessário (silenciosamente)
+                const needsImages = weeklyMenu.some(dayMenu => 
+                    !dayMenu.isHoliday && (
+                        (dayMenu.pratoPrincipal?.name && !dayMenu.pratoPrincipal.image) ||
+                        (dayMenu.opcao?.name && !dayMenu.opcao.image) ||
+                        (dayMenu.guarnicao?.name && !dayMenu.guarnicao.image)
+                    )
+                );
+                
+                if (needsImages) {
+                    // Buscar imagens silenciosamente em background
+                    searchImagesForMenu(false).then(async (foundNew) => {
+                        if (foundNew) {
+                            // Atualizar no Firebase silenciosamente
+                            try {
+                                await setDoc(menuDocRef, { menu: weeklyMenu });
+                                createMenuHTML(); // Atualizar a exibição
+                            } catch (error) {
+                                console.error("Erro ao salvar imagens:", error);
+                            }
+                        }
+                    });
+                }
+                
                 createMenuHTML();
                 renderOrdersTable(allOrders); 
             }, (error) => {
@@ -1191,6 +1219,14 @@
             try { 
                 await setDoc(menuDocRef, { menu: newMenu });
                 await clearAllOrders();
+                
+                // Buscar imagens automaticamente para o novo cardápio
+                weeklyMenu = newMenu; // Atualizar a variável global
+                await searchImagesForMenu(true);
+                
+                // Atualizar o cardápio no Firebase com as imagens
+                await setDoc(menuDocRef, { menu: weeklyMenu });
+                
                 showToast('Cardápio atualizado e pedidos zerados!', 'success'); 
                 document.getElementById('confirmation-form').classList.add('hidden'); 
                 document.getElementById('imagePreview').classList.add('hidden');
@@ -1298,41 +1334,50 @@
             }
         }
         
-        async function searchImagesForMenu() {
-            const button = document.getElementById('searchImagesBtn');
+        async function searchImagesForMenu(showProgress = true) {
             const progressContainer = document.getElementById('image-search-progress');
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
-            const resultsContainer = document.getElementById('image-results');
-            const imageGrid = document.getElementById('image-grid');
+            const statusIndicator = document.getElementById('ai-status-indicator');
             
             if (!weeklyMenu || weeklyMenu.length === 0) {
-                showToast('Carregue primeiro um cardápio para buscar imagens.', 'error');
-                return;
+                return false;
             }
             
-            button.disabled = true;
-            button.textContent = 'Buscando...';
-            progressContainer.classList.remove('hidden');
-            resultsContainer.classList.add('hidden');
+            if (showProgress) {
+                progressContainer.classList.remove('hidden');
+                showToast('🤖 Buscando imagens automaticamente...', 'info');
+            } else {
+                // Mostrar indicador silencioso
+                if (statusIndicator) {
+                    statusIndicator.classList.remove('hidden');
+                }
+            }
             
-            const quality = document.getElementById('imageQuality').value;
-            const style = document.getElementById('imageStyle').value;
-            
-            foundImages = {};
-            imageGrid.innerHTML = '';
+            const quality = document.getElementById('imageQuality')?.value || 'medium';
+            const style = document.getElementById('imageStyle')?.value || 'appetizing food';
             
             let totalDishes = 0;
             let processedDishes = 0;
+            let newImagesFound = 0;
             
-            // Contar total de pratos
+            // Contar total de pratos que precisam de imagens
             weeklyMenu.forEach(dayMenu => {
                 if (!dayMenu.isHoliday) {
-                    if (dayMenu.pratoPrincipal?.name) totalDishes++;
-                    if (dayMenu.opcao?.name) totalDishes++;
-                    if (dayMenu.guarnicao?.name) totalDishes++;
+                    ['pratoPrincipal', 'opcao', 'guarnicao'].forEach(key => {
+                        if (dayMenu[key]?.name && !dayMenu[key].image) {
+                            totalDishes++;
+                        }
+                    });
                 }
             });
+            
+            if (totalDishes === 0) {
+                if (showProgress) {
+                    progressContainer.classList.add('hidden');
+                }
+                return true; // Todos os pratos já têm imagens
+            }
             
             // Buscar imagens para cada prato
             for (const dayMenu of weeklyMenu) {
@@ -1345,75 +1390,84 @@
                 ];
                 
                 for (const { key, dish } of dishes) {
-                    if (dish?.name && !foundImages[dish.name]) {
-                        progressText.textContent = `Buscando imagem para: ${dish.name}`;
+                    if (dish?.name && !dish.image) {
+                        if (showProgress) {
+                            progressText.textContent = `Buscando: ${dish.name}`;
+                        }
                         
                         const imageData = await searchFoodImage(dish.name, quality, style);
                         if (imageData) {
-                            foundImages[dish.name] = imageData;
-                            
-                            // Adicionar à grade de resultados
-                            const imageCard = document.createElement('div');
-                            imageCard.className = 'bg-white rounded-lg p-3 border border-gray-200 hover:shadow-lg transition-shadow';
-                            imageCard.innerHTML = `
-                                <img src="${imageData.url}" alt="${imageData.alt}" class="w-full h-32 object-cover rounded-lg mb-2 dish-image">
-                                <h4 class="font-semibold text-sm text-gray-800 truncate">${dish.name}</h4>
-                                <p class="text-xs text-gray-500">Por: ${imageData.credit}</p>
-                            `;
-                            imageGrid.appendChild(imageCard);
+                            // Aplicar imagem diretamente ao prato
+                            dish.image = imageData.url;
+                            dish.imageAlt = imageData.alt;
+                            newImagesFound++;
                         }
                         
                         processedDishes++;
-                        const progress = (processedDishes / totalDishes) * 100;
-                        progressBar.style.width = `${progress}%`;
+                        if (showProgress) {
+                            const progress = (processedDishes / totalDishes) * 100;
+                            progressBar.style.width = `${progress}%`;
+                        }
                         
                         // Pequeno delay para não sobrecarregar a API
-                        await new Promise(resolve => setTimeout(resolve, 500));
+                        await new Promise(resolve => setTimeout(resolve, 300));
                     }
                 }
             }
             
-            progressText.textContent = 'Busca concluída!';
-            button.disabled = false;
-            button.textContent = 'Buscar Imagens Automaticamente';
-            
-            if (Object.keys(foundImages).length > 0) {
-                resultsContainer.classList.remove('hidden');
-                showToast(`${Object.keys(foundImages).length} imagens encontradas!`, 'success');
+            if (showProgress) {
+                progressText.textContent = 'Imagens aplicadas automaticamente!';
+                
+                setTimeout(() => {
+                    progressContainer.classList.add('hidden');
+                }, 2000);
+                
+                if (newImagesFound > 0) {
+                    showToast(`✨ ${newImagesFound} imagens aplicadas automaticamente!`, 'success');
+                }
             } else {
-                showToast('Nenhuma imagem foi encontrada.', 'warning');
+                // Esconder indicador silencioso
+                if (statusIndicator) {
+                    statusIndicator.classList.add('hidden');
+                }
             }
             
-            setTimeout(() => {
-                progressContainer.classList.add('hidden');
-            }, 2000);
+            return newImagesFound > 0;
         }
         
-        function applyImagesToMenu() {
-            if (Object.keys(foundImages).length === 0) {
-                showToast('Nenhuma imagem para aplicar.', 'warning');
-                return;
+        function clearImageCache() {
+            localStorage.removeItem('dishImageCache');
+            imageCache = {};
+            
+            // Limpar imagens do cardápio atual
+            if (weeklyMenu) {
+                weeklyMenu.forEach(dayMenu => {
+                    if (!dayMenu.isHoliday) {
+                        ['pratoPrincipal', 'opcao', 'guarnicao'].forEach(key => {
+                            if (dayMenu[key]) {
+                                delete dayMenu[key].image;
+                                delete dayMenu[key].imageAlt;
+                            }
+                        });
+                    }
+                });
+                
+                // Buscar novas imagens automaticamente
+                searchImagesForMenu(true).then(async (foundNew) => {
+                    if (foundNew) {
+                        try {
+                            await setDoc(menuDocRef, { menu: weeklyMenu });
+                            createMenuHTML();
+                        } catch (error) {
+                            console.error("Erro ao salvar novas imagens:", error);
+                        }
+                    }
+                });
             }
             
-            // Aplicar imagens ao cardápio atual
-            weeklyMenu.forEach(dayMenu => {
-                if (!dayMenu.isHoliday) {
-                    ['pratoPrincipal', 'opcao', 'guarnicao'].forEach(key => {
-                        if (dayMenu[key]?.name && foundImages[dayMenu[key].name]) {
-                            dayMenu[key].image = foundImages[dayMenu[key].name].url;
-                            dayMenu[key].imageAlt = foundImages[dayMenu[key].name].alt;
-                        }
-                    });
-                }
-            });
-            
-            // Atualizar a exibição do menu
-            displayMenu(weeklyMenu);
-            showToast('Imagens aplicadas ao cardápio com sucesso!', 'success');
-            
-            // Esconder resultados
-            document.getElementById('image-results').classList.add('hidden');
+            showToast('Cache de imagens limpo! Buscando novas imagens...', 'info');
         }
+
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.uid === APP_CONFIG.ADMIN_UID) {
@@ -1510,9 +1564,8 @@
             
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
             
-            // Event listeners para busca automática de imagens
-            document.getElementById('searchImagesBtn').addEventListener('click', searchImagesForMenu);
-            document.getElementById('applyImagesBtn').addEventListener('click', applyImagesToMenu);
+            // Event listener para limpar cache de imagens
+            document.getElementById('clearImageCache').addEventListener('click', clearImageCache);
         }
 
         main();
