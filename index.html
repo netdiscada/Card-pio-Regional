@@ -43,9 +43,20 @@
         #app-toast.success { background-color: #22c55e; }
         #app-toast.error { background-color: #ef4444; }
         #app-toast.info { background-color: #3b82f6; }
+        /* === Dark Mode Overrides === */
+        .dark body { background-color: #0f172a; color: #e2e8f0; }
+        .dark .bg-white, .dark .bg-gray-50, .dark .bg-slate-50 { background-color: #1e293b !important; }
+        .dark .text-gray-800 { color: #f1f5f9 !important; }
+        .dark .text-gray-700 { color: #e2e8f0 !important; }
+        .dark .text-gray-600 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .border-gray-300, .dark .border-gray-200 { border-color: #334155 !important; }
+        .dark .menu-option-card:has(input:checked) { border-color: #3b82f6; background-color: #1e40af; }
     </style>
 </head>
 <body class="bg-slate-50">
+    <!-- Dark-mode toggle -->
+    <button id="themeToggle" class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-2 rounded-full shadow-lg text-sm">🌙 Modo Escuro</button>
 
     <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
         
@@ -360,17 +371,18 @@
                     dayHTML += `<div class="space-y-3">`;
                     allOptions.forEach((option) => {
                         if (option.name) {
-                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
-                                <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
-                                <div class="flex items-center">
-                                    <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
-                                    <div class="flex-grow">
-                                        <p class="font-semibold text-gray-800">${option.name}</p>
-                                        <p class="text-sm text-gray-500">${option.type}</p>
-                                    </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
-                                </div>
-                            </label>`;
+                            const imageUrl = option.image || `https://source.unsplash.com/100x100/?${encodeURIComponent(option.name)}`;
+                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">`+
+                                `<input type="radio" name="${dayId}" value="${option.name}" class="hidden">`+
+                                `<div class="flex items-center gap-4">`+
+                                    `<img src="${imageUrl}" alt="${option.name}" class="w-14 h-14 rounded-lg object-cover">`+
+                                    `<div class="flex-grow">`+
+                                        `<p class="font-semibold text-gray-800">${option.name}</p>`+
+                                        `<p class="text-sm text-gray-500">${option.type}</p>`+
+                                    `</div>`+
+                                    `<svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>`+
+                                `</div>`+
+                            `</label>`;
                         }
                     });
                     dayHTML += `</div>`;
@@ -949,6 +961,8 @@
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
             
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            initTheme();
         }
 
         main();
