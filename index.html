@@ -11,39 +11,54 @@
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
-        .font-brand { font-family: 'Lobster Two', cursive; }
-        .menu-option-card:has(input:checked) { border-color: #2563eb; background-color: #eff6ff; transform: scale(1.02); }
-        .menu-option-card:has(input:checked) .checkmark { opacity: 1; }
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid #3498db; width: 40px; height: 40px; animation: spin 2s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .no-print { }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
-        .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
-        input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
-        #print-report { display: none; }
-        @media print {
-            @page { size: A4 portrait; margin: 10mm; }
-            html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
-            .no-print { display: none !important; }
-            body > *:not(#print-report) { display: none !important; }
-            #print-report { display: block !important; }
-            #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; }
-            .report-day-section { margin-bottom: 12px; page-break-inside: avoid; }
-            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-            #print-report th, #print-report td { border: 1px solid #999; padding: 5px; text-align: left; }
-            #print-report th { background-color: #e2e8f0; font-weight: 600; }
-            #print-report .rgf-col { width: 15%; }
-            #print-report .nome-col { width: 60%; }
-            #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
-        }
-        #app-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; pointer-events: none; transform: translateX(-50%) translateY(20px); }
-        #app-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
-        #app-toast.success { background-color: #22c55e; }
-        #app-toast.error { background-color: #ef4444; }
-        #app-toast.info { background-color: #3b82f6; }
+        .dark-mode body { background-color: #18181b; color: #f4f4f5; }
+        .dark-mode .bg-white { background-color: #23232a !important; }
+        .dark-mode .text-gray-800, .dark-mode .text-gray-700 { color: #f4f4f5 !important; }
+        .dark-mode .text-gray-500 { color: #a1a1aa !important; }
+        .dark-mode .border-gray-200 { border-color: #27272a !important; }
+        .dark-mode .bg-blue-100 { background-color: #1e293b !important; color: #60a5fa !important; }
+        .dark-mode .bg-yellow-100 { background-color: #facc15 !important; color: #18181b !important; }
+        .dark-mode .bg-green-50 { background-color: #14532d !important; color: #bbf7d0 !important; }
+        .dark-mode .bg-red-50 { background-color: #7f1d1d !important; color: #fecaca !important; }
+        .dark-mode .bg-indigo-100 { background-color: #312e81 !important; color: #a5b4fc !important; }
+        .dark-mode .bg-purple-200 { background-color: #6d28d9 !important; color: #f3e8ff !important; }
+        .dark-mode .border-indigo-500 { border-color: #6366f1 !important; }
+        .dark-mode .border-yellow-500 { border-color: #facc15 !important; }
+        .dark-mode .border-blue-600 { border-color: #2563eb !important; }
+        .dark-mode .bg-blue-600 { background-color: #2563eb !important; }
+        .dark-mode .bg-green-500 { background-color: #22c55e !important; }
+        .dark-mode .bg-red-500 { background-color: #ef4444 !important; }
+        .dark-mode .bg-gray-300 { background-color: #27272a !important; color: #f4f4f5 !important; }
+        .dark-mode .bg-gray-50 { background-color: #18181b !important; }
+        .dark-mode .rounded-xl { box-shadow: 0 2px 8px 0 #00000033; }
+        .dark-mode input, .dark-mode textarea { background-color: #23232a; color: #f4f4f5; border-color: #27272a; }
+        .dark-mode .modal-content { background-color: #23232a; color: #f4f4f5; }
+        .dark-mode #app-toast { background-color: #27272a; color: #f4f4f5; }
+        .dark-mode #app-toast.success { background-color: #166534; }
+        .dark-mode #app-toast.error { background-color: #7f1d1d; }
+        .dark-mode #app-toast.info { background-color: #1e293b; }
+        .dark-mode .border { border-color: #27272a !important; }
+        .dark-mode .shadow-lg, .dark-mode .shadow-sm { box-shadow: 0 2px 8px 0 #00000066; }
+        .dark-mode .file\:bg-blue-50 { background-color: #1e293b !important; color: #60a5fa !important; }
+        .dark-mode .file\:text-blue-700 { color: #60a5fa !important; }
+        .dark-mode .hover\:file\:bg-blue-100:hover { background-color: #334155 !important; }
+        .dark-mode .text-blue-600 { color: #60a5fa !important; }
+        .dark-mode .hover\:bg-blue-600:hover { background-color: #1e40af !important; }
+        .dark-mode .hover\:bg-blue-700:hover { background-color: #1e3a8a !important; }
+        .dark-mode .hover\:bg-green-600:hover { background-color: #166534 !important; }
+        .dark-mode .hover\:bg-red-600:hover { background-color: #7f1d1d !important; }
+        .dark-mode .hover\:bg-gray-400:hover { background-color: #52525b !important; }
+        .dark-mode .hover\:text-blue-600:hover { color: #60a5fa !important; }
     </style>
+    <script>
+      function toggleDarkMode() {
+        document.documentElement.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.documentElement.classList.contains('dark-mode'));
+      }
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    </script>
 </head>
 <body class="bg-slate-50">
 
@@ -953,5 +968,6 @@
 
         main();
     </script>
+    <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-700 transition-colors no-print">🌙/☀️</button>
 </body>
 </html>
