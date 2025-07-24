@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,9 +10,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        :root {
+            --background-light: #f8fafc; /* slate-50 */
+            --background-dark: #1e293b;  /* slate-800 */
+            --text-light: #1f2937;       /* gray-800 */
+            --text-dark: #f1f5f9;        /* slate-100 */
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #334155;    /* slate-700 */
+            --border-light: #e5e7eb;     /* gray-200 */
+            --border-dark: #475569;      /* slate-600 */
+            --primary-color: #3b82f6;    /* blue-500 */
+        }
+        html.light { background-color: var(--background-light); color: var(--text-light); }
+        html.dark { background-color: var(--background-dark); color: var(--text-dark); }
+        body { font-family: 'Poppins', sans-serif; transition: background-color 0.3s, color 0.3s; }
         .font-brand { font-family: 'Lobster Two', cursive; }
-        .menu-option-card:has(input:checked) { border-color: #2563eb; background-color: #eff6ff; transform: scale(1.02); }
+        .menu-option-card:has(input:checked) { border-color: var(--primary-color) !important; background-color: rgba(59, 130, 246, 0.1); transform: scale(1.02); }
+        .dark .menu-option-card:has(input:checked) { background-color: rgba(59, 130, 246, 0.2); }
         .menu-option-card:has(input:checked) .checkmark { opacity: 1; }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -20,56 +34,97 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .no-print { }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
-        .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
+        .modal-content { background-color: var(--card-bg-light); color: var(--text-light); padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
+        .dark .modal-content { background-color: var(--card-bg-dark); color: var(--text-dark); }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
+        .dark input:read-only { background-color: #475569; }
         #print-report { display: none; }
+        #app-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; pointer-events: none; transform: translateX(-50%) translateY(20px); }
+        #app-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+        #app-toast.success { background-color: #22c55e; }
+        #app-toast.error { background-color: #ef4444; }
+        #app-toast.info { background-color: #3b82f6; }
+
         @media print {
             @page { size: A4 portrait; margin: 10mm; }
             html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
             .no-print { display: none !important; }
             body > *:not(#print-report) { display: none !important; }
             #print-report { display: block !important; }
-            #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+            #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; color: #000; }
             .report-day-section { margin-bottom: 12px; page-break-inside: avoid; }
-            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; color: #000; }
             #print-report th, #print-report td { border: 1px solid #999; padding: 5px; text-align: left; }
             #print-report th { background-color: #e2e8f0; font-weight: 600; }
-            #print-report .rgf-col { width: 15%; }
-            #print-report .nome-col { width: 60%; }
-            #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+            #print-report .rgf-col { width: 15%; } #print-report .nome-col { width: 60%; } #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
         }
-        #app-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; pointer-events: none; transform: translateX(-50%) translateY(20px); }
-        #app-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
-        #app-toast.success { background-color: #22c55e; }
-        #app-toast.error { background-color: #ef4444; }
-        #app-toast.info { background-color: #3b82f6; }
     </style>
+    <script>
+        // Lógica para aplicar o tema (escuro/claro) ao carregar a página
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        } else {
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100">
 
     <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
-        
+
+        <header class="flex justify-between items-center mb-8 no-print">
+            <button id="switchToAdmin" class="flex items-center space-x-2 text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span class="font-semibold text-sm">Admin</span>
+            </button>
+            <button id="theme-toggle" class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <svg id="theme-toggle-dark-icon" class="hidden h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            </button>
+        </header>
+
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
-                
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
+                <header class="text-center mb-8">
+                    <h1 class="font-brand text-5xl text-blue-500 dark:text-blue-400">Delícias Urbanas</h1>
+                    <p class="mt-2 text-md text-gray-500 dark:text-gray-400">O seu cardápio da semana está servido!</p>
+                </header>
+
+                <div class="bg-white dark:bg-slate-700 rounded-xl shadow-md p-6 mb-6">
+                    <h2 class="block text-lg font-semibold text-gray-800 dark:text-slate-100 mb-2">👤 Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
-                        <div><label for="employeeRGF" class="block text-sm font-medium text-gray-700">Seu RGF</label><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
-                        <div><label for="employeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div>
+                        <div>
+                            <label for="employeeRGF" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Seu RGF</label>
+                            <input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 bg-slate-50 dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-lg text-slate-800 dark:text-slate-100 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="employeeName" class="block text-sm font-medium text-gray-700 dark:text-slate-300">Nome Completo</label>
+                            <input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 bg-slate-200 dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-lg" readonly>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
-                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
-                <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
+                <div class="bg-white dark:bg-slate-700 rounded-xl shadow-md p-6 mb-6">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-4">🍽️ Escolha os seus pratos</h2>
+                    <div id="menu" class="space-y-8">
+                        <div class="text-center text-gray-500 dark:text-gray-400">A carregar o cardápio...</div>
+                    </div>
+                </div>
+                <div id="guidanceSection" class="bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded-md mb-6">
+                    <p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p>
+                </div>
+                <div id="submitButtonContainer" class="hidden text-center">
+                    <button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg transition-transform hover:scale-105">Revisar e Finalizar Pedido</button>
+                </div>
             </div>
-            <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
-            <footer class="text-center mt-10">
-                <button id="switchToAdmin" class="text-sm text-gray-500 hover:text-blue-600">Aceder ao Painel do Administrador</button>
-            </footer>
-        </div>
+            <div id="success-message" class="hidden text-center p-10 bg-white dark:bg-slate-700 rounded-lg shadow-lg">
+                <h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2>
+                <p id="success-text" class="mt-4 text-gray-600 dark:text-gray-300"></p>
+                <button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Fazer Novo Pedido</button>
+            </div>
+            </div>
 
         <div id="admin-view" class="hidden no-print">
             <header class="text-center border-b pb-6 mb-6">
@@ -143,12 +198,13 @@
 
     <div id="print-report"></div>
     <div id="app-toast"></div>
-    
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
+
+        // Mantenha sua configuração do Firebase e o resto do seu JavaScript aqui
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
             authDomain: "cardapio-8ddea.firebaseapp.com",
@@ -160,6 +216,32 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        // --- INÍCIO DO NOVO CÓDIGO PARA O TEMA ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Função para alternar o tema
+        const toggleTheme = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.documentElement.classList.toggle('light', !isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcons(isDark);
+        };
+
+        // Função para atualizar os ícones
+        const updateThemeIcons = (isDark) => {
+            themeToggleDarkIcon.classList.toggle('hidden', !isDark);
+            themeToggleLightIcon.classList.toggle('hidden', isDark);
+        };
+
+        // Event listener para o botão
+        themeToggleBtn.addEventListener('click', toggleTheme);
+
+        // Define o ícone correto ao carregar a página
+        updateThemeIcons(document.documentElement.classList.contains('dark'));
+        // --- FIM DO NOVO CÓDIGO PARA O TEMA ---
 
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
@@ -330,10 +412,10 @@
                 const dayId = getDayId(item.day);
                 let dayHTML = `<div class="day-section space-y-3">`;
                 
-                let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
+                let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800 dark:text-slate-100">${item.day}</h3>`;
                 if (item.isSpecial) {
                     dayTitleHTML = `<div class="flex items-center gap-3">
-                        <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-slate-100">${item.day}</h3>
                         <span class="text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1">✨ Almoço Especial</span>
                     </div>`;
                 }
@@ -341,7 +423,7 @@
                 if (item.isHoliday) {
                     dayHTML += dayTitleHTML;
                     dayHTML += `
-                        <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
+                        <div class="bg-indigo-100 dark:bg-indigo-900 border-l-4 border-indigo-500 text-indigo-700 dark:text-indigo-300 p-4 rounded-md">
                             <p class="font-bold">🎊 Feriado</p>
                             <p>Não haverá refeição neste dia.</p>
                         </div>`;
@@ -354,19 +436,19 @@
 
                     dayHTML += dayTitleHTML;
                     if (item.guarnicao?.name) {
-                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
+                        dayHTML += `<div class="text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
                     }
                     
                     dayHTML += `<div class="space-y-3">`;
                     allOptions.forEach((option) => {
                         if (option.name) {
-                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
+                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-slate-200 dark:border-slate-600 rounded-lg cursor-pointer transition-all duration-200">
                                 <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
                                 <div class="flex items-center">
                                     <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
                                     <div class="flex-grow">
-                                        <p class="font-semibold text-gray-800">${option.name}</p>
-                                        <p class="text-sm text-gray-500">${option.type}</p>
+                                        <p class="font-semibold text-gray-800 dark:text-slate-100">${option.name}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">${option.type}</p>
                                     </div>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
                                 </div>
@@ -376,7 +458,7 @@
                     dayHTML += `</div>`;
                     
                     dayHTML += `<div class="mt-3">
-                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
                     </div>`;
                 }
 
