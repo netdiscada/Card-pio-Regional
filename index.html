@@ -395,7 +395,6 @@
             return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
         }
 
-        // VERSÃO DE DIAGNÓSTICO DA FUNÇÃO loadAndDisplayMenu
         function loadAndDisplayMenu() {
             console.log("PASSO 1: A função 'loadAndDisplayMenu' foi chamada.");
             
@@ -439,181 +438,6 @@
             });
         }
         
-        function createMenuHTML() { /* ...código original mantido... */ }
-        function validateForm() { /* ...código original mantido... */ }
-        function openConfirmationModal() { /* ...código original mantido... */ }
-
-        async function submitOrder() {
-            const button = document.getElementById('submitOrder');
-            button.disabled = true; button.textContent = 'A enviar...';
-            try {
-                const rgf = document.getElementById('employeeRGF').value.trim();
-                const empDoc = await getDoc(doc(funcionariosCollectionRef, rgf));
-                if (empDoc.exists()) {
-                    tempOrderData.regional = empDoc.data().regional;
-                } else {
-                    throw new Error("Funcionário não encontrado, não é possível definir a regional.");
-                }
-                
-                await addDoc(pedidosCollectionRef, tempOrderData);
-                document.getElementById('confirmation-modal').classList.add('hidden');
-                document.getElementById('form-container').classList.add('hidden');
-                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
-                document.getElementById('success-message').classList.remove('hidden');
-                showToast("Pedido enviado com sucesso!", 'success');
-            } catch (error) {
-                console.error("Erro ao enviar pedido: ", error);
-                showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
-            } finally {
-                button.disabled = false; button.textContent = 'Confirmar e Enviar';
-            }
-        }
-        
-        function loadAdminData() { /* ...código original mantido... */ }
-        async function renderOrderStatus(orders) { /* ...código original mantido... */ }
-        function renderOrdersTable(orders) { /* ...código original mantido... */ }
-        function generateAndPrintReport() { /* ...código original mantido... */ }
-        async function openOrderEditModal(docId) { /* ...código original mantido... */ }
-        async function saveOrderChanges(event) { /* ...código original mantido... */ }
-        function deleteOrder(docId, name) { /* ...código original mantido... */ }
-
-        const toBase64 = file => new Promise((resolve, reject) => { /* ...código original... */ });
-        function displayConfirmationForm(menuData) { /* ...código original mantido... */ }
-        async function clearAllOrders() { /* ...código original mantido... */ }
-        async function saveNewMenu(menuData) { /* ...código original mantido... */ }
-        function handleWhatsAppNotification() { /* ...código original mantido... */ }
-        
-        function populateAdminEmployeeSelect() { /* ...código original mantido... */ }
-        async function handleAddAdmin(e) { /* ...código original mantido... */ }
-        function loadAdminsList() { /* ...código original mantido... */ }
-        function handleDeleteAdmin(uid, email) { /* ...código original mantido... */ }
-
-        function main() {
-            const rgfInput = document.getElementById('employeeRGF');
-            if (rgfInput) {
-                rgfInput.value = localStorage.getItem('employeeRGF') || '';
-                if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
-                rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
-                rgfInput.addEventListener('input', validateForm);
-            }
-            
-            document.getElementById('menu')?.addEventListener('change', validateForm);
-            document.getElementById('openConfirmationModal')?.addEventListener('click', openConfirmationModal);
-            document.getElementById('submitOrder')?.addEventListener('click', submitOrder);
-            
-            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
-                btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
-            });
-
-            document.getElementById('switchToAdmin')?.addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
-            document.getElementById('admin-login-form')?.addEventListener('submit', handleAdminLogin);
-            
-            document.getElementById('adminLogoutBtn')?.addEventListener('click', handleAdminLogout);
-            document.getElementById('switchToUserFromAdmin')?.addEventListener('click', showUserView);
-            
-            document.getElementById('add-employee-form')?.addEventListener('submit', handleAddEmployee);
-            document.getElementById('employee-list-container')?.addEventListener('click', (e) => {
-                const editBtn = e.target.closest('.edit-employee-btn');
-                if (editBtn) { openEmployeeEditModal(editBtn.dataset.id, editBtn.dataset.name, editBtn.dataset.regional); }
-                const deleteBtn = e.target.closest('.delete-employee-btn');
-                if (deleteBtn) { handleDeleteEmployee(deleteBtn.dataset.id, deleteBtn.dataset.name); }
-            });
-            document.getElementById('edit-employee-form')?.addEventListener('submit', handleSaveEmployeeChanges);
-            
-            document.getElementById('searchInput')?.addEventListener('input', () => renderOrdersTable(allOrders));
-            document.getElementById('generateReportBtn')?.addEventListener('click', generateAndPrintReport);
-            
-            document.getElementById('ordersTableContainer')?.addEventListener('click', function(e) {
-                const editBtn = e.target.closest('.edit-order-btn');
-                if (editBtn) { openOrderEditModal(editBtn.dataset.id); }
-                const deleteBtn = e.target.closest('.delete-order-btn');
-                if (deleteBtn) { deleteOrder(deleteBtn.dataset.id, deleteBtn.dataset.name); }
-            });
-            document.getElementById('edit-order-form')?.addEventListener('submit', saveOrderChanges);
-            
-            document.getElementById('notifyWhatsAppBtn')?.addEventListener('click', handleWhatsAppNotification);
-            
-            document.getElementById('add-admin-form')?.addEventListener('submit', handleAddAdmin);
-            document.getElementById('admin-list-container')?.addEventListener('click', (e) => {
-                 const deleteAdminBtn = e.target.closest('.delete-admin-btn');
-                 if(deleteAdminBtn) { handleDeleteAdmin(deleteAdminBtn.dataset.id, deleteAdminBtn.dataset.email); }
-            });
-
-            // Adicionei os event listeners de upload de imagem aqui também
-            document.getElementById('imageUpload')?.addEventListener('change', function(event) {
-                const file = event.target.files[0]; if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('imagePreview').src = e.target.result;
-                    document.getElementById('imagePreview').classList.remove('hidden');
-                    document.getElementById('image-processor-container').classList.remove('hidden');
-                    document.getElementById('whatsapp-notification-container').classList.add('hidden');
-                }
-                reader.readAsDataURL(file);
-            });
-
-            document.getElementById('processImageBtn')?.addEventListener('click', async () => {
-                if (typeof imageCompression === 'undefined') {
-                    showToast('Erro: Biblioteca de compressão não carregou.', 'error');
-                    return;
-                }
-
-                const loader = document.getElementById('loader'); const button = document.getElementById('processImageBtn'); const confirmationForm = document.getElementById('confirmation-form');
-                button.disabled = true; button.textContent = 'A analisar...'; loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
-                const file = document.getElementById('imageUpload').files[0]; 
-                const options = { maxSizeMB: 1.5, maxWidthOrHeight: 1500, useWebWorker: true };
-                try {
-                    const compressedFile = await imageCompression(file, options);
-                    const base64ImageData = await toBase64(compressedFile);
-                    
-                    const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado, marque-o. Além disso, determine se o almoço é 'especial' (ex: uma refeição comemorativa, temática ou de maior qualidade) e defina o campo booleano 'isSpecial'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "isSpecial": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🍲"}, "guarnicao": {"name": "Nome", "emoji": "🥗"}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
-
-                    const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
-                    const apiKey = firebaseConfig.apiKey;
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; 
-
-                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
-                    const result = await response.json();
-                    
-                    let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
-                    
-                    textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const menuData = JSON.parse(textResponse);
-
-                    if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
-                    
-                    displayConfirmationForm(menuData.menu);
-
-                } catch (error) { 
-                    console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
-                } finally { 
-                    button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
-                }
-            });
-        }
-
-        // Restante das funções (aqui eu as copiei sem alterações para garantir a completude)
-        // ... (código original para createMenuHTML, validateForm, etc.) ...
-        
-        // As funções abaixo são as que já existem no seu código. 
-        // Eu as inclui aqui para ter certeza de que o ficheiro está 100% completo, 
-        // mas elas não foram alteradas em relação à versão que já tínhamos.
-
-        function handleDeleteEmployee(rgf, name) {
-            const message = `Tem a certeza que deseja excluir o funcionário ${name} (RGF: ${rgf})? Esta ação não pode ser desfeita.`;
-            showCustomConfirm(message, async () => {
-                try {
-                    await deleteDoc(doc(db, "funcionarios", rgf));
-                    showToast("Funcionário excluído com sucesso.", 'success');
-                } catch (error) {
-                    console.error("Erro ao excluir funcionário: ", error);
-                    showToast("Falha ao excluir o funcionário.", 'error');
-                }
-            });
-        }
-
         function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
             if (!menuContainer) return;
@@ -740,7 +564,33 @@
             document.getElementById('confirmation-modal').classList.remove('hidden');
         }
 
-        loadAdminData() {
+        async function submitOrder() {
+            const button = document.getElementById('submitOrder');
+            button.disabled = true; button.textContent = 'A enviar...';
+            try {
+                const rgf = document.getElementById('employeeRGF').value.trim();
+                const empDoc = await getDoc(doc(funcionariosCollectionRef, rgf));
+                if (empDoc.exists()) {
+                    tempOrderData.regional = empDoc.data().regional;
+                } else {
+                    throw new Error("Funcionário não encontrado, não é possível definir a regional.");
+                }
+                
+                await addDoc(pedidosCollectionRef, tempOrderData);
+                document.getElementById('confirmation-modal').classList.add('hidden');
+                document.getElementById('form-container').classList.add('hidden');
+                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
+                document.getElementById('success-message').classList.remove('hidden');
+                showToast("Pedido enviado com sucesso!", 'success');
+            } catch (error) {
+                console.error("Erro ao enviar pedido: ", error);
+                showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
+            } finally {
+                button.disabled = false; button.textContent = 'Confirmar e Enviar';
+            }
+        }
+        
+        function loadAdminData() {
             let q = pedidosCollectionRef;
             if(currentUserRole === 'adm') {
                 q = query(q, where("regional", "==", currentUserRegional));
@@ -792,6 +642,7 @@
         
         function renderOrdersTable(orders) {
             const container = document.getElementById('ordersTableContainer');
+            if (!container) return; // Add guard clause
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
@@ -989,6 +840,284 @@
             });
         }
         
+        const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
+        
+        function displayConfirmationForm(menuData) {
+            const container = document.getElementById('confirmation-form'); 
+            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
+            
+            menuData.forEach((item, index) => {
+                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4">
+                    <h4 class="font-bold">${item.day}</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                        <div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
+                    </div>
+                    <div class="mt-3 flex items-center space-x-6">
+                        <label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-indigo-600"> <span class="ml-2 text-sm text-gray-900">Marcar como Feriado</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="special-${index}" ${item.isSpecial ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-purple-600"> <span class="ml-2 text-sm text-gray-900">✨ Almoço Especial</span></label>
+                    </div>
+                    </div>`;
+            });
+            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
+            container.classList.remove('hidden'); 
+            
+            document.getElementById('saveNewMenuBtn').addEventListener('click', () => {
+                const message = "Tem certeza que deseja salvar o novo cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente. Esta ação não pode ser desfeita.";
+                showCustomConfirm(message, () => {
+                    saveNewMenu(menuData);
+                });
+            });
+
+            document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
+                container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+                showToast("Atualização cancelada.", 'info');
+            });
+        }
+        
+        async function clearAllOrders() {
+            console.log("Iniciando a limpeza de todos os pedidos da semana...");
+            const querySnapshot = await getDocs(pedidosCollectionRef);
+            const deletionPromises = [];
+            querySnapshot.forEach((doc) => {
+                deletionPromises.push(deleteDoc(doc.ref));
+            });
+            await Promise.all(deletionPromises);
+            console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
+        }
+
+        async function saveNewMenu(menuData) {
+            const button = document.getElementById('saveNewMenuBtn'); 
+            const cancelButton = document.getElementById('cancelNewMenuBtn');
+            button.disabled = true;
+            cancelButton.disabled = true;
+            button.textContent = 'A salvar...'; 
+
+            const newMenu = menuData.map((item, i) => ({ 
+                day: item.day, 
+                pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
+                opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
+                guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
+                isHoliday: document.getElementById(`holiday-${i}`).checked,
+                isSpecial: document.getElementById(`special-${i}`).checked,
+            })); 
+
+            try { 
+                await setDoc(menuDocRef, { menu: newMenu });
+                await clearAllOrders();
+                showToast('Cardápio atualizado e pedidos zerados!', 'success'); 
+                document.getElementById('confirmation-form').classList.add('hidden'); 
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden'); 
+                document.getElementById('imageUpload').value = ''; 
+                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+            } catch (error) { 
+                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
+                showToast("Erro ao salvar o novo cardápio.", 'error'); 
+            } finally { 
+                button.disabled = false; 
+                cancelButton.disabled = false;
+                button.textContent = 'Salvar Novo Cardápio'; 
+            }
+        }
+        
+        function handleWhatsAppNotification() {
+            const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
+            showToast('Abra o WhatsApp para enviar a notificação.', 'info');
+        }
+
+        function populateAdminEmployeeSelect() {
+            const select = document.getElementById('admin-employee-select');
+            select.innerHTML = '<option value="">Selecione um funcionário...</option>';
+            allEmployees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify({ rgf: emp.id, nome: emp.nome, regional: emp.regional });
+                option.textContent = `${emp.nome} (${emp.regional})`;
+                select.appendChild(option);
+            });
+        }
+        
+        async function handleAddAdmin(e) {
+            e.preventDefault();
+            const select = document.getElementById('admin-employee-select');
+            if(!select.value) { showToast('Selecione um funcionário.', 'error'); return; }
+            const selectedData = JSON.parse(select.value);
+            const email = document.getElementById('admin-email-input').value;
+            const password = document.getElementById('admin-password-input').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            if (!selectedData || !email || !password) { showToast('Preencha todos os campos.', 'error'); return; }
+            
+            btn.disabled = true; btn.textContent = 'A promover...';
+
+            try {
+                const secondaryApp = initializeApp(firebaseConfig, `secondary-app-${Date.now()}`);
+                const secondaryAuth = getAuth(secondaryApp);
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                
+                await setDoc(doc(usuariosCollectionRef, userCredential.user.uid), {
+                    email: email,
+                    role: 'adm',
+                    regional: selectedData.regional,
+                    employeeName: selectedData.nome,
+                    employeeRGF: selectedData.rgf
+                });
+
+                await signOut(secondaryAuth);
+                showToast(`Usuário ${email} promovido a admin da regional ${selectedData.regional}!`, 'success');
+                e.target.reset();
+            } catch (error) {
+                console.error("Erro ao promover admin:", error);
+                showToast(`Erro: ${error.message}`, 'error', 6000);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Promover a Administrador';
+            }
+        }
+
+        function loadAdminsList() {
+            const q = query(usuariosCollectionRef, where("role", "==", "adm"), orderBy("regional"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('admin-list-container');
+                if (snapshot.empty) { container.innerHTML = '<p>Nenhum admin regional cadastrado.</p>'; return; }
+                
+                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th>Email</th><th>Regional</th><th>Funcionário</th><th>Ações</th></tr></thead><tbody>`;
+                snapshot.forEach(doc => {
+                    const admin = doc.data();
+                    tableHTML += `<tr>
+                        <td class="py-2 px-3 border-b">${admin.email}</td>
+                        <td class="py-2 px-3 border-b font-bold">${admin.regional}</td>
+                        <td class="py-2 px-3 border-b">${admin.employeeName || 'N/A'}</td>
+                        <td class="py-2 px-3 border-b">
+                            <button data-id="${doc.id}" data-email="${admin.email}" class="delete-admin-btn text-red-600 hover:text-red-800 text-sm font-semibold">Remover</button>
+                        </td>
+                    </tr>`;
+                });
+                tableHTML += `</tbody></table>`;
+                container.innerHTML = tableHTML;
+            });
+        }
+        
+        function handleDeleteAdmin(uid, email) {
+            const message = `Tem a certeza que deseja remover o acesso de administrador de ${email}? Isto apenas remove a permissão, não apaga o login.`;
+            showCustomConfirm(message, async () => {
+                try {
+                    await deleteDoc(doc(usuariosCollectionRef, uid));
+                    showToast("Acesso de administrador removido.", 'success');
+                } catch (error) {
+                    console.error("Erro ao remover admin:", error); showToast("Falha ao remover acesso.", 'error');
+                }
+            });
+        }
+        
+        function main() {
+            const rgfInput = document.getElementById('employeeRGF');
+            if (rgfInput) {
+                rgfInput.value = localStorage.getItem('employeeRGF') || '';
+                if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
+                rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
+                rgfInput.addEventListener('input', validateForm);
+            }
+            
+            document.getElementById('menu')?.addEventListener('change', validateForm);
+            document.getElementById('openConfirmationModal')?.addEventListener('click', openConfirmationModal);
+            document.getElementById('submitOrder')?.addEventListener('click', submitOrder);
+            
+            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
+                btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
+            });
+
+            document.getElementById('switchToAdmin')?.addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
+            document.getElementById('admin-login-form')?.addEventListener('submit', handleAdminLogin);
+            
+            document.getElementById('adminLogoutBtn')?.addEventListener('click', handleAdminLogout);
+            document.getElementById('switchToUserFromAdmin')?.addEventListener('click', showUserView);
+            
+            document.getElementById('add-employee-form')?.addEventListener('submit', handleAddEmployee);
+            document.getElementById('employee-list-container')?.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.edit-employee-btn');
+                if (editBtn) { openEmployeeEditModal(editBtn.dataset.id, editBtn.dataset.name, editBtn.dataset.regional); }
+                const deleteBtn = e.target.closest('.delete-employee-btn');
+                if (deleteBtn) { handleDeleteEmployee(deleteBtn.dataset.id, deleteBtn.dataset.name); }
+            });
+            document.getElementById('edit-employee-form')?.addEventListener('submit', handleSaveEmployeeChanges);
+            
+            document.getElementById('searchInput')?.addEventListener('input', () => renderOrdersTable(allOrders));
+            document.getElementById('generateReportBtn')?.addEventListener('click', generateAndPrintReport);
+            
+            document.getElementById('ordersTableContainer')?.addEventListener('click', function(e) {
+                const editBtn = e.target.closest('.edit-order-btn');
+                if (editBtn) { openOrderEditModal(editBtn.dataset.id); }
+                const deleteBtn = e.target.closest('.delete-order-btn');
+                if (deleteBtn) { deleteOrder(deleteBtn.dataset.id, deleteBtn.dataset.name); }
+            });
+            document.getElementById('edit-order-form')?.addEventListener('submit', saveOrderChanges);
+            
+            document.getElementById('notifyWhatsAppBtn')?.addEventListener('click', handleWhatsAppNotification);
+            
+            document.getElementById('add-admin-form')?.addEventListener('submit', handleAddAdmin);
+            document.getElementById('admin-list-container')?.addEventListener('click', (e) => {
+                 const deleteAdminBtn = e.target.closest('.delete-admin-btn');
+                 if(deleteAdminBtn) { handleDeleteAdmin(deleteAdminBtn.dataset.id, deleteAdminBtn.dataset.email); }
+            });
+            
+            document.getElementById('imageUpload')?.addEventListener('change', function(event) {
+                const file = event.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    document.getElementById('image-processor-container').classList.remove('hidden');
+                    document.getElementById('whatsapp-notification-container').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('processImageBtn')?.addEventListener('click', async () => {
+                if (typeof imageCompression === 'undefined') {
+                    showToast('Erro: Biblioteca de compressão não carregou.', 'error');
+                    return;
+                }
+
+                const loader = document.getElementById('loader'); const button = document.getElementById('processImageBtn'); const confirmationForm = document.getElementById('confirmation-form');
+                button.disabled = true; button.textContent = 'A analisar...'; loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
+                const file = document.getElementById('imageUpload').files[0]; 
+                const options = { maxSizeMB: 1.5, maxWidthOrHeight: 1500, useWebWorker: true };
+                try {
+                    const compressedFile = await imageCompression(file, options);
+                    const base64ImageData = await toBase64(compressedFile);
+                    
+                    const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado, marque-o. Além disso, determine se o almoço é 'especial' (ex: uma refeição comemorativa, temática ou de maior qualidade) e defina o campo booleano 'isSpecial'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "isSpecial": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🍲"}, "guarnicao": {"name": "Nome", "emoji": "🥗"}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
+
+                    const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
+                    const apiKey = firebaseConfig.apiKey;
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; 
+
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
+                    const result = await response.json();
+                    
+                    let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
+                    
+                    textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const menuData = JSON.parse(textResponse);
+
+                    if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
+                    
+                    displayConfirmationForm(menuData.menu);
+
+                } catch (error) { 
+                    console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
+                } finally { 
+                    button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
+                }
+            });
+        }
         main();
     </script>
 </body>
