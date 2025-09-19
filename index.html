@@ -214,7 +214,6 @@
         // DECLARAÇÃO DE TODAS AS FUNÇÕES
         // =================================================================================
 
-        // --- Funções de Data e Utilidades ---
         function getWeekId(d) {
             d = new Date(d);
             const day = d.getDay();
@@ -253,7 +252,6 @@
 
         const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
 
-        // --- Funções de Controlo de Visibilidade e Acesso ---
         function showUserView() {
             document.getElementById('user-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
@@ -308,7 +306,6 @@
             catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
         }
 
-        // --- Funções da Visão do Funcionário ---
         async function findEmployeeByRGF(rgf) {
             const nameInput = document.getElementById('employeeName');
             const menuContainer = document.getElementById('menu');
@@ -484,7 +481,6 @@
             }
         }
         
-        // --- Funções do Painel de Administrador ---
         function loadAdminData() {
             const q = query(pedidosCollectionRef, where("semana", "==", nextWeekId));
             onSnapshot(q, (snapshot) => {
@@ -502,9 +498,12 @@
             const container = document.getElementById('order-status-container');
             container.innerHTML = '<p class="text-gray-500">A processar...</p>';
             try {
-                let employeesForStatus = allEmployees;
+                let employeesForStatus = [];
                 if (currentUserRole === 'superadm') {
                     const snapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
+                    employeesForStatus = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } else if (currentUserRole === 'adm') {
+                     const snapshot = await getDocs(query(funcionariosCollectionRef, where("regional", "==", currentUserRegional), orderBy("nome")));
                     employeesForStatus = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 }
                 const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
@@ -622,26 +621,26 @@
             }
         }
         
-        // --- Funções de Gestão de Funcionários ---
-        function loadAndRenderEmployees() { /* ...código mantido... */ }
-        async function handleAddEmployee(e) { /* ...código mantido... */ }
-        function openEmployeeEditModal(rgf, nome, regional) { /* ...código mantido... */ }
-        async function handleSaveEmployeeChanges(e) { /* ...código mantido... */ }
-        function handleDeleteEmployee(rgf, name) { /* ...código mantido... */ }
-        
-        // --- Funções do Fluxo de Aprovação e Gestão de Admins ---
-        function loadPendingMenu() { /* ...código mantido... */ }
+        async function openOrderEditModal(docId) { /* ...código mantido... */ }
+        function deleteOrder(docId, name) { /* ...código mantido... */ }
+        function displayConfirmationForm(menuData) { /* ...código mantido... */ }
+        async function saveNewMenu(menuData) { /* ...código mantido... */ }
         async function handleApproveMenu() { /* ...código mantido... */ }
         async function handleRejectMenu() { /* ...código mantido... */ }
-        async function saveNewMenu(menuData) { /* ...código mantido... */ }
-        async function clearAllOrdersForWeek(weekId) { /* ...código mantido... */ }
         function loadSuperAdminsList() { /* ...código mantido... */ }
         function loadAdminsList() { /* ...código mantido... */ }
         async function handleAddAdmin(e) { /* ...código mantido... */ }
         async function handlePromoteToSuperAdmin(uid, email) { /* ...código mantido... */ }
         function handleDeleteAdmin(uid, email) { /* ...código mantido... */ }
         function populateAdminEmployeeSelect() { /* ...código mantido... */ }
-        
+        function handleWhatsAppNotification() {
+            const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
+            showToast('Abra o WhatsApp para enviar a notificação.', 'info');
+        }
+
         // =================================================================================
         // PONTO DE ENTRADA E EVENT LISTENERS PRINCIPAIS
         // =================================================================================
@@ -687,8 +686,17 @@
             document.getElementById('super-admin-list-container')?.addEventListener('click', (e) => {
                  const deleteAdminBtn = e.target.closest('.delete-admin-btn'); if(deleteAdminBtn) { handleDeleteAdmin(deleteAdminBtn.dataset.id, deleteAdminBtn.dataset.email); }
             });
-            document.getElementById('imageUpload')?.addEventListener('change', function(event) { /* ...código de upload... */ });
-            document.getElementById('processImageBtn')?.addEventListener('click', async () => { /* ...código de processamento de imagem... */ });
+            document.getElementById('imageUpload')?.addEventListener('change', function(event) {
+                const file = event.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    document.getElementById('image-processor-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            });
+            document.getElementById('processImageBtn')?.addEventListener('click', async () => { /* ...código mantido... */ });
         }
 
         main();
