@@ -171,11 +171,11 @@
         </div>
     </div>
 
-    <div id="edit-order-modal" class="modal-overlay hidden no-print">...</div>
-    <div id="edit-employee-modal" class="modal-overlay hidden no-print">...</div>
-    <div id="confirmation-modal" class="modal-overlay hidden no-print">...</div>
-    <div id="admin-login-modal" class="modal-overlay hidden no-print">...</div>
-    <div id="custom-confirm-modal" class="modal-overlay hidden no-print">...</div>
+    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="editEmployeeRegional" class="block text-sm font-medium text-gray-700">Regional</label><input type="text" id="editEmployeeRegional" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
+    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
     <div id="app-toast"></div>
@@ -255,20 +255,17 @@
 
         // --- Funções de Controlo de Visibilidade e Acesso ---
         function showUserView() {
-            console.log("[showUserView] A mostrar a vista do funcionário.");
             document.getElementById('user-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
         }
 
         function showAdminView() {
-            console.log("[showAdminView] A mostrar a vista de administrador.");
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
             
             if (currentUserRole === 'superadm') {
-                console.log("   -> O utilizador é SUPERADM.");
                 document.getElementById('admin-title').textContent = 'Painel Central (Super Adm)';
                 document.getElementById('admin-management-section').classList.remove('hidden');
                 const regionalInput = document.getElementById('newEmployeeRegional');
@@ -278,7 +275,6 @@
                 loadSuperAdminsList();
                 loadPendingMenu();
             } else if (currentUserRole === 'adm') {
-                console.log(`   -> O utilizador é ADM da regional: ${currentUserRegional}.`);
                 document.getElementById('admin-title').textContent = `Painel Regional (${currentUserRegional})`;
                 document.getElementById('admin-management-section').classList.add('hidden');
                 const regionalInput = document.getElementById('newEmployeeRegional');
@@ -293,31 +289,27 @@
 
         async function handleAdminLogin(e) {
             e.preventDefault();
-            console.log("[handleAdminLogin] A tentar fazer login...");
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
             const btn = e.target.querySelector('button[type="submit"]');
             btn.disabled = true; btn.textContent = 'Entrando...';
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                console.log("[handleAdminLogin] Login com sucesso (Authentication). A aguardar verificação de permissões.");
             } catch (error) {
-                console.error("[handleAdminLogin] Erro de autenticação:", error);
-                const msg = (error.code === 'auth/invalid-credential') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
-                showToast(msg, 'error');
+                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
+                showToast(msg, 'error', 5000);
             } finally {
                 btn.disabled = false; btn.textContent = 'Entrar';
             }
         }
 
         async function handleAdminLogout() {
-            try { await signOut(auth); showToast("Logout bem-sucedido!", 'info'); console.log("[handleAdminLogout] Logout efetuado.");} 
+            try { await signOut(auth); showToast("Logout bem-sucedido!", 'info'); } 
             catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
         }
 
         // --- Funções da Visão do Funcionário ---
         async function findEmployeeByRGF(rgf) {
-            console.log(`[findEmployeeByRGF] A procurar funcionário com RGF: ${rgf}`);
             const nameInput = document.getElementById('employeeName');
             const menuContainer = document.getElementById('menu');
             const userViewInfo = document.getElementById('user-view-info');
@@ -334,12 +326,10 @@
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
-                    console.log(`[findEmployeeByRGF] Funcionário encontrado: ${nameInput.value}. A procurar pedido para semana atual (${currentWeekId}).`);
                     const q = query(pedidosCollectionRef, where("employeeRGF", "==", rgf), where("semana", "==", currentWeekId));
                     const orderSnapshot = await getDocs(q);
 
                     if (!orderSnapshot.empty) {
-                        console.log("[findEmployeeByRGF] Pedido para a semana atual ENCONTRADO. A mostrar em modo de visualização.");
                         const orderData = orderSnapshot.docs[0].data();
                         const menuRef = doc(menusCollectionRef, currentWeekId);
                         const menuDoc = await getDoc(menuRef);
@@ -348,31 +338,27 @@
                         menuTitle.textContent = `🍽️ O seu pedido para a semana atual:`;
                         displayMenu(menuDoc, orderData, true);
                     } else {
-                        console.log(`[findEmployeeByRGF] Nenhum pedido encontrado para a semana atual. A procurar cardápio para a PRÓXIMA semana (${nextWeekId}).`);
                         const menuRef = doc(menusCollectionRef, nextWeekId);
                         const menuDoc = await getDoc(menuRef);
                         if (!menuDoc.exists()) { throw new Error("Cardápio da próxima semana ainda não publicado."); }
-                        console.log("[findEmployeeByRGF] Cardápio da próxima semana encontrado. A mostrar em modo de pedido.");
                         userViewInfo.innerHTML = `<p class="font-bold">Faça o seu pedido para a próxima semana (${nextWeekId}).</p>`;
                         userViewInfo.classList.remove('hidden');
                         menuTitle.textContent = `🗓️ Cardápio para a próxima semana:`;
                         displayMenu(menuDoc, null, false);
                     }
                 } else {
-                    console.warn(`[findEmployeeByRGF] RGF ${rgf} não encontrado na base de dados.`);
                     nameInput.value = '';
                     menuContainer.innerHTML = '<div class="text-center text-red-500 font-bold">RGF não encontrado. Contacte um administrador.</div>';
                 }
                 validateForm();
             } catch (error) {
-                console.error("[findEmployeeByRGF] Erro:", error);
+                console.error("Erro ao buscar funcionário ou cardápio:", error);
                 menuContainer.innerHTML = `<div class="text-center text-red-500 font-bold">${error.message}</div>`;
                 showToast(error.message, 'error');
             }
         }
         
         function displayMenu(menuDoc, orderData = null, isViewOnly = false) {
-            console.log(`[displayMenu] A preparar para mostrar o cardápio. Modo de visualização: ${isViewOnly}`);
             weeklyMenu = (menuDoc.exists() && menuDoc.data().menu?.length > 0) ? menuDoc.data().menu : createFallbackMenu();
             createMenuHTML(orderData, isViewOnly);
         }
@@ -381,18 +367,100 @@
             const menuContainer = document.getElementById('menu');
             if (!menuContainer) return;
             menuContainer.innerHTML = '';
-            weeklyMenu.forEach(item => { /* ...código de renderização do menu... */ });
+            weeklyMenu.forEach(item => {
+                const dayId = getDayId(item.day);
+                let dayHTML = `<div class="day-section space-y-3 opacity-100 ${isViewOnly ? 'opacity-75' : ''}">`;
+                let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
+                if (item.isSpecial) { dayTitleHTML = `<div class="flex items-center gap-3"><h3 class="text-xl font-bold text-gray-800">${item.day}</h3><span class="text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1">✨ Almoço Especial</span></div>`; }
+                if (item.isHoliday) { dayHTML += dayTitleHTML + `<div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md"><p class="font-bold">🎊 Feriado</p><p>Não haverá refeição neste dia.</p></div>`; } 
+                else {
+                    const allOptions = [ { ...item.pratoPrincipal, type: 'Prato Principal' }, ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []), ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })), ];
+                    dayHTML += dayTitleHTML;
+                    if (item.guarnicao?.name) { dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`; }
+                    dayHTML += `<div class="space-y-3">`;
+                    allOptions.forEach((option) => {
+                        if (option.name) {
+                            const isChecked = orderData && orderData[dayId] === option.name ? 'checked' : '';
+                            const disabled = isViewOnly ? 'disabled' : '';
+                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} transition-transform duration-200">
+                                <input type="radio" name="${dayId}" value="${option.name}" class="hidden" ${isChecked} ${disabled}>
+                                <div class="flex items-center">
+                                    <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
+                                    <div class="flex-grow"><p class="font-semibold text-gray-800">${option.name}</p><p class="text-sm text-gray-500">${option.type}</p></div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </label>`;
+                        }
+                    });
+                    dayHTML += `</div>`;
+                    const notes = orderData ? (orderData[`${dayId}_notes`] || '') : '';
+                    const readonly = isViewOnly ? 'readonly' : '';
+                    dayHTML += `<div class="mt-3"><textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, etc." ${readonly}>${notes}</textarea></div>`;
+                }
+                dayHTML += `</div>`;
+                menuContainer.innerHTML += dayHTML;
+            });
             document.getElementById('submitButtonContainer').classList.toggle('hidden', isViewOnly);
             validateForm();
-            console.log("[createMenuHTML] Cardápio renderizado no ecrã.");
         }
 
-        function createFallbackMenu() { /* ...código mantido... */ }
-        function validateForm() { /* ...código mantido... */ }
-        function openConfirmationModal() { /* ...código mantido... */ }
+        function createFallbackMenu() {
+            const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+            return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
+        }
+
+        function validateForm() {
+            const name = document.getElementById('employeeName')?.value.trim();
+            const rgf = document.getElementById('employeeRGF')?.value.trim();
+            const guidanceSection = document.getElementById('guidanceSection');
+            const guidanceText = document.getElementById('guidanceText');
+            const submitBtnContainer = document.getElementById('submitButtonContainer');
+            if (!guidanceSection || !submitBtnContainer) return;
+
+            const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
+            const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
+
+            if (name && rgf && hasAllSelections) {
+                guidanceSection.classList.add('hidden');
+                if (!submitBtnContainer.closest('.modal-overlay')) submitBtnContainer.classList.remove('hidden');
+            } else {
+                submitBtnContainer.classList.add('hidden');
+                guidanceSection.classList.remove('hidden');
+                let message = '';
+                if(!rgf) message = 'Digite seu RGF para começar.';
+                else if(!name) message = 'RGF não encontrado.';
+                else if (!hasAllSelections) {
+                    const missingDays = nonHolidayItems.filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`)).map(item => item.day);
+                    if (missingDays.length > 0) message += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
+                }
+                guidanceText.textContent = message || 'Por favor, preencha todos os campos.';
+            }
+        }
+
+        function openConfirmationModal() {
+            tempOrderData = {
+                employeeName: document.getElementById('employeeName').value.trim(),
+                employeeRGF: document.getElementById('employeeRGF').value.trim(),
+                timestamp: serverTimestamp()
+            };
+            const summaryContainer = document.getElementById('confirmation-summary');
+            summaryContainer.innerHTML = '';
+            weeklyMenu.forEach(item => {
+                const dayId = getDayId(item.day);
+                if (!item.isHoliday) {
+                    const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
+                    if (!choiceInput) return;
+                    const choice = choiceInput.value;
+                    const notes = document.getElementById(`notes-${dayId}`).value.trim();
+                    tempOrderData[dayId] = choice;
+                    if(notes) { tempOrderData[`${dayId}_notes`] = notes; }
+                    summaryContainer.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${choice} ${notes ? `<span class="text-sm text-gray-500 italic">(${notes})</span>` : ''}</p>`;
+                }
+            });
+            document.getElementById('confirmation-modal').classList.remove('hidden');
+        }
 
         async function submitOrder() {
-            console.log("[submitOrder] A iniciar envio do pedido.");
             const button = document.getElementById('submitOrder');
             button.disabled = true; button.textContent = 'A enviar...';
             try {
@@ -409,61 +477,173 @@
                 document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido para a semana de ${nextWeekId} foi registado com sucesso.`;
                 document.getElementById('success-message').classList.remove('hidden');
                 showToast("Pedido enviado com sucesso!", 'success');
-                console.log("[submitOrder] Pedido enviado com sucesso para a base de dados.");
             } catch (error) {
-                console.error("[submitOrder] Erro ao enviar pedido: ", error); showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
+                console.error("Erro ao enviar pedido: ", error); showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
             } finally {
                 button.disabled = false; button.textContent = 'Confirmar e Enviar';
             }
         }
         
         // --- Funções do Painel de Administrador ---
-        function loadAdminData() { /* ...código mantido... */ }
-        async function renderOrderStatus(orders) { /* ...código mantido... */ }
-        function renderOrdersTable(orders) { /* ...código mantido... */ }
-        function generateAndPrintReport() { /* ...código mantido... */ }
+        function loadAdminData() {
+            const q = query(pedidosCollectionRef, where("semana", "==", nextWeekId));
+            onSnapshot(q, (snapshot) => {
+                let ordersForNextWeek = snapshot.docs;
+                if (currentUserRole === 'adm') {
+                    ordersForNextWeek = ordersForNextWeek.filter(doc => doc.data().regional === currentUserRegional);
+                }
+                allOrders = ordersForNextWeek.sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
+                renderOrdersTable(allOrders);
+                renderOrderStatus(allOrders);
+            }, (error) => { console.error("Erro ao carregar dados de admin:", error); });
+        }
+
+        async function renderOrderStatus(orders) {
+            const container = document.getElementById('order-status-container');
+            container.innerHTML = '<p class="text-gray-500">A processar...</p>';
+            try {
+                let employeesForStatus = allEmployees;
+                if (currentUserRole === 'superadm') {
+                    const snapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
+                    employeesForStatus = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                }
+                const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
+                const haveOrdered = employeesForStatus.filter(emp => orderedRGFs.has(emp.id));
+                const haveNotOrdered = employeesForStatus.filter(emp => !orderedRGFs.has(emp.id));
+                let html = `<div><h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3><ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul></div><div><h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3><ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul></div>`;
+                container.innerHTML = html;
+            } catch (error) { console.error("Erro ao renderizar status:", error); container.innerHTML = '<p class="text-red-500">Falha ao carregar status.</p>'; }
+        }
+        
+        function renderOrdersTable(orders) {
+            const container = document.getElementById('ordersTableContainer');
+            if (!container) return;
+            const searchTermInput = document.getElementById('searchInput');
+            const searchTerm = searchTermInput ? searchTermInput.value.toLowerCase() : '';
+            const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
+
+            if (!weeklyMenu || weeklyMenu.length === 0) { weeklyMenu = createFallbackMenu(); }
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-center py-4 text-gray-500">Nenhum pedido encontrado para a próxima semana.</p>'; return; }
+            
+            let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
+            if (currentUserRole === 'superadm') tableHTML += `<th class="py-2 px-3 border-b text-left">Regional</th>`;
+            weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
+            tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+
+            filteredOrders.forEach(doc => {
+                const order = doc.data();
+                tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
+                if (currentUserRole === 'superadm') tableHTML += `<td class="py-2 px-3 border-b">${order.regional || 'N/A'}</td>`;
+                weeklyMenu.forEach(dayMenuItem => {
+                    const dayId = getDayId(dayMenuItem.day); let cellContent = '';
+                    if (dayMenuItem.isHoliday) { cellContent = '<span class="text-xs text-indigo-600">Feriado</span>'; } 
+                    else {
+                        let choice = order[dayId] || 'N/A';
+                        const notes = order[`${dayId}_notes`];
+                        const mainDishName = dayMenuItem.pratoPrincipal.name;
+                        const optionDishName = dayMenuItem.opcao?.name;
+                        let reportChoice = choice;
+                        if (choice === mainDishName) { reportChoice = 'Prato'; } 
+                        else if (optionDishName && choice === optionDishName) { reportChoice = 'Opção'; }
+                        cellContent = reportChoice;
+                        if (notes) { cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`; }
+                    }
+                    tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
+                });
+                tableHTML += `<td class="py-2 px-3 border-b space-x-2"><button data-id="${doc.id}" class="edit-order-btn text-blue-600">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600">Excluir</button></td></tr>`;
+            });
+            tableHTML += `</tbody></table>`;
+            container.innerHTML = tableHTML;
+        }
+
+        function generateAndPrintReport() {
+            const reportContainer = document.getElementById('print-report');
+            if (allOrders.length === 0) { showToast("Não há pedidos para gerar o relatório.", "info"); return; }
+            const menuForReport = weeklyMenu.length > 0 ? weeklyMenu : createFallbackMenu();
+            reportContainer.innerHTML = '';
+            const regionais = currentUserRole === 'superadm' ? [...new Set(allOrders.map(o => o.data().regional).filter(r => r))] : [currentUserRegional];
+            if (regionais.length === 0 || !regionais[0]) { showToast("Não foram encontrados pedidos com regionais definidas.", "error"); return; }
+            
+            regionais.forEach(regional => {
+                if (!regional) return; 
+                let regionalHTML = `<h1 class="regional-title">Relatório da Regional: ${regional.toUpperCase()}</h1>`;
+                const ordersFromRegional = allOrders.filter(o => o.data().regional === regional);
+                menuForReport.forEach(dayMenuItem => {
+                    if (dayMenuItem.isHoliday) return;
+                    const dayId = getDayId(dayMenuItem.day);
+                    let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
+                    const dailyOrders = ordersFromRegional.filter(orderDoc => orderDoc.data()[dayId]).sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
+                    if(dailyOrders.length > 0) {
+                        dailyOrders.forEach(orderDoc => {
+                            const order = orderDoc.data(); const choice = order[dayId]; const notes = order[`${dayId}_notes`];
+                            const mainDishName = dayMenuItem.pratoPrincipal.name; const optionDishName = dayMenuItem.opcao?.name;
+                            let reportChoice = '';
+                            if (choice === mainDishName) { reportChoice = 'PRATO'; } 
+                            else if (optionDishName && choice === optionDishName) { reportChoice = 'OPÇÃO'; } 
+                            else { reportChoice = choice.toUpperCase(); }
+                            let choiceHTML = reportChoice;
+                            if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
+                            tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
+                        });
+                        tableHTML += '</tbody></table></div>';
+                        regionalHTML += tableHTML;
+                    }
+                });
+                reportContainer.innerHTML += regionalHTML;
+            });
+            if (reportContainer.innerHTML.trim() === '') { showToast("Nenhum pedido para exibir no relatório.", "info"); return; }
+            window.print();
+        }
 
         // --- Funções de Gestão de Funcionários ---
-        function loadAndRenderEmployees() { /* ...código mantido... */ }
+        function loadAndRenderEmployees() {
+            let q = funcionariosCollectionRef;
+            if (currentUserRole === 'adm') {
+                q = query(q, where("regional", "==", currentUserRegional));
+            }
+            q = query(q, orderBy("nome"));
+            onSnapshot(q, (snapshot) => {
+                allEmployees = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+                const container = document.getElementById('employee-list-container');
+                if (snapshot.empty) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcionário cadastrado.</p>'; return; }
+                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th>RGF</th><th>Nome</th><th>Regional</th><th>Ações</th></tr></thead><tbody>`;
+                snapshot.forEach(doc => {
+                    const employee = doc.data();
+                    tableHTML += `<tr> <td class="py-2 px-3 border-b font-mono">${doc.id}</td><td class="py-2 px-3 border-b font-semibold">${employee.nome}</td> <td class="py-2 px-3 border-b">${employee.regional || 'N/A'}</td> <td class="py-2 px-3 border-b space-x-2"> <button data-id="${doc.id}" data-name="${employee.nome}" data-regional="${employee.regional || ''}" class="edit-employee-btn text-blue-600 hover:text-blue-800 text-sm">Editar</button> <button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 text-sm">Excluir</button> </td> </tr>`;
+                });
+                tableHTML += '</tbody></table>';
+                container.innerHTML = tableHTML;
+                if(currentUserRole === 'superadm') { populateAdminEmployeeSelect(); }
+            }, (error) => { console.error("Erro ao carregar funcionários:", error); });
+        }
         async function handleAddEmployee(e) { /* ...código mantido... */ }
         function openEmployeeEditModal(rgf, nome, regional) { /* ...código mantido... */ }
         async function handleSaveEmployeeChanges(e) { /* ...código mantido... */ }
         function handleDeleteEmployee(rgf, name) { /* ...código mantido... */ }
         
-        // --- Funções do Fluxo de Aprovação de Cardápio ---
+        // --- Funções do Fluxo de Aprovação e Gestão de Admins ---
         function loadPendingMenu() {
-            console.log("[loadPendingMenu] A verificar se existe cardápio pendente de aprovação...");
             onSnapshot(pendingMenuDocRef, (docSnap) => {
                 const approvalSection = document.getElementById('approval-section');
                 const approvalInfo = document.getElementById('approval-info');
                 const approvalButtons = document.getElementById('approval-buttons');
-
                 if (docSnap.exists()) {
-                    console.log("[loadPendingMenu] Cardápio pendente ENCONTRADO.");
                     const data = docSnap.data();
                     const date = data.propostoEm?.toDate().toLocaleString('pt-BR') || 'data desconhecida';
                     approvalInfo.innerHTML = `<p>Um novo cardápio para a semana de <strong>${nextWeekId}</strong> foi enviado por <strong>${data.propostoPor}</strong> em ${date}.</p>`;
                     approvalSection.classList.remove('hidden');
-
                     if (currentUserRole === 'superadm') {
                         approvalButtons.innerHTML = `<button id="approveMenuBtn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Aprovar e Publicar</button> <button id="rejectMenuBtn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600">Rejeitar</button>`;
                         document.getElementById('approveMenuBtn').onclick = handleApproveMenu;
                         document.getElementById('rejectMenuBtn').onclick = handleRejectMenu;
-                    } else {
-                        approvalButtons.innerHTML = '';
-                    }
-                } else {
-                    console.log("[loadPendingMenu] Nenhum cardápio pendente.");
-                    approvalSection.classList.add('hidden');
-                }
+                    } else { approvalButtons.innerHTML = ''; }
+                } else { approvalSection.classList.add('hidden'); }
             });
         }
         
         async function handleApproveMenu() {
-            console.log("[handleApproveMenu] Botão 'Aprovar' clicado.");
             const message = "Tem a certeza que deseja aprovar e publicar este cardápio?";
             showCustomConfirm(message, async () => {
-                console.log("[handleApproveMenu] Confirmação aceite. A processar aprovação...");
                 try {
                     const pendingDoc = await getDoc(pendingMenuDocRef);
                     if (!pendingDoc.exists()) throw new Error("Cardápio pendente não encontrado.");
@@ -471,61 +651,161 @@
                     await deleteDoc(pendingMenuDocRef);
                     await clearAllOrdersForWeek(nextWeekId);
                     showToast("Cardápio aprovado e publicado com sucesso!", "success");
-                    console.log("[handleApproveMenu] Cardápio publicado com sucesso.");
-                } catch(error) {
-                    console.error("[handleApproveMenu] Erro:", error); showToast("Erro ao aprovar cardápio.", "error");
-                }
+                } catch(error) { console.error("Erro ao aprovar cardápio:", error); }
             });
         }
 
-        async function handleRejectMenu() { /* ...código mantido... */ }
-        async function saveNewMenu(menuData) { /* ...código mantido... */ }
-        async function clearAllOrdersForWeek(weekId) { /* ...código mantido... */ }
+        async function handleRejectMenu() {
+            showCustomConfirm("Tem a certeza que deseja rejeitar este cardápio?", async () => {
+                try { await deleteDoc(pendingMenuDocRef); showToast("Cardápio pendente rejeitado.", "info"); } 
+                catch(error) { console.error("Erro ao rejeitar cardápio:", error); }
+            });
+        }
+
+        async function saveNewMenu(menuData) {
+            const button = document.getElementById('saveNewMenuBtn'); 
+            button.disabled = true; button.textContent = 'A enviar para aprovação...'; 
+            const newMenu = menuData.map((item, i) => ({ day: item.day, pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' }, isHoliday: document.getElementById(`holiday-${i}`).checked, isSpecial: document.getElementById(`special-${i}`).checked, })); 
+            try { 
+                await setDoc(pendingMenuDocRef, { menu: newMenu, propostoPor: auth.currentUser.email, propostoEm: serverTimestamp() });
+                showToast('Cardápio enviado para aprovação!', 'success'); 
+                document.getElementById('confirmation-form').classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+            } catch (error) { console.error("Erro ao enviar cardápio:", error); } 
+            finally { button.disabled = false; button.textContent = 'Salvar Novo Cardápio'; }
+        }
+
+        async function clearAllOrdersForWeek(weekId) {
+            const q = query(pedidosCollectionRef, where("semana", "==", weekId));
+            const querySnapshot = await getDocs(q);
+            const deletionPromises = querySnapshot.docs.map(d => deleteDoc(d.ref));
+            await Promise.all(deletionPromises);
+        }
+
+        function loadSuperAdminsList() {
+            const q = query(usuariosCollectionRef, where("role", "==", "superadm"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('super-admin-list-container');
+                if (snapshot.empty) { container.innerHTML = '<p class="text-gray-500">Nenhum super admin encontrado.</p>'; return; }
+                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr><th>Email</th><th>Funcionário Associado</th><th>Ações</th></tr></thead><tbody>`;
+                snapshot.forEach(doc => {
+                    const admin = doc.data();
+                    tableHTML += `<tr> <td class="py-2 px-3 border-b">${admin.email}</td> <td class="py-2 px-3 border-b">${admin.employeeName || 'N/A'}</td> <td class="py-2 px-3 border-b"> <button data-id="${doc.id}" data-email="${admin.email}" class="delete-admin-btn text-red-600 text-sm font-semibold">Remover</button> </td> </tr>`;
+                });
+                tableHTML += `</tbody></table>`; container.innerHTML = tableHTML;
+            });
+        }
         
-        // --- Funções de Gestão de Administradores ---
-        function loadSuperAdminsList() { /* ...código mantido... */ }
-        function loadAdminsList() { /* ...código mantido... */ }
-        async function handleAddAdmin(e) { /* ...código mantido... */ }
-        async function handlePromoteToSuperAdmin(uid, email) { /* ...código mantido... */ }
-        function handleDeleteAdmin(uid, email) { /* ...código mantido... */ }
-        function populateAdminEmployeeSelect() { /* ...código mantido... */ }
+        function loadAdminsList() {
+            const q = query(usuariosCollectionRef, where("role", "==", "adm"), orderBy("regional"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('admin-list-container');
+                if (snapshot.empty) { container.innerHTML = '<p class="text-gray-500">Nenhum admin regional cadastrado.</p>'; return; }
+                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr><th>Email</th><th>Regional</th><th>Funcionário</th><th>Ações</th></tr></thead><tbody>`;
+                snapshot.forEach(doc => {
+                    const admin = doc.data();
+                    tableHTML += `<tr> <td class="py-2 px-3 border-b">${admin.email}</td> <td class="py-2 px-3 border-b font-bold">${admin.regional}</td> <td class="py-2 px-3 border-b">${admin.employeeName || 'N/A'}</td> <td class="py-2 px-3 border-b space-x-2"> <button data-id="${doc.id}" data-email="${admin.email}" class="promote-super-btn text-purple-600 text-sm font-semibold">Promover a Super Adm</button> <button data-id="${doc.id}" data-email="${admin.email}" class="delete-admin-btn text-red-600 text-sm font-semibold">Remover</button> </td> </tr>`;
+                });
+                tableHTML += `</tbody></table>`; container.innerHTML = tableHTML;
+            });
+        }
         
+        async function handleAddAdmin(e) {
+            e.preventDefault();
+            const select = document.getElementById('admin-employee-select');
+            if(!select.value) { showToast('Selecione um funcionário.', 'error'); return; }
+            const selectedData = JSON.parse(select.value); const email = document.getElementById('admin-email-input').value; const password = document.getElementById('admin-password-input').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (!selectedData || !email || !password) { showToast('Preencha todos os campos.', 'error'); return; }
+            btn.disabled = true; btn.textContent = 'A promover...';
+            try {
+                const secondaryApp = initializeApp(firebaseConfig, `secondary-app-${Date.now()}`);
+                const secondaryAuth = getAuth(secondaryApp);
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                await setDoc(doc(usuariosCollectionRef, userCredential.user.uid), { email: email, role: 'adm', regional: selectedData.regional, employeeName: selectedData.nome, employeeRGF: selectedData.rgf });
+                await signOut(secondaryAuth);
+                showToast(`Usuário ${email} promovido a admin da regional ${selectedData.regional}!`, 'success');
+                e.target.reset();
+            } catch (error) { console.error("Erro ao promover admin:", error); showToast(`Erro: ${error.message}`, 'error', 6000);
+            } finally { btn.disabled = false; btn.textContent = 'Promover a Administrador Regional'; }
+        }
+
+        async function handlePromoteToSuperAdmin(uid, email) {
+            const message = `Tem a certeza que deseja promover ${email} a Super Administrador?`;
+            showCustomConfirm(message, async () => {
+                try {
+                    await updateDoc(doc(usuariosCollectionRef, uid), { role: 'superadm', regional: deleteField() });
+                    showToast(`${email} foi promovido a Super Administrador!`, 'success');
+                } catch (error) { console.error("Erro ao promover para Super Adm:", error); }
+            });
+        }
+        
+        function handleDeleteAdmin(uid, email) {
+            if (uid === auth.currentUser.uid) { showToast("Não se pode remover a si mesmo.", "error"); return; }
+            const message = `Tem a certeza que deseja remover o acesso de administrador de ${email}?`;
+            showCustomConfirm(message, async () => {
+                try { await deleteDoc(doc(usuariosCollectionRef, uid)); showToast("Acesso de administrador removido.", 'success'); } 
+                catch (error) { console.error("Erro ao remover admin:", error); }
+            });
+        }
+
+        function populateAdminEmployeeSelect() {
+            const select = document.getElementById('admin-employee-select');
+            select.innerHTML = '<option value="">Selecione um funcionário...</option>';
+            allEmployees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify({ rgf: emp.id, nome: emp.nome, regional: emp.regional });
+                option.textContent = `${emp.nome} (${emp.regional})`;
+                select.appendChild(option);
+            });
+        }
+
         // =================================================================================
         // PONTO DE ENTRADA E EVENT LISTENERS PRINCIPAIS
         // =================================================================================
-        
-        onAuthStateChanged(auth, async (user) => {
-            console.log("[Auth State] A verificar estado de autenticação...");
-            if (user) {
-                console.log(`[Auth State] Utilizador encontrado (UID: ${user.uid}). A verificar permissões...`);
-                const userDoc = await getDoc(doc(usuariosCollectionRef, user.uid));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    currentUserRole = userData.role;
-                    currentUserRegional = userData.regional;
-                    console.log(`[Auth State] Permissões encontradas. Role: ${currentUserRole}`);
-                    showAdminView();
-                } else {
-                    console.log("[Auth State] Utilizador logado mas sem permissões de admin. A mostrar vista de funcionário.");
-                    if (!user.isAnonymous) await signOut(auth);
-                    showUserView();
-                }
-            } else {
-                console.log("[Auth State] Nenhum utilizador logado. A iniciar login anónimo...");
-                signInAnonymously(auth).catch((error) => console.error("[Auth State] Erro no login anónimo:", error));
-                showUserView();
-            }
-        });
-
         function main() {
-            console.log("[main] A aplicação iniciou. A adicionar event listeners...");
-            // Adiciona todos os event listeners aos elementos do HTML
-            // ... (código da função main mantido)
-            console.log("[main] Event listeners adicionados com sucesso.");
+            document.getElementById('switchToAdmin')?.addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
+            document.getElementById('admin-login-form')?.addEventListener('submit', handleAdminLogin);
+            document.getElementById('adminLogoutBtn')?.addEventListener('click', handleAdminLogout);
+            document.getElementById('switchToUserFromAdmin')?.addEventListener('click', showUserView);
+            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden')));
+            const rgfInput = document.getElementById('employeeRGF');
+            if (rgfInput) {
+                rgfInput.value = localStorage.getItem('employeeRGF') || '';
+                if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); }
+                rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
+            }
+            document.getElementById('menu')?.addEventListener('change', validateForm);
+            document.getElementById('openConfirmationModal')?.addEventListener('click', openConfirmationModal);
+            document.getElementById('submitOrder')?.addEventListener('click', submitOrder);
+            document.getElementById('add-employee-form')?.addEventListener('submit', handleAddEmployee);
+            document.getElementById('employee-list-container')?.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.edit-employee-btn');
+                if (editBtn) { openEmployeeEditModal(editBtn.dataset.id, editBtn.dataset.name, editBtn.dataset.regional); }
+                const deleteBtn = e.target.closest('.delete-employee-btn');
+                if (deleteBtn) { handleDeleteEmployee(deleteBtn.dataset.id, deleteBtn.dataset.name); }
+            });
+            document.getElementById('edit-employee-form')?.addEventListener('submit', handleSaveEmployeeChanges);
+            document.getElementById('searchInput')?.addEventListener('input', () => renderOrdersTable(allOrders));
+            document.getElementById('generateReportBtn')?.addEventListener('click', generateAndPrintReport);
+            document.getElementById('ordersTableContainer')?.addEventListener('click', function(e) {
+                const editBtn = e.target.closest('.edit-order-btn'); if (editBtn) { openOrderEditModal(editBtn.dataset.id); }
+                const deleteBtn = e.target.closest('.delete-order-btn'); if (deleteBtn) { deleteOrder(deleteBtn.dataset.id, deleteBtn.dataset.name); }
+            });
+            document.getElementById('edit-order-form')?.addEventListener('submit', saveOrderChanges);
+            document.getElementById('notifyWhatsAppBtn')?.addEventListener('click', handleWhatsAppNotification);
+            document.getElementById('add-admin-form')?.addEventListener('submit', handleAddAdmin);
+            document.getElementById('admin-list-container')?.addEventListener('click', (e) => {
+                 const deleteAdminBtn = e.target.closest('.delete-admin-btn'); if(deleteAdminBtn) { handleDeleteAdmin(deleteAdminBtn.dataset.id, deleteAdminBtn.dataset.email); }
+                 const promoteSuperBtn = e.target.closest('.promote-super-btn'); if(promoteSuperBtn) { handlePromoteToSuperAdmin(promoteSuperBtn.dataset.id, promoteSuperBtn.dataset.email); }
+            });
+            document.getElementById('super-admin-list-container')?.addEventListener('click', (e) => {
+                 const deleteAdminBtn = e.target.closest('.delete-admin-btn'); if(deleteAdminBtn) { handleDeleteAdmin(deleteAdminBtn.dataset.id, deleteAdminBtn.dataset.email); }
+            });
+            document.getElementById('imageUpload')?.addEventListener('change', function(event) { /* ...código de upload de imagem... */ });
+            document.getElementById('processImageBtn')?.addEventListener('click', async () => { /* ...código de processamento de imagem... */ });
         }
 
         main();
-
     </script>
 </body>
 </html>
