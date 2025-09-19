@@ -213,7 +213,6 @@
         // =================================================================================
         // DECLARAÇÃO DE TODAS AS FUNÇÕES
         // =================================================================================
-
         function getWeekId(d) {
             d = new Date(d);
             const day = d.getDay();
@@ -221,13 +220,11 @@
             const monday = new Date(d.setDate(diff));
             return monday.toISOString().split('T')[0];
         }
-
         const today = new Date();
         const currentWeekId = getWeekId(today);
         const nextWeekDate = new Date();
         nextWeekDate.setDate(today.getDate() + 7);
         const nextWeekId = getWeekId(nextWeekDate);
-
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
         
         function showToast(message, type = 'info', duration = 3000) {
@@ -621,18 +618,100 @@
             }
         }
         
-        async function openOrderEditModal(docId) { /* ...código mantido... */ }
-        function deleteOrder(docId, name) { /* ...código mantido... */ }
-        function displayConfirmationForm(menuData) { /* ...código mantido... */ }
-        async function saveNewMenu(menuData) { /* ...código mantido... */ }
-        async function handleApproveMenu() { /* ...código mantido... */ }
-        async function handleRejectMenu() { /* ...código mantido... */ }
-        function loadSuperAdminsList() { /* ...código mantido... */ }
-        function loadAdminsList() { /* ...código mantido... */ }
-        async function handleAddAdmin(e) { /* ...código mantido... */ }
-        async function handlePromoteToSuperAdmin(uid, email) { /* ...código mantido... */ }
-        function handleDeleteAdmin(uid, email) { /* ...código mantido... */ }
-        function populateAdminEmployeeSelect() { /* ...código mantido... */ }
+        async function openOrderEditModal(docId) {
+            const modal = document.getElementById('edit-order-modal');
+            const formContent = document.getElementById('edit-menu-options');
+            const employeeNameInput = document.getElementById('edit-order-employeeName');
+            const orderIdInput = document.getElementById('edit-order-id');
+            formContent.innerHTML = '<p class="text-center text-gray-500">A carregar...</p>';
+            modal.classList.remove('hidden');
+            try {
+                const docSnap = await getDoc(doc(db, "pedidosDaSemana", docId));
+                if (!docSnap.exists()) { showToast("Erro: Pedido não encontrado.", 'error'); modal.classList.add('hidden'); return; }
+                const orderData = docSnap.data();
+                employeeNameInput.value = orderData.employeeName;
+                orderIdInput.value = docId;
+                formContent.innerHTML = '';
+                weeklyMenu.forEach(item => {
+                    const dayId = getDayId(item.day);
+                    let dayHTML = `<fieldset class="day-section border p-4 rounded-lg"><legend class="font-bold text-lg text-gray-800 px-2">${item.day}</legend>`;
+                    if(item.isHoliday) { dayHTML += `<div class="bg-indigo-100 text-indigo-700 p-3 rounded-md text-center">Feriado</div>`; } 
+                    else {
+                        const currentChoice = orderData[dayId];
+                        const currentNotes = orderData[`${dayId}_notes`] || '';
+                        const allOptions = [ { ...item.pratoPrincipal }, ...(item.opcao?.name ? [{ ...item.opcao }] : []), ...fixedOptions ];
+                        dayHTML += `<div class="space-y-2 mt-2">`;
+                        allOptions.forEach((option, index) => {
+                            if (option.name) {
+                                const uniqueId = `edit-${dayId}-${index}`;
+                                const isChecked = (option.name === currentChoice) ? 'checked' : '';
+                                dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
+                            }
+                        });
+                        dayHTML += `</div>`;
+                        dayHTML += `<div class="mt-4"><label for="edit-notes-${dayId}" class="block text-sm font-medium text-gray-700">Anotações</label><textarea id="edit-notes-${dayId}" name="edit-notes-${dayId}" rows="2" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">${currentNotes}</textarea></div>`;
+                    }
+                    dayHTML += `</fieldset>`;
+                    formContent.innerHTML += dayHTML;
+                });
+            } catch (error) { console.error("Erro ao abrir modal de edição:", error); showToast("Não foi possível carregar os dados do pedido.", 'error'); modal.classList.add('hidden'); }
+        }
+
+        function deleteOrder(docId, name) {
+            const message = `Tem a certeza que deseja excluir o pedido de ${name}?`;
+            showCustomConfirm(message, async () => {
+                try {
+                    await deleteDoc(doc(db, "pedidosDaSemana", docId));
+                    showToast("Pedido excluído com sucesso.", 'success');
+                } catch (error) { console.error("Erro ao excluir pedido: ", error); showToast("Falha ao excluir o pedido.", 'error'); }
+            });
+        }
+        
+        function displayConfirmationForm(menuData) {
+            const container = document.getElementById('confirmation-form'); 
+            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
+            menuData.forEach((item, index) => {
+                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4">
+                    <h4 class="font-bold">${item.day}</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                        <div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
+                        <div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
+                    </div>
+                    <div class="mt-3 flex items-center space-x-6">
+                        <label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-indigo-600"> <span class="ml-2 text-sm text-gray-900">Marcar como Feriado</span></label>
+                        <label class="flex items-center"><input type="checkbox" id="special-${index}" ${item.isSpecial ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-purple-600"> <span class="ml-2 text-sm text-gray-900">✨ Almoço Especial</span></label>
+                    </div>
+                    </div>`;
+            });
+            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Enviar para Aprovação</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
+            container.classList.remove('hidden'); 
+            document.getElementById('saveNewMenuBtn').addEventListener('click', () => { saveNewMenu(menuData); });
+            document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
+                container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
+                showToast("Atualização cancelada.", 'info');
+            });
+        }
+        
+        async function saveNewMenu(menuData) {
+            const button = document.getElementById('saveNewMenuBtn'); 
+            button.disabled = true; button.textContent = 'A enviar...'; 
+            const newMenu = menuData.map((item, i) => ({ day: item.day, pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' }, isHoliday: document.getElementById(`holiday-${i}`).checked, isSpecial: document.getElementById(`special-${i}`).checked, })); 
+            try { 
+                await setDoc(pendingMenuDocRef, { menu: newMenu, propostoPor: auth.currentUser.email, propostoEm: serverTimestamp() });
+                showToast('Cardápio enviado para aprovação!', 'success'); 
+                document.getElementById('confirmation-form').classList.add('hidden'); 
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('image-processor-container').classList.add('hidden'); 
+                document.getElementById('imageUpload').value = ''; 
+            } catch (error) { 
+                console.error("Erro ao enviar cardápio:", error); 
+            } finally { 
+                button.disabled = false; button.textContent = 'Enviar para Aprovação'; 
+            }
+        }
+
         function handleWhatsAppNotification() {
             const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
             const encodedMessage = encodeURIComponent(message);
@@ -641,6 +720,41 @@
             showToast('Abra o WhatsApp para enviar a notificação.', 'info');
         }
 
+        async function handleApproveMenu() {
+            const message = "Tem a certeza que deseja aprovar e publicar este cardápio?";
+            showCustomConfirm(message, async () => {
+                try {
+                    const pendingDoc = await getDoc(pendingMenuDocRef);
+                    if (!pendingDoc.exists()) throw new Error("Cardápio pendente não encontrado.");
+                    await setDoc(doc(menusCollectionRef, nextWeekId), pendingDoc.data());
+                    await deleteDoc(pendingMenuDocRef);
+                    await clearAllOrdersForWeek(nextWeekId);
+                    showToast("Cardápio aprovado e publicado com sucesso!", "success");
+                } catch(error) { console.error("Erro ao aprovar cardápio:", error); }
+            });
+        }
+
+        async function handleRejectMenu() {
+            showCustomConfirm("Tem a certeza que deseja rejeitar este cardápio?", async () => {
+                try { await deleteDoc(pendingMenuDocRef); showToast("Cardápio pendente rejeitado.", "info"); } 
+                catch(error) { console.error("Erro ao rejeitar cardápio:", error); }
+            });
+        }
+
+        async function clearAllOrdersForWeek(weekId) {
+            const q = query(pedidosCollectionRef, where("semana", "==", weekId));
+            const querySnapshot = await getDocs(q);
+            const deletionPromises = querySnapshot.docs.map(d => deleteDoc(d.ref));
+            await Promise.all(deletionPromises);
+        }
+
+        function loadSuperAdminsList() { /* ...código mantido... */ }
+        function loadAdminsList() { /* ...código mantido... */ }
+        async function handleAddAdmin(e) { /* ...código mantido... */ }
+        async function handlePromoteToSuperAdmin(uid, email) { /* ...código mantido... */ }
+        function handleDeleteAdmin(uid, email) { /* ...código mantido... */ }
+        function populateAdminEmployeeSelect() { /* ...código mantido... */ }
+        
         // =================================================================================
         // PONTO DE ENTRADA E EVENT LISTENERS PRINCIPAIS
         // =================================================================================
@@ -696,7 +810,7 @@
                 }
                 reader.readAsDataURL(file);
             });
-            document.getElementById('processImageBtn')?.addEventListener('click', async () => { /* ...código mantido... */ });
+            document.getElementById('processImageBtn')?.addEventListener('click', async () => { /* ...código da IA mantido... */ });
         }
 
         main();
