@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         html { scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
@@ -97,7 +98,6 @@
                 <p class="text-gray-600 mb-4">Envie uma única imagem do novo cardápio da semana. Ela será exibida para os funcionários.</p>
                 <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                 <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden border" />
-                <div id="upload-progress-container" class="w-full bg-gray-200 rounded-full h-2.5 my-4 hidden"><div id="upload-progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div></div>
                 <div class="mt-4 text-center">
                     <button id="uploadImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400" disabled>Enviar Nova Imagem</button>
                 </div>
@@ -159,7 +159,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
@@ -172,7 +171,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const storage = getStorage(app);
 
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
@@ -318,13 +316,13 @@
         
         function loadAndDisplayMenu() {
             onSnapshot(menuDocRef, (docSnap) => {
-                weeklyMenu = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { imageUrl: '' };
+                weeklyMenu = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '' };
                 createMenuHTML();
                 renderOrdersTable(allOrders);
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
                  showToast("Erro ao carregar o cardápio.", 'error');
-                 weeklyMenu = { imageUrl: '' };
+                 weeklyMenu = { menuImageBase64: '' };
                  createMenuHTML();
                  renderOrdersTable(allOrders);
             });
@@ -337,8 +335,8 @@
 
             if (!menuContainer || !imageContainer || !menuImage) return;
 
-            if (weeklyMenu.imageUrl) {
-                menuImage.src = weeklyMenu.imageUrl;
+            if (weeklyMenu.menuImageBase64) {
+                menuImage.src = weeklyMenu.menuImageBase64;
                 imageContainer.classList.remove('hidden');
             } else {
                 imageContainer.classList.add('hidden');
@@ -414,7 +412,7 @@
                 submitBtnContainer.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
                 let message = '';
-                if(!weeklyMenu.imageUrl) message = 'Aguardando o administrador enviar o cardápio da semana. ';
+                if(!weeklyMenu.menuImageBase64) message = 'Aguardando o administrador enviar o cardápio da semana. ';
                 else if(!rgf) message = 'Digite seu RGF para começar. ';
                 else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
                 else if (!hasAllSelections) {
@@ -533,7 +531,7 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            if (!weeklyMenu.imageUrl) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
+            if (!weeklyMenu.menuImageBase64) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
             if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
             
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
@@ -582,6 +580,11 @@
                     const choice = (order[dayId] || '').toUpperCase();
                     const notes = order[`${dayId}_notes`];
                     let choiceHTML = choice;
+
+                    // Simplificar para o relatório
+                    if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
+                    if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
+
                     if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
 
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
@@ -708,6 +711,13 @@
             reader.readAsDataURL(file);
         }
 
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
         async function uploadImageAndSaveMenu() {
             if (!fileToUpload) {
                 showToast("Nenhuma imagem selecionada.", "error");
@@ -715,43 +725,36 @@
             }
 
             const message = "Tem a certeza que deseja atualizar o cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente.";
-            showCustomConfirm(message, () => {
-                const storageRef = ref(storage, 'cardapio/cardapio-semanal.jpg');
-                const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
-                
-                const progressContainer = document.getElementById('upload-progress-container');
-                const progressBar = document.getElementById('upload-progress-bar');
+            showCustomConfirm(message, async () => {
                 const uploadBtn = document.getElementById('uploadImageBtn');
-
                 uploadBtn.disabled = true;
                 uploadBtn.textContent = "A enviar...";
-                progressContainer.classList.remove('hidden');
 
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        progressBar.style.width = progress + '%';
-                    }, 
-                    (error) => {
-                        console.error("Erro no upload:", error);
-                        showToast("Falha ao enviar a imagem.", "error");
-                        uploadBtn.disabled = false;
-                        uploadBtn.textContent = "Enviar Nova Imagem";
-                        progressContainer.classList.add('hidden');
-                    }, 
-                    async () => {
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        await setDoc(menuDocRef, { imageUrl: downloadURL });
-                        await clearAllOrders();
-                        
-                        showToast("Cardápio atualizado e pedidos zerados!", "success");
-                        document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-                        uploadBtn.disabled = false;
-                        uploadBtn.textContent = "Enviar Nova Imagem";
-                        progressContainer.classList.add('hidden');
-                        document.getElementById('imageUpload').value = '';
-                    }
-                );
+                try {
+                    // Compress the image
+                    const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024 };
+                    const compressedFile = await imageCompression(fileToUpload, options);
+
+                    // Convert to Base64
+                    const base64String = await toBase64(compressedFile);
+
+                    // Save to Firestore
+                    await setDoc(menuDocRef, { menuImageBase64: base64String });
+                    await clearAllOrders();
+                    
+                    showToast("Cardápio atualizado e pedidos zerados!", "success");
+                    document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+                    document.getElementById('imageUpload').value = '';
+                    document.getElementById('imagePreview').classList.add('hidden');
+                    fileToUpload = null;
+
+                } catch (error) {
+                    console.error("Erro ao processar e guardar imagem:", error);
+                    showToast("Falha ao guardar a imagem. A imagem pode ser grande demais.", "error");
+                } finally {
+                    uploadBtn.disabled = true; // Keep it disabled until a new file is chosen
+                    uploadBtn.textContent = "Enviar Nova Imagem";
+                }
             });
         }
 
@@ -828,12 +831,14 @@
             
             document.getElementById('menu').addEventListener('change', (e) => {
                 validateForm();
-                // Auto-scroll
                 const currentDay = e.target.name;
                 const currentDayIndex = weekDays.findIndex(day => getDayId(day) === currentDay);
                 if (currentDayIndex < weekDays.length - 1) {
                     const nextDayId = getDayId(weekDays[currentDayIndex + 1]);
-                    document.getElementById(`section-${nextDayId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const nextSection = document.getElementById(`section-${nextDayId}`);
+                    if (nextSection) {
+                        nextSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
             });
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
