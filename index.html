@@ -241,8 +241,111 @@
             });
         }
 
-        // --- LÓGICA DO NOVO WIZARD DE PEDIDOS ---
+        async function loadAndRenderEmployees() {
+            const container = document.getElementById('employee-list-container');
+            try {
+                const q = query(funcionariosCollectionRef, orderBy("nome"));
+                const snapshot = await getDocs(q);
 
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcionário cadastrado.</p>';
+                    return;
+                }
+                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+                snapshot.forEach(doc => {
+                    const employee = doc.data();
+                    tableHTML += `<tr>
+                        <td class="py-2 px-3 border-b font-mono">${doc.id}</td>
+                        <td class="py-2 px-3 border-b font-semibold">${employee.nome}</td>
+                        <td class="py-2 px-3 border-b space-x-2">
+                            <button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button>
+                            <button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button>
+                        </td>
+                    </tr>`;
+                });
+                tableHTML += '</tbody></table>';
+                container.innerHTML = tableHTML;
+            } catch (error) {
+                console.error("Erro ao carregar funcionários:", error);
+                container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcionários. Verifique as regras de segurança do Firestore.</p>`;
+                showToast("Falha ao carregar a lista de funcionários.", "error");
+            }
+        }
+
+        async function handleAddEmployee(e) {
+            e.preventDefault();
+            const rgfInput = document.getElementById('newEmployeeRGF');
+            const nameInput = document.getElementById('newEmployeeName');
+            const rgf = rgfInput.value.trim();
+            const nome = nameInput.value.trim();
+
+            if (!rgf || !nome) { showToast("Por favor, preencha o RGF e o Nome.", 'error'); return; }
+
+            try {
+                await setDoc(doc(db, "funcionarios", rgf), { nome });
+                showToast("Funcionário adicionado com sucesso!", 'success');
+                rgfInput.value = ''; nameInput.value = '';
+                loadAndRenderEmployees(); // Re-carrega a lista
+            } catch (error) {
+                console.error("Erro ao adicionar funcionário: ", error);
+                showToast("Ocorreu um erro ao adicionar o funcionário.", 'error');
+            }
+        }
+
+        function handleDeleteEmployee(rgf, name) {
+            const message = `Tem a certeza que deseja excluir o funcionário ${name} (RGF: ${rgf})? Esta ação não pode ser desfeita.`;
+            showCustomConfirm(message, async () => {
+                try {
+                    await deleteDoc(doc(db, "funcionarios", rgf));
+                    showToast("Funcionário excluído com sucesso.", 'success');
+                    loadAndRenderEmployees(); // Re-carrega a lista
+                } catch (error) {
+                    console.error("Erro ao excluir funcionário: ", error);
+                    showToast("Falha ao excluir o funcionário.", 'error');
+                }
+            });
+        }
+        
+        function openEmployeeEditModal(rgf, nome) {
+            document.getElementById('editEmployeeRGF').value = rgf;
+            document.getElementById('editEmployeeName').value = nome;
+            document.getElementById('edit-employee-modal').classList.remove('hidden');
+        }
+
+        async function handleSaveEmployeeChanges(e) {
+            e.preventDefault();
+            const rgf = document.getElementById('editEmployeeRGF').value;
+            const newName = document.getElementById('editEmployeeName').value.trim();
+
+            if (!newName) { showToast("O nome não pode ficar em branco.", 'error'); return; }
+            try {
+                await updateDoc(doc(db, "funcionarios", rgf), { nome: newName });
+                showToast("Funcionário atualizado com sucesso!", 'success');
+                document.getElementById('edit-employee-modal').classList.add('hidden');
+                loadAndRenderEmployees(); // Re-carrega a lista
+            } catch (error) {
+                console.error("Erro ao salvar alterações do funcionário: ", error);
+                showToast("Falha ao salvar as alterações do funcionário.", 'error');
+            }
+        }
+        
+        async function findEmployeeByRGF(rgf) {
+            const nameInput = document.getElementById('employeeName');
+            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return; }
+            try {
+                const docSnap = await getDoc(doc(db, "funcionarios", rgf));
+                if (docSnap.exists()) {
+                    nameInput.value = docSnap.data().nome;
+                } else {
+                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
+                }
+            } catch (error) {
+                console.error("Erro ao buscar funcionário:", error);
+                nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
+                showToast("Erro ao buscar funcionário.", 'error');
+            }
+        }
+        
         function renderWizardStep(index) {
             const wizardContainer = document.getElementById('order-wizard');
             if (index >= weekDays.length) {
@@ -280,7 +383,7 @@
             const progressContainer = document.getElementById('wizard-progress');
             progressContainer.innerHTML = '';
             for(let i=0; i < weekDays.length; i++) {
-                const dotClass = i <= index ? 'bg-blue-600' : 'bg-gray-300';
+                const dotClass = i < index ? 'bg-blue-600' : (i === index ? 'bg-blue-300' : 'bg-gray-300');
                 progressContainer.innerHTML += `<div class="w-2.5 h-2.5 rounded-full ${dotClass}"></div>`;
             }
         }
@@ -302,8 +405,6 @@
             renderWizardStep(currentDayIndex);
         }
 
-        // --- FIM DA LÓGICA DO WIZARD ---
-
         function loadAndDisplayMenu() {
             onSnapshot(menuDocRef, (docSnap) => {
                 const menuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '' };
@@ -316,11 +417,11 @@
                     weeklyMenu.menuImageBase64 = menuData.menuImageBase64;
                     menuImage.src = weeklyMenu.menuImageBase64;
                     menuImageContainer.classList.remove('hidden');
-                    wizardContainer.classList.remove('hidden');
                     guidanceSection.classList.add('hidden');
                     currentDayIndex = 0;
                     userChoices = [];
                     renderWizardStep(0);
+                    validateForm();
                 } else {
                     menuImageContainer.classList.add('hidden');
                     wizardContainer.classList.add('hidden');
@@ -342,8 +443,10 @@
 
             if (!name || !rgf) {
                 wizardContainer.classList.add('hidden');
-                guidanceSection.classList.remove('hidden');
-                document.getElementById('guidanceText').textContent = 'Por favor, preencha o seu RGF para começar.';
+                if (weeklyMenu.menuImageBase64) {
+                    guidanceSection.classList.remove('hidden');
+                    document.getElementById('guidanceText').textContent = 'Por favor, preencha o seu RGF para começar.';
+                }
             } else if (weeklyMenu.menuImageBase64) {
                  guidanceSection.classList.add('hidden');
                  wizardContainer.classList.remove('hidden');
@@ -513,7 +616,7 @@
             reportContainer.innerHTML += allDaysHTML;
             window.print();
         }
-
+        
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
