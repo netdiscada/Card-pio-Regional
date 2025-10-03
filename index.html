@@ -8,19 +8,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
+        html { scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
         .font-brand { font-family: 'Lobster Two', cursive; }
         .menu-option-card:has(input:checked) { border-color: #2563eb; background-color: #eff6ff; transform: scale(1.02); }
         .menu-option-card:has(input:checked) .checkmark { opacity: 1; }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid #3498db; width: 40px; height: 40px; animation: spin 2s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .no-print { }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
+        #image-zoom-modal .modal-content { width: auto; max-width: 95%; padding: 0.5rem; }
+        #zoomed-image { max-width: 90vw; max-height: 85vh; }
         input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
         #print-report { display: none; }
         @media print {
@@ -53,6 +53,15 @@
             <div id="form-container">
                 <header class="text-center mb-8"><h1 class="font-brand text-5xl text-blue-600">Delícias Urbanas</h1><p class="mt-2 text-md text-gray-500">O seu cardápio da semana está servido!</p></header>
                 
+                <div id="menu-image-container" class="mb-8 hidden sticky top-4 z-10">
+                    <div class="relative">
+                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto rounded-xl shadow-lg border-4 border-white cursor-pointer">
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -61,7 +70,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">A carregar o cardápio...</div></div></div>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6"><h2 class="text-lg font-semibold text-gray-800 mb-4">🍽️ 2. Escolha os seus pratos</h2><div id="menu" class="space-y-8"><div class="text-center text-gray-500">Aguardando cardápio...</div></div></div>
                 <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Digite seu RGF e escolha uma opção para cada dia.</p></div>
                 <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
@@ -83,26 +92,27 @@
                 <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
             
-            <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
-                <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <p class="text-gray-500">A carregar status dos pedidos...</p>
-                </div>
-            </section>
-
-            <section id="menu-updater-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🍜 Atualizar Cardápio com Imagem (IA)</h2>
-                <p class="text-gray-600 mb-4">Envie uma imagem do novo cardápio. A nossa inteligência artificial irá ler e preencher os campos para si.</p>
+            <section id="menu-image-uploader-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🖼️ Atualizar Imagem do Cardápio</h2>
+                <p class="text-gray-600 mb-4">Envie uma única imagem do novo cardápio da semana. Ela será exibida para os funcionários.</p>
                 <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden" />
-                <div id="image-processor-container" class="mt-4 text-center hidden"><button id="processImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Analisar Cardápio</button></div>
-                <div id="loader" class="hidden mx-auto my-4 loader"></div>
-                <div id="confirmation-form" class="hidden mt-6"></div>
-                <div id="whatsapp-notification-container" class="mt-4 text-center hidden">
+                <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden border" />
+                <div id="upload-progress-container" class="w-full bg-gray-200 rounded-full h-2.5 my-4 hidden"><div id="upload-progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div></div>
+                <div class="mt-4 text-center">
+                    <button id="uploadImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400" disabled>Enviar Nova Imagem</button>
+                </div>
+                 <div id="whatsapp-notification-container" class="mt-6 text-center hidden">
                     <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                         Notificar Funcionários no WhatsApp
                     </button>
+                </div>
+            </section>
+            
+            <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
+                <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <p class="text-gray-500">A carregar status dos pedidos...</p>
                 </div>
             </section>
 
@@ -135,6 +145,7 @@
         </div>
     </div>
 
+    <div id="image-zoom-modal" class="modal-overlay hidden no-print cursor-zoom-out"><div class="modal-content"><img id="zoomed-image" src=""></div></div>
     <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
     <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
     <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
@@ -148,6 +159,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
@@ -160,6 +172,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
@@ -169,10 +182,11 @@
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
         
-        const fixedOptions = [{ name: 'Omelete', emoji: '🍳' }, { name: 'Filé de frango', emoji: '🍗' }];
-        let weeklyMenu = [];
+        const weekDays = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+        let weeklyMenu = {};
         let allOrders = [];
         let tempOrderData = {};
+        let fileToUpload = null;
         
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
 
@@ -302,20 +316,15 @@
             }
         }
         
-        function createFallbackMenu() {
-            const days = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-            return days.map(day => ({ day, isHoliday: false, isSpecial: false, pratoPrincipal: { name: 'Cardápio não definido', emoji: '🚧' }, opcao: { name: '', emoji: '' }, guarnicao: { name: 'A definir', emoji: '' } }));
-        }
-
         function loadAndDisplayMenu() {
             onSnapshot(menuDocRef, (docSnap) => {
-                weeklyMenu = (docSnap.exists() && docSnap.data().menu?.length > 0) ? docSnap.data().menu : createFallbackMenu();
+                weeklyMenu = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { imageUrl: '' };
                 createMenuHTML();
-                renderOrdersTable(allOrders); 
+                renderOrdersTable(allOrders);
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
-                 showToast("Erro ao carregar o cardápio. Usando cardápio padrão.", 'error');
-                 weeklyMenu = createFallbackMenu();
+                 showToast("Erro ao carregar o cardápio.", 'error');
+                 weeklyMenu = { imageUrl: '' };
                  createMenuHTML();
                  renderOrdersTable(allOrders);
             });
@@ -323,66 +332,67 @@
         
         function createMenuHTML() {
             const menuContainer = document.getElementById('menu');
-            if (!menuContainer) return;
+            const imageContainer = document.getElementById('menu-image-container');
+            const menuImage = document.getElementById('menu-image');
+
+            if (!menuContainer || !imageContainer || !menuImage) return;
+
+            if (weeklyMenu.imageUrl) {
+                menuImage.src = weeklyMenu.imageUrl;
+                imageContainer.classList.remove('hidden');
+            } else {
+                imageContainer.classList.add('hidden');
+            }
+            
             menuContainer.innerHTML = '';
+            let formHTML = '';
 
-            weeklyMenu.forEach(item => {
-                const dayId = getDayId(item.day);
-                let dayHTML = `<div class="day-section space-y-3">`;
-                
-                let dayTitleHTML = `<h3 class="text-xl font-bold text-gray-800">${item.day}</h3>`;
-                if (item.isSpecial) {
-                    dayTitleHTML = `<div class="flex items-center gap-3">
-                        <h3 class="text-xl font-bold text-gray-800">${item.day}</h3>
-                        <span class="text-sm font-semibold text-purple-800 bg-purple-200 rounded-full px-3 py-1">✨ Almoço Especial</span>
-                    </div>`;
-                }
-                
-                if (item.isHoliday) {
-                    dayHTML += dayTitleHTML;
-                    dayHTML += `
-                        <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-md">
-                            <p class="font-bold">🎊 Feriado</p>
-                            <p>Não haverá refeição neste dia.</p>
-                        </div>`;
-                } else {
-                    const allOptions = [
-                        { ...item.pratoPrincipal, type: 'Prato Principal' },
-                        ...(item.opcao?.name ? [{ ...item.opcao, type: 'Opção do Dia' }] : []),
-                        ...fixedOptions.map(fixa => ({ ...fixa, type: 'Opção Fixa' })),
-                    ];
-
-                    dayHTML += dayTitleHTML;
-                    if (item.guarnicao?.name) {
-                        dayHTML += `<div class="text-sm font-semibold text-blue-600 bg-blue-100 rounded-full inline-block px-3 py-1 mb-3">Guarnição: ${item.guarnicao.name} ${item.guarnicao.emoji || ''}</div>`;
-                    }
-                    
-                    dayHTML += `<div class="space-y-3">`;
-                    allOptions.forEach((option) => {
-                        if (option.name) {
-                            dayHTML += `<label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
-                                <input type="radio" name="${dayId}" value="${option.name}" class="hidden">
+            weekDays.forEach(day => {
+                const dayId = getDayId(day);
+                formHTML += `
+                    <div id="section-${dayId}" class="day-section space-y-3">
+                        <h3 class="text-xl font-bold text-gray-800">${day}</h3>
+                        <div class="space-y-3">
+                            <label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
+                                <input type="radio" name="${dayId}" value="Prato Principal" class="hidden">
                                 <div class="flex items-center">
-                                    <span class="text-3xl mr-4">${option.emoji || '🍽️'}</span>
-                                    <div class="flex-grow">
-                                        <p class="font-semibold text-gray-800">${option.name}</p>
-                                        <p class="text-sm text-gray-500">${option.type}</p>
-                                    </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                    <span class="text-3xl mr-4">🍽️</span>
+                                    <div><p class="font-semibold text-gray-800">Prato Principal</p><p class="text-sm text-gray-500">A opção do dia, conforme a imagem</p></div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark ml-auto h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
                                 </div>
-                            </label>`;
-                        }
-                    });
-                    dayHTML += `</div>`;
-                    
-                    dayHTML += `<div class="mt-3">
-                        <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
-                    </div>`;
-                }
-
-                dayHTML += `</div>`;
-                menuContainer.innerHTML += dayHTML;
+                            </label>
+                            <label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
+                                <input type="radio" name="${dayId}" value="Opção" class="hidden">
+                                <div class="flex items-center">
+                                    <span class="text-3xl mr-4">🍲</span>
+                                    <div><p class="font-semibold text-gray-800">Opção</p><p class="text-sm text-gray-500">A segunda opção do dia, se houver</p></div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark ml-auto h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </label>
+                            <label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
+                                <input type="radio" name="${dayId}" value="Omelete" class="hidden">
+                                <div class="flex items-center">
+                                    <span class="text-3xl mr-4">🍳</span>
+                                    <div><p class="font-semibold text-gray-800">Omelete</p><p class="text-sm text-gray-500">Opção fixa</p></div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark ml-auto h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </label>
+                            <label class="menu-option-card block p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-transform duration-200">
+                                <input type="radio" name="${dayId}" value="Filé de frango" class="hidden">
+                                <div class="flex items-center">
+                                    <span class="text-3xl mr-4">🍗</span>
+                                    <div><p class="font-semibold text-gray-800">Filé de frango</p><p class="text-sm text-gray-500">Opção fixa</p></div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="checkmark ml-auto h-6 w-6 text-blue-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="mt-3">
+                            <textarea id="notes-${dayId}" name="notes-${dayId}" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                        </div>
+                    </div>
+                `;
             });
+            menuContainer.innerHTML = formHTML || '<p class="text-center text-gray-500">O administrador ainda não enviou o cardápio da semana.</p>';
 
             validateForm();
         }
@@ -395,8 +405,7 @@
             const submitBtnContainer = document.getElementById('submitButtonContainer');
             if (!guidanceSection || !submitBtnContainer) return;
 
-            const nonHolidayItems = weeklyMenu.filter(item => !item.isHoliday);
-            const hasAllSelections = nonHolidayItems.length > 0 && nonHolidayItems.every(item => document.querySelector(`input[name="${getDayId(item.day)}"]:checked`));
+            const hasAllSelections = weekDays.every(day => document.querySelector(`input[name="${getDayId(day)}"]:checked`));
 
             if (name && rgf && hasAllSelections) {
                 guidanceSection.classList.add('hidden');
@@ -405,12 +414,13 @@
                 submitBtnContainer.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
                 let message = '';
-                if(!rgf) message = 'Digite seu RGF para começar. ';
+                if(!weeklyMenu.imageUrl) message = 'Aguardando o administrador enviar o cardápio da semana. ';
+                else if(!rgf) message = 'Digite seu RGF para começar. ';
                 else if(!name) message = 'RGF não encontrado. Peça para um administrador cadastrá-lo. ';
                 else if (!hasAllSelections) {
-                    const missingDays = nonHolidayItems
-                        .filter(item => !document.querySelector(`input[name="${getDayId(item.day)}"]:checked`))
-                        .map(item => item.day);
+                    const missingDays = weekDays
+                        .filter(day => !document.querySelector(`input[name="${getDayId(day)}"]:checked`))
+                        .map(day => day);
                     if (missingDays.length > 0) message += `Falta selecionar opções para: ${missingDays.join(', ')}.`;
                 }
                 guidanceText.textContent = message || 'Por favor, preencha todos os campos.';
@@ -426,22 +436,19 @@
             const summaryContainer = document.getElementById('confirmation-summary');
             summaryContainer.innerHTML = '';
             
-            weeklyMenu.forEach(item => {
-                const dayId = getDayId(item.day);
-                
-                if (!item.isHoliday) {
-                    const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
-                    if (!choiceInput) return;
-                    const choice = choiceInput.value;
-                    const notes = document.getElementById(`notes-${dayId}`).value.trim();
+            weekDays.forEach(day => {
+                const dayId = getDayId(day);
+                const choiceInput = document.querySelector(`input[name="${dayId}"]:checked`);
+                if (!choiceInput) return;
+                const choice = choiceInput.value;
+                const notes = document.getElementById(`notes-${dayId}`).value.trim();
 
-                    tempOrderData[dayId] = choice;
-                    if(notes) {
-                        tempOrderData[`${dayId}_notes`] = notes;
-                    }
-
-                    summaryContainer.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${choice} ${notes ? `<span class="text-sm text-gray-500 italic">(${notes})</span>` : ''}</p>`;
+                tempOrderData[dayId] = choice;
+                if(notes) {
+                    tempOrderData[`${dayId}_notes`] = notes;
                 }
+
+                summaryContainer.innerHTML += `<p><span class="font-bold">${day}:</span> ${choice} ${notes ? `<span class="text-sm text-gray-500 italic">(${notes})</span>` : ''}</p>`;
             });
             
             document.getElementById('confirmation-modal').classList.remove('hidden');
@@ -526,39 +533,24 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            if (!weeklyMenu || weeklyMenu.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
+            if (!weeklyMenu.imageUrl) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
             if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
             
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
-            weeklyMenu.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.day.substring(0,3)}</th>`);
+            weekDays.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.substring(0,3)}</th>`);
             tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
 
             filteredOrders.forEach(doc => {
                 const order = doc.data();
                 tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
-                weeklyMenu.forEach(dayMenuItem => {
-                    const dayId = getDayId(dayMenuItem.day);
-                    let cellContent = '';
-
-                    if (dayMenuItem.isHoliday) {
-                        cellContent = '<span class="text-xs text-indigo-600">Feriado</span>';
-                    } else {
-                        let choice = order[dayId] || 'N/A';
-                        const notes = order[`${dayId}_notes`];
-                        const mainDishName = dayMenuItem.pratoPrincipal.name;
-                        const optionDishName = dayMenuItem.opcao?.name;
-
-                        let reportChoice = choice;
-                        if (choice === mainDishName) {
-                            reportChoice = 'Prato';
-                        } else if (optionDishName && choice === optionDishName) {
-                            reportChoice = 'Opção';
-                        }
-                        
-                        cellContent = reportChoice;
-                        if (notes) {
-                            cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
-                        }
+                weekDays.forEach(day => {
+                    const dayId = getDayId(day);
+                    let choice = order[dayId] || 'N/A';
+                    const notes = order[`${dayId}_notes`];
+                    
+                    let cellContent = choice;
+                    if (notes) {
+                        cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
                     }
                     tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
                 });
@@ -570,18 +562,16 @@
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            if (allOrders.length === 0 || weeklyMenu.length === 0) {
-                showToast("Não há pedidos ou cardápio para gerar o relatório.", "info");
+            if (allOrders.length === 0) {
+                showToast("Não há pedidos para gerar o relatório.", "info");
                 return;
             }
             reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
             
             let allDaysHTML = '';
-            weeklyMenu.forEach(dayMenuItem => {
-                if (dayMenuItem.isHoliday) return; 
-
-                const dayId = getDayId(dayMenuItem.day);
-                let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${dayMenuItem.day}</th></tr></thead><tbody>`;
+            weekDays.forEach(day => {
+                const dayId = getDayId(day);
+                let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${day}</th></tr></thead><tbody>`;
                 
                 const dailyOrders = allOrders
                     .filter(orderDoc => orderDoc.data()[dayId])
@@ -589,18 +579,9 @@
                 
                 dailyOrders.forEach(orderDoc => {
                     const order = orderDoc.data();
-                    const choice = order[dayId];
+                    const choice = (order[dayId] || '').toUpperCase();
                     const notes = order[`${dayId}_notes`];
-                    
-                    const mainDishName = dayMenuItem.pratoPrincipal.name;
-                    const optionDishName = dayMenuItem.opcao?.name;
-                    let reportChoice = '';
-
-                    if (choice === mainDishName) { reportChoice = 'PRATO'; } 
-                    else if (optionDishName && choice === optionDishName) { reportChoice = 'OPÇÃO'; } 
-                    else { reportChoice = choice.toUpperCase(); }
-                    
-                    let choiceHTML = reportChoice;
+                    let choiceHTML = choice;
                     if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
 
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
@@ -630,32 +611,26 @@
                 orderIdInput.value = docId;
                 formContent.innerHTML = '';
 
-                weeklyMenu.forEach(item => {
-                    const dayId = getDayId(item.day);
-                    let dayHTML = `<fieldset class="day-section border p-4 rounded-lg"><legend class="font-bold text-lg text-gray-800 px-2">${item.day}</legend>`;
+                weekDays.forEach(day => {
+                    const dayId = getDayId(day);
+                    let dayHTML = `<fieldset class="day-section border p-4 rounded-lg"><legend class="font-bold text-lg text-gray-800 px-2">${day}</legend>`;
                     
-                    if(item.isHoliday) {
-                        dayHTML += `<div class="bg-indigo-100 text-indigo-700 p-3 rounded-md text-center">Feriado</div>`;
-                    } else {
-                        const currentChoice = orderData[dayId];
-                        const currentNotes = orderData[`${dayId}_notes`] || '';
-                        const allOptions = [ { ...item.pratoPrincipal }, ...(item.opcao?.name ? [{ ...item.opcao }] : []), ...fixedOptions ];
-                        
-                        dayHTML += `<div class="space-y-2 mt-2">`;
-                        allOptions.forEach((option, index) => {
-                            if (option.name) {
-                                const uniqueId = `edit-${dayId}-${index}`;
-                                const isChecked = (option.name === currentChoice) ? 'checked' : '';
-                                dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="${dayId}" value="${option.name}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option.emoji || ''} ${option.name}</label></div>`;
-                            }
-                        });
-                        dayHTML += `</div>`;
-                        
-                        dayHTML += `<div class="mt-4">
-                            <label for="edit-notes-${dayId}" class="block text-sm font-medium text-gray-700">Anotações</label>
-                            <textarea id="edit-notes-${dayId}" name="edit-notes-${dayId}" rows="2" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">${currentNotes}</textarea>
-                        </div>`;
-                    }
+                    const currentChoice = orderData[dayId];
+                    const currentNotes = orderData[`${dayId}_notes`] || '';
+                    const options = ["Prato Principal", "Opção", "Omelete", "Filé de frango"];
+                    
+                    dayHTML += `<div class="space-y-2 mt-2">`;
+                    options.forEach((option, index) => {
+                        const uniqueId = `edit-${dayId}-${index}`;
+                        const isChecked = (option === currentChoice) ? 'checked' : '';
+                        dayHTML += `<div class="flex items-center"><input type="radio" id="${uniqueId}" name="${dayId}" value="${option}" class="h-4 w-4 text-blue-600 border-gray-300" ${isChecked} required><label for="${uniqueId}" class="ml-3 block text-sm font-medium text-gray-700">${option}</label></div>`;
+                    });
+                    dayHTML += `</div>`;
+                    
+                    dayHTML += `<div class="mt-4">
+                        <label for="edit-notes-${dayId}" class="block text-sm font-medium text-gray-700">Anotações</label>
+                        <textarea id="edit-notes-${dayId}" name="edit-notes-${dayId}" rows="2" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">${currentNotes}</textarea>
+                    </div>`;
                     
                     dayHTML += `</fieldset>`;
                     formContent.innerHTML += dayHTML;
@@ -674,16 +649,14 @@
             const docId = document.getElementById('edit-order-id').value;
             const updateData = {};
             
-            weeklyMenu.forEach(item => {
-                if (!item.isHoliday) {
-                    const dayId = getDayId(item.day);
-                    const selectedOption = document.querySelector(`#edit-order-form input[name="${dayId}"]:checked`);
-                    if (selectedOption) { 
-                        updateData[dayId] = selectedOption.value; 
-                    }
-                    const notes = document.getElementById(`edit-notes-${dayId}`).value.trim();
-                    updateData[`${dayId}_notes`] = notes;
+            weekDays.forEach(day => {
+                const dayId = getDayId(day);
+                const selectedOption = document.querySelector(`#edit-order-form input[name="${dayId}"]:checked`);
+                if (selectedOption) { 
+                    updateData[dayId] = selectedOption.value; 
                 }
+                const notes = document.getElementById(`edit-notes-${dayId}`).value.trim();
+                updateData[`${dayId}_notes`] = notes;
             });
 
             try {
@@ -710,99 +683,8 @@
                 }
             });
         }
-
-        const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
-        
-        document.getElementById('imageUpload').addEventListener('change', function(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('imagePreview').src = e.target.result;
-                document.getElementById('imagePreview').classList.remove('hidden');
-                document.getElementById('image-processor-container').classList.remove('hidden');
-                document.getElementById('whatsapp-notification-container').classList.add('hidden');
-            }
-            reader.readAsDataURL(file);
-        });
-
-        document.getElementById('processImageBtn').addEventListener('click', async () => {
-            if (typeof imageCompression === 'undefined') {
-                showToast('Erro: Biblioteca de compressão não carregou.', 'error');
-                return;
-            }
-
-            const loader = document.getElementById('loader'); const button = document.getElementById('processImageBtn'); const confirmationForm = document.getElementById('confirmation-form');
-            button.disabled = true; button.textContent = 'A analisar...'; loader.classList.remove('hidden'); confirmationForm.classList.add('hidden');
-            const file = document.getElementById('imageUpload').files[0]; 
-            const options = { maxSizeMB: 1.5, maxWidthOrHeight: 1500, useWebWorker: true };
-            try {
-                const compressedFile = await imageCompression(file, options);
-                const base64ImageData = await toBase64(compressedFile);
-                
-                const prompt = `Analise a imagem deste cardápio semanal. Extraia as informações para cada dia (Segunda a Sexta). Para cada dia, identifique o 'Prato Principal', a 'Opção' e a 'Guarnição'. Se o dia for um feriado, marque-o. Além disso, determine se o almoço é 'especial' (ex: uma refeição comemorativa, temática ou de maior qualidade) e defina o campo booleano 'isSpecial'. Retorne um objeto JSON seguindo esta estrutura: {"menu": [{"day": "Segunda-feira", "isHoliday": false, "isSpecial": false, "pratoPrincipal": {"name": "Nome", "emoji": "🍛"}, "opcao": {"name": "Nome", "emoji": "🍲"}, "guarnicao": {"name": "Nome", "emoji": "🥗"}}, ...]}. Se um campo não existir, retorne o nome como string vazia. Atribua emojis apropriados. O JSON deve ser a única coisa na resposta.`;
-
-                const payload = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: compressedFile.type, data: base64ImageData } }] }] };
-                const apiKey = firebaseConfig.apiKey;
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`; 
-
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { const err = await response.json(); throw new Error(`API Error: ${err.error.message}`); }
-                const result = await response.json();
-                
-                let textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!textResponse) { throw new Error("Resposta da IA vazia ou mal formatada."); }
-                
-                textResponse = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-                const menuData = JSON.parse(textResponse);
-
-                if (!menuData || !Array.isArray(menuData.menu)) { throw new Error("Estrutura do JSON da IA inváĺida."); }
-                
-                displayConfirmationForm(menuData.menu);
-
-            } catch (error) { 
-                console.error("Erro ao processar IA:", error); showToast("Erro ao ler imagem com IA: " + error.message, 'error', 8000); 
-            } finally { 
-                button.disabled = false; button.textContent = 'Analisar Cardápio'; loader.classList.add('hidden'); 
-            }
-        });
-
-        function displayConfirmationForm(menuData) {
-            const container = document.getElementById('confirmation-form'); 
-            container.innerHTML = '<h3 class="text-xl font-semibold mb-4">Confirme os Dados Extraídos</h3>';
-            
-            menuData.forEach((item, index) => {
-                container.innerHTML += `<div class="p-4 bg-gray-50 rounded-lg mb-4">
-                    <h4 class="font-bold">${item.day}</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                        <div><label class="block text-sm font-medium">Prato Principal</label><input type="text" id="prato-${index}" value="${item.pratoPrincipal.name || ''}" class="w-full border rounded p-1"></div>
-                        <div><label class="block text-sm font-medium">Opção</label><input type="text" id="opcao-${index}" value="${item.opcao.name || ''}" class="w-full border rounded p-1"></div>
-                        <div><label class="block text-sm font-medium">Guarnição</label><input type="text" id="guarnicao-${index}" value="${item.guarnicao.name || ''}" class="w-full border rounded p-1"></div>
-                    </div>
-                    <div class="mt-3 flex items-center space-x-6">
-                        <label class="flex items-center"><input type="checkbox" id="holiday-${index}" ${item.isHoliday ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-indigo-600"> <span class="ml-2 text-sm text-gray-900">Marcar como Feriado</span></label>
-                        <label class="flex items-center"><input type="checkbox" id="special-${index}" ${item.isSpecial ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-purple-600"> <span class="ml-2 text-sm text-gray-900">✨ Almoço Especial</span></label>
-                    </div>
-                    </div>`;
-            });
-            container.innerHTML += `<div class="text-center mt-4"><button id="saveNewMenuBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Salvar Novo Cardápio</button><button type="button" id="cancelNewMenuBtn" class="w-full mt-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Cancelar</button></div>`;
-            container.classList.remove('hidden'); 
-            
-            document.getElementById('saveNewMenuBtn').addEventListener('click', () => {
-                const message = "Tem certeza que deseja salvar o novo cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente. Esta ação não pode ser desfeita.";
-                showCustomConfirm(message, () => {
-                    saveNewMenu(menuData);
-                });
-            });
-
-            document.getElementById('cancelNewMenuBtn').addEventListener('click', () => {
-                container.classList.add('hidden'); document.getElementById('imagePreview').classList.add('hidden');
-                document.getElementById('image-processor-container').classList.add('hidden'); document.getElementById('imageUpload').value = ''; 
-                showToast("Atualização cancelada.", 'info');
-            });
-        }
         
         async function clearAllOrders() {
-            console.log("Iniciando a limpeza de todos os pedidos da semana...");
             const querySnapshot = await getDocs(pedidosCollectionRef);
             const deletionPromises = [];
             querySnapshot.forEach((doc) => {
@@ -811,42 +693,68 @@
             await Promise.all(deletionPromises);
             console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
         }
-
-        async function saveNewMenu(menuData) {
-            const button = document.getElementById('saveNewMenuBtn'); 
-            const cancelButton = document.getElementById('cancelNewMenuBtn');
-            button.disabled = true;
-            cancelButton.disabled = true;
-            button.textContent = 'A salvar...'; 
-
-            const newMenu = menuData.map((item, i) => ({ 
-                day: item.day, 
-                pratoPrincipal: { name: document.getElementById(`prato-${i}`).value.trim(), emoji: '🍛' }, 
-                opcao: { name: document.getElementById(`opcao-${i}`).value.trim(), emoji: '🍲' }, 
-                guarnicao: { name: document.getElementById(`guarnicao-${i}`).value.trim(), emoji: '🥗' },
-                isHoliday: document.getElementById(`holiday-${i}`).checked,
-                isSpecial: document.getElementById(`special-${i}`).checked,
-            })); 
-
-            try { 
-                await setDoc(menuDocRef, { menu: newMenu });
-                await clearAllOrders();
-                showToast('Cardápio atualizado e pedidos zerados!', 'success'); 
-                document.getElementById('confirmation-form').classList.add('hidden'); 
-                document.getElementById('imagePreview').classList.add('hidden');
-                document.getElementById('image-processor-container').classList.add('hidden'); 
-                document.getElementById('imageUpload').value = ''; 
-                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-            } catch (error) { 
-                console.error("Erro ao salvar o cardápio ou zerar pedidos:", error); 
-                showToast("Erro ao salvar o novo cardápio.", 'error'); 
-            } finally { 
-                button.disabled = false; 
-                cancelButton.disabled = false;
-                button.textContent = 'Salvar Novo Cardápio'; 
-            }
-        }
         
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            fileToUpload = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreview').classList.remove('hidden');
+                document.getElementById('uploadImageBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadImageAndSaveMenu() {
+            if (!fileToUpload) {
+                showToast("Nenhuma imagem selecionada.", "error");
+                return;
+            }
+
+            const message = "Tem a certeza que deseja atualizar o cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente.";
+            showCustomConfirm(message, () => {
+                const storageRef = ref(storage, 'cardapio/cardapio-semanal.jpg');
+                const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
+                
+                const progressContainer = document.getElementById('upload-progress-container');
+                const progressBar = document.getElementById('upload-progress-bar');
+                const uploadBtn = document.getElementById('uploadImageBtn');
+
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = "A enviar...";
+                progressContainer.classList.remove('hidden');
+
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressBar.style.width = progress + '%';
+                    }, 
+                    (error) => {
+                        console.error("Erro no upload:", error);
+                        showToast("Falha ao enviar a imagem.", "error");
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = "Enviar Nova Imagem";
+                        progressContainer.classList.add('hidden');
+                    }, 
+                    async () => {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        await setDoc(menuDocRef, { imageUrl: downloadURL });
+                        await clearAllOrders();
+                        
+                        showToast("Cardápio atualizado e pedidos zerados!", "success");
+                        document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = "Enviar Nova Imagem";
+                        progressContainer.classList.add('hidden');
+                        document.getElementById('imageUpload').value = '';
+                    }
+                );
+            });
+        }
+
         function handleWhatsAppNotification() {
             const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
             const encodedMessage = encodeURIComponent(message);
@@ -918,7 +826,16 @@
             rgfInput.addEventListener('blur', (e) => { localStorage.setItem('employeeRGF', e.target.value); findEmployeeByRGF(e.target.value); });
             rgfInput.addEventListener('input', validateForm);
             
-            document.getElementById('menu').addEventListener('change', validateForm);
+            document.getElementById('menu').addEventListener('change', (e) => {
+                validateForm();
+                // Auto-scroll
+                const currentDay = e.target.name;
+                const currentDayIndex = weekDays.findIndex(day => getDayId(day) === currentDay);
+                if (currentDayIndex < weekDays.length - 1) {
+                    const nextDayId = getDayId(weekDays[currentDayIndex + 1]);
+                    document.getElementById(`section-${nextDayId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
             
@@ -949,6 +866,17 @@
             document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
             
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
+            
+            document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+            document.getElementById('uploadImageBtn').addEventListener('click', uploadImageAndSaveMenu);
+
+            const zoomModal = document.getElementById('image-zoom-modal');
+            const menuImage = document.getElementById('menu-image');
+            menuImage.addEventListener('click', () => {
+                document.getElementById('zoomed-image').src = menuImage.src;
+                zoomModal.classList.remove('hidden');
+            });
+            zoomModal.addEventListener('click', () => zoomModal.classList.add('hidden'));
         }
 
         main();
