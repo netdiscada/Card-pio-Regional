@@ -62,15 +62,6 @@
             <div id="form-container">
                 <p class="text-center mt-2 mb-8 text-md text-gray-500">O seu cardápio da semana está servido!</p>
 
-                <div id="menu-image-container" class="mb-6 hidden">
-                    <div class="relative">
-                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto rounded-xl shadow-lg border-4 border-white cursor-pointer">
-                        <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full pointer-events-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -79,22 +70,33 @@
                     </div>
                 </div>
 
-                <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-6 mb-6 hidden">
-                    <div id="order-wizard">
-                        <div class="flex justify-between items-center mb-4">
-                             <h2 class="text-lg font-semibold text-gray-800">🍽️ 2. Escolha o seu prato para:</h2>
-                             <div id="wizard-progress" class="flex space-x-2"></div>
+                <div id="order-section" class="hidden">
+                    <div id="menu-image-container" class="mb-4">
+                        <div class="relative">
+                            <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto rounded-xl shadow-lg border-4 border-white cursor-pointer">
+                            <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                            </div>
                         </div>
-                        <h3 id="wizard-day-title" class="text-2xl font-bold text-blue-600 mb-4 text-center"></h3>
-                        <div id="wizard-options" class="grid grid-cols-2 gap-3 sm:gap-4"></div>
-                        <div class="mt-4">
-                            <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                    </div>
+
+                    <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                        <div id="order-wizard">
+                            <div class="flex justify-between items-center mb-4">
+                                 <h2 class="text-lg font-semibold text-gray-800">🍽️ 2. Escolha para:</h2>
+                                 <div id="wizard-progress" class="flex space-x-2"></div>
+                            </div>
+                            <h3 id="wizard-day-title" class="text-2xl font-bold text-blue-600 mb-4 text-center"></h3>
+                            <div id="wizard-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                            <div class="mt-4">
+                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, ponto da carne, etc."></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
-                <div id="submitButtonContainer" class="hidden text-center"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
+                <div id="submitButtonContainer" class="hidden text-center mt-6"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
             <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
         </div>
@@ -347,7 +349,7 @@
         }
         
         function renderWizardStep(index) {
-            const wizardContainer = document.getElementById('order-wizard');
+            const wizardContainer = document.getElementById('order-wizard-container');
             if (index >= weekDays.length) {
                 wizardContainer.classList.add('hidden');
                 document.getElementById('submitButtonContainer').classList.remove('hidden');
@@ -361,11 +363,11 @@
             optionsContainer.innerHTML = '';
             mealOptions.forEach(opt => {
                 optionsContainer.innerHTML += `
-                    <button data-value="${opt.name}" class="wizard-btn text-left p-4 border-2 border-gray-200 rounded-lg">
+                    <button data-value="${opt.name}" class="wizard-btn text-left p-3 border-2 border-gray-200 rounded-lg">
                         <div class="flex items-center">
-                            <span class="text-3xl mr-3">${opt.emoji}</span>
+                            <span class="text-2xl mr-3">${opt.emoji}</span>
                             <div>
-                                <p class="font-semibold text-gray-800">${opt.name}</p>
+                                <p class="font-semibold text-gray-800 text-sm">${opt.name}</p>
                                 <p class="text-xs text-gray-500">${opt.description}</p>
                             </div>
                         </div>
@@ -408,26 +410,18 @@
         function loadAndDisplayMenu() {
             onSnapshot(menuDocRef, (docSnap) => {
                 const menuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '' };
-                const menuImageContainer = document.getElementById('menu-image-container');
                 const menuImage = document.getElementById('menu-image');
-                const guidanceSection = document.getElementById('guidanceSection');
-                const wizardContainer = document.getElementById('order-wizard-container');
 
                 if (menuData.menuImageBase64) {
                     weeklyMenu.menuImageBase64 = menuData.menuImageBase64;
                     menuImage.src = weeklyMenu.menuImageBase64;
-                    menuImageContainer.classList.remove('hidden');
-                    guidanceSection.classList.add('hidden');
                     currentDayIndex = 0;
                     userChoices = [];
                     renderWizardStep(0);
-                    validateForm();
                 } else {
-                    menuImageContainer.classList.add('hidden');
-                    wizardContainer.classList.add('hidden');
-                    guidanceSection.classList.remove('hidden');
-                    document.getElementById('guidanceText').textContent = 'O administrador ainda não enviou o cardápio da semana.';
+                    weeklyMenu.menuImageBase64 = null;
                 }
+                validateForm();
                 renderOrdersTable(allOrders);
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
@@ -439,17 +433,21 @@
             const name = document.getElementById('employeeName')?.value.trim();
             const rgf = document.getElementById('employeeRGF')?.value.trim();
             const guidanceSection = document.getElementById('guidanceSection');
-            const wizardContainer = document.getElementById('order-wizard-container');
+            const orderSection = document.getElementById('order-section');
 
-            if (!name || !rgf) {
-                wizardContainer.classList.add('hidden');
-                if (weeklyMenu.menuImageBase64) {
+            if (weeklyMenu.menuImageBase64) {
+                if (!name || !rgf) {
+                    orderSection.classList.add('hidden');
                     guidanceSection.classList.remove('hidden');
                     document.getElementById('guidanceText').textContent = 'Por favor, preencha o seu RGF para começar.';
+                } else {
+                    guidanceSection.classList.add('hidden');
+                    orderSection.classList.remove('hidden');
                 }
-            } else if (weeklyMenu.menuImageBase64) {
-                 guidanceSection.classList.add('hidden');
-                 wizardContainer.classList.remove('hidden');
+            } else {
+                orderSection.classList.add('hidden');
+                guidanceSection.classList.remove('hidden');
+                document.getElementById('guidanceText').textContent = 'O administrador ainda não enviou o cardápio da semana.';
             }
         }
 
@@ -617,6 +615,17 @@
             window.print();
         }
         
+        async function clearAllOrders() {
+            console.log("Iniciando a limpeza de todos os pedidos da semana...");
+            const querySnapshot = await getDocs(pedidosCollectionRef);
+            const deletionPromises = [];
+            querySnapshot.forEach((doc) => {
+                deletionPromises.push(deleteDoc(doc.ref));
+            });
+            await Promise.all(deletionPromises);
+            console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
+        }
+
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
