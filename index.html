@@ -351,7 +351,7 @@
         function renderWizardStep(index) {
             const wizardContainer = document.getElementById('order-wizard-container');
             if (index >= weekDays.length) {
-                wizardContainer.parentElement.classList.add('hidden'); // Hide the whole order section
+                wizardContainer.parentElement.classList.add('hidden');
                 document.getElementById('submitButtonContainer').classList.remove('hidden');
                 return;
             }
@@ -362,10 +362,11 @@
             const optionsContainer = document.getElementById('wizard-options');
             optionsContainer.innerHTML = '';
             mealOptions.forEach(opt => {
+                // CHANGE: Reduced padding (p-2) and adjusted text sizes for compactness
                 optionsContainer.innerHTML += `
-                    <button data-value="${opt.name}" class="wizard-btn text-left p-3 border-2 border-gray-200 rounded-lg">
-                        <div class="flex items-start">
-                            <span class="text-2xl mr-3">${opt.emoji}</span>
+                    <button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <span class="text-xl mr-2">${opt.emoji}</span>
                             <div>
                                 <p class="font-semibold text-gray-800 text-sm leading-tight">${opt.name}</p>
                                 <p class="text-xs text-gray-500">${opt.description}</p>
