@@ -111,13 +111,21 @@
             </div>
             
             <section id="menu-image-uploader-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🖼️ Atualizar Imagem do Cardápio</h2>
-                <p class="text-gray-600 mb-4">Envie uma única imagem do novo cardápio da semana. Ela será exibida para os funcionários.</p>
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🖼️ Novo Cardápio da Semana</h2>
+                <p class="text-gray-600 mb-4">Envie a imagem do novo cardápio. Isso limpará os pedidos da semana anterior.</p>
                 <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                 <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden border" />
-                <div class="mt-4 text-center">
-                    <button id="uploadImageBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400" disabled>Enviar Nova Imagem</button>
+                
+                <div class="mt-6 border-t pt-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">📅 Marcar Feriados (Não haverá pedido nestes dias)</h3>
+                    <div id="holiday-selector" class="flex flex-wrap gap-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                        </div>
                 </div>
+
+                <div class="mt-6 text-center">
+                    <button id="uploadImageBtn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md transition-colors" disabled>Salvar Cardápio e Feriados</button>
+                </div>
+
                  <div id="whatsapp-notification-container" class="mt-6 text-center hidden">
                     <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
@@ -211,6 +219,7 @@
         let userChoices = [];
         let currentDayIndex = 0;
         let fileToUpload = null;
+        let activeHolidays = [];
         
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
 
@@ -354,6 +363,19 @@
             }
 
             const day = weekDays[index];
+            const dayId = getDayId(day);
+
+            // LOGICA DE FERIADO: Pula automaticamente o dia se for feriado
+            if (activeHolidays.includes(dayId)) {
+                userChoices[index] = {
+                    day: day,
+                    choice: "FERIADO",
+                    notes: ""
+                };
+                renderWizardStep(index + 1);
+                return;
+            }
+
             document.getElementById('wizard-day-title').textContent = day;
 
             const optionsContainer = document.getElementById('wizard-options');
@@ -404,10 +426,33 @@
             renderWizardStep(currentDayIndex);
         }
 
+        // Função para mostrar checkboxes de feriado no admin
+        function renderHolidayCheckboxes() {
+            const container = document.getElementById('holiday-selector');
+            if (!container) return;
+            container.innerHTML = '';
+            weekDays.forEach(day => {
+                const dayId = getDayId(day);
+                const isChecked = activeHolidays.includes(dayId) ? 'checked' : '';
+                container.innerHTML += `
+                    <label class="flex items-center space-x-2 cursor-pointer select-none bg-white p-2 rounded shadow-sm border border-gray-100 hover:bg-gray-50 transition">
+                        <input type="checkbox" value="${dayId}" class="holiday-checkbox w-5 h-5 text-blue-600 rounded focus:ring-blue-500" ${isChecked}>
+                        <span class="text-gray-700 font-medium">${day}</span>
+                    </label>
+                `;
+            });
+        }
+
         function loadAndDisplayMenu() {
             onSnapshot(menuDocRef, (docSnap) => {
-                const menuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '' };
+                // Carrega menu e feriados
+                const menuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [] };
+                
                 const menuImage = document.getElementById('menu-image');
+                activeHolidays = menuData.holidays || []; // Atualiza feriados globais
+
+                // Atualiza UI de checkboxes para o admin ver o estado atual
+                renderHolidayCheckboxes();
 
                 if (menuData.menuImageBase64) {
                     weeklyMenu.menuImageBase64 = menuData.menuImageBase64;
@@ -463,7 +508,10 @@
                 if(item.notes) {
                     tempOrderData[`${dayId}_notes`] = item.notes;
                 }
-                summaryContainer.innerHTML += `<p><span class="font-bold">${item.day}:</span> ${item.choice} ${item.notes ? `<span class="text-sm text-gray-500 italic">(${item.notes})</span>` : ''}</p>`;
+                const displayChoice = item.choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : item.choice;
+                const styleClass = item.choice === 'FERIADO' ? 'text-gray-400 italic' : 'text-gray-800';
+                
+                summaryContainer.innerHTML += `<p class="${styleClass}"><span class="font-bold">${item.day}:</span> ${displayChoice} ${item.notes ? `<span class="text-sm text-gray-500 italic">(${item.notes})</span>` : ''}</p>`;
             });
             
             document.getElementById('confirmation-modal').classList.remove('hidden');
@@ -563,11 +611,15 @@
                     let choice = order[dayId] || 'N/A';
                     const notes = order[`${dayId}_notes`];
                     
-                    let cellContent = choice;
-                    if (notes) {
-                        cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
+                    if (choice === 'FERIADO') {
+                        tableHTML += `<td class="py-2 px-3 border-b bg-gray-100 text-gray-400 text-xs text-center">FERIADO</td>`;
+                    } else {
+                        let cellContent = choice;
+                        if (notes) {
+                            cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
+                        }
+                        tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
                     }
-                    tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
                 });
                 tableHTML += `<td class="py-2 px-3 border-b space-x-2"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
             });
@@ -586,6 +638,9 @@
             let allDaysHTML = '';
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
+                // Se o dia é feriado e ninguém pediu nada (o que é esperado), podemos até pular a página ou mostrar aviso
+                // Mas aqui vamos gerar a tabela normalmente. Se for feriado, vai mostrar "FERIADO"
+                
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${day}</th></tr></thead><tbody>`;
                 
                 const dailyOrders = allOrders
@@ -650,6 +705,9 @@
                 return;
             }
 
+            // Captura feriados selecionados
+            const selectedHolidays = Array.from(document.querySelectorAll('.holiday-checkbox:checked')).map(cb => cb.value);
+
             const message = "Tem a certeza que deseja atualizar o cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente.";
             showCustomConfirm(message, async () => {
                 const uploadBtn = document.getElementById('uploadImageBtn');
@@ -661,21 +719,26 @@
                     const compressedFile = await imageCompression(fileToUpload, options);
                     const base64String = await toBase64(compressedFile);
 
-                    await setDoc(menuDocRef, { menuImageBase64: base64String });
+                    // Salva imagem E feriados
+                    await setDoc(menuDocRef, { 
+                        menuImageBase64: base64String,
+                        holidays: selectedHolidays 
+                    });
+                    
                     await clearAllOrders();
                     
-                    showToast("Cardápio atualizado e pedidos zerados!", "success");
+                    showToast("Cardápio e Feriados atualizados!", "success");
                     document.getElementById('whatsapp-notification-container').classList.remove('hidden');
                     document.getElementById('imageUpload').value = '';
                     document.getElementById('imagePreview').classList.add('hidden');
                     fileToUpload = null;
 
                 } catch (error) {
-                    console.error("Erro ao processar e guardar imagem:", error);
-                    showToast("Falha ao guardar a imagem. A imagem pode ser grande demais.", "error");
+                    console.error("Erro ao processar e guardar dados:", error);
+                    showToast("Falha ao guardar. Tente novamente.", "error");
                 } finally {
                     uploadBtn.disabled = true;
-                    uploadBtn.textContent = "Enviar Nova Imagem";
+                    uploadBtn.textContent = "Salvar Cardápio e Feriados";
                 }
             });
         }
@@ -740,8 +803,16 @@
         }
 
         async function handleAdminLogout() {
-            try { await signOut(auth); showToast("Logout de administrador bem-sucedido!", 'info'); } 
-            catch (error) { console.error("Erro no logout:", error); showToast("Erro ao fazer logout.", 'error'); }
+            try { 
+                await signOut(auth); 
+                showToast("Saindo do painel...", 'info');
+                // FORÇA O RECARREGAMENTO DA PÁGINA PARA LIMPAR O ESTADO
+                setTimeout(() => { window.location.reload(); }, 500);
+            } 
+            catch (error) { 
+                console.error("Erro no logout:", error); 
+                showToast("Erro ao fazer logout.", 'error'); 
+            }
         }
 
         function main() {
