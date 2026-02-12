@@ -3,868 +3,663 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cardápio Quatinga</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <title>Sistema de Marmitas - Com Painel Adm</title>
     <style>
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
-        .font-brand { font-family: 'Lobster Two', cursive; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .no-print { }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
-        .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
-        #image-zoom-modal .modal-content { width: auto; max-width: 95%; padding: 0.5rem; background: none; box-shadow: none; }
-        #zoomed-image { max-width: 90vw; max-height: 85vh; border-radius: 0.75rem; }
-        input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
-        .wizard-btn { transition: all 0.2s ease-in-out; }
-        .wizard-btn:hover { transform: scale(1.03); border-color: #3b82f6; }
-        .wizard-btn:active { transform: scale(0.98); background-color: #eff6ff; }
-        #print-report { display: none; }
-        @media print {
-            @page { size: A4 portrait; margin: 10mm; }
-            html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
-            .no-print { display: none !important; }
-            body > *:not(#print-report) { display: none !important; }
-            #print-report { display: block !important; }
-            #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; }
-            .report-day-section { margin-bottom: 12px; page-break-inside: avoid; }
-            .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-            #print-report th, #print-report td { border: 1px solid #999; padding: 5px; text-align: left; }
-            #print-report th { background-color: #e2e8f0; font-weight: 600; }
-            #print-report .rgf-col { width: 15%; }
-            #print-report .nome-col { width: 60%; }
-            #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+        :root {
+            --primary: #4a69bd; /* Azul Profundo */
+            --secondary: #6a89cc;
+            --accent: #f6b93b; /* Amarelo */
+            --danger: #e55039;
+            --dark: #1e3799;
+            --light: #f8f9fa;
+            --success: #38ada9;
         }
-        #app-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; pointer-events: none; transform: translateX(-50%) translateY(20px); }
-        #app-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
-        #app-toast.success { background-color: #22c55e; }
-        #app-toast.error { background-color: #ef4444; }
-        #app-toast.info { background-color: #3b82f6; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Navegação / Abas */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            padding: 5px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            padding: 10px 25px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 25px;
+            font-weight: 600;
+            color: #777;
+            transition: 0.3s;
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(74, 105, 189, 0.3);
+        }
+
+        /* Container Principal */
+        .main-container {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            min-height: 400px;
+        }
+
+        /* --- Estilos do Wizard (Usuário) --- */
+        .wizard-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            margin-top: 10px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .wizard-body {
+            padding: 30px;
+        }
+
+        .step-title {
+            font-size: 1.4em;
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .step-subtitle {
+            text-align: center;
+            color: #7f8fa6;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+
+        /* Cartões de Opção */
+        .option-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option-card:hover { border-color: var(--secondary); background: #fdfdfd; }
+        .option-card.selected {
+            border-color: var(--primary);
+            background-color: #f0f6ff;
+        }
+        .option-card input { display: none; }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-next { background: var(--primary); color: white; }
+        .btn-prev { background: #dfe4ea; color: #555; }
+        .btn-next:hover { background: var(--dark); }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* --- Estilos do Admin --- */
+        #adminPanel {
+            padding: 20px;
+            display: none; /* Oculto por padrão */
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .config-area {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            border: 1px solid #ffeeba;
+        }
+
+        .config-area input {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        th { background: var(--primary); color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        tr:hover { background-color: #f9f9f9; }
+
+        .badge-total {
+            background: var(--success);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-right: 5px;
+        }
+        .btn-edit { background: var(--accent); color: #333; }
+        .btn-del { background: var(--danger); color: white; }
+
+        /* Estado: Editando (Aviso Visual) */
+        .editing-banner {
+            background: var(--accent);
+            color: #333;
+            text-align: center;
+            padding: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
-<body class="bg-slate-50">
+<body>
 
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-20 shadow-sm no-print">
-        <div class="container mx-auto max-w-4xl p-2 flex justify-between items-center">
-            <h1 class="font-brand text-2xl text-blue-600">Delícias Urbanas</h1>
-            <button id="switchToAdmin" class="text-xs text-gray-500 hover:text-blue-600 font-semibold py-1 px-2 rounded-md hover:bg-gray-100">Painel ADM</button>
-        </div>
-    </header>
+    <div class="nav-tabs">
+        <button class="nav-btn active" onclick="mudarAba('usuario')" id="tabUser">Fazer Pedido</button>
+        <button class="nav-btn" onclick="mudarAba('admin')" id="tabAdmin">Administração</button>
+    </div>
 
-    <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
-        
-        <div id="user-view" class="no-print">
-            <div id="form-container">
-                <p class="text-center mt-2 mb-8 text-md text-gray-500">O seu cardápio da semana está servido!</p>
+    <div class="main-container">
+        <div id="editingBanner" class="editing-banner">⚠️ MODO DE EDIÇÃO ADMINISTRATIVA</div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div><label for="employeeRGF" class="block text-sm font-medium text-gray-700">Seu RGF</label><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
-                        <div><label for="employeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div>
-                    </div>
-                </div>
-
-                <div id="order-section" class="hidden">
-                    <div id="menu-image-container" class="mb-4">
-                        <div class="relative">
-                            <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto rounded-xl shadow-lg border-4 border-white cursor-pointer">
-                            <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-                        <div id="order-wizard">
-                            <h3 id="wizard-day-title" class="text-2xl font-bold text-blue-600 mb-4 text-center"></h3>
-                            <div id="wizard-options" class="grid grid-cols-2 gap-3"></div>
-                            <div class="mt-4">
-                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, etc."></textarea>
-                            </div>
-                            <div id="wizard-progress" class="flex space-x-2 justify-center mt-4"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
-                <div id="submitButtonContainer" class="hidden text-center mt-6"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
+        <div id="userPanel">
+            <div class="wizard-header">
+                <h2 style="margin:0">Marmita Express</h2>
+                <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
             </div>
-            <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
+
+            <div class="wizard-body" id="wizardContent">
+                </div>
         </div>
 
-        <div id="admin-view" class="hidden no-print">
-            <header class="text-center border-b pb-6 mb-6">
-                <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
-                <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
-                <div class="mt-4">
-                    <button id="adminLogoutBtn" class="bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600">Sair do Painel</button>
-                </div>
-            </header>
-            <div class="mb-8">
-                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
+        <div id="adminPanel">
+            <div class="admin-header">
+                <h3 style="margin:0; color: var(--primary)">Gerenciamento</h3>
+                <button onclick="renderAdminTable()" class="btn-sm btn-edit">🔄 Atualizar</button>
             </div>
-            
-            <section id="menu-image-uploader-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🖼️ Novo Cardápio da Semana</h2>
-                <p class="text-gray-600 mb-4">Envie a imagem do novo cardápio. Isso limpará os pedidos da semana anterior.</p>
-                <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden border" />
-                
-                <div class="mt-6 border-t pt-4">
-                    <h3 class="font-semibold text-gray-700 mb-2">📅 Marcar Feriados (Não haverá pedido nestes dias)</h3>
-                    <div id="holiday-selector" class="flex flex-wrap gap-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
-                        </div>
-                </div>
 
-                <div class="mt-6 text-center">
-                    <button id="uploadImageBtn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md transition-colors" disabled>Salvar Cardápio e Feriados</button>
-                </div>
+            <div class="config-area">
+                <strong>Configurações Globais</strong><br>
+                <label>Data Início:</label>
+                <input type="date" id="startDate" onchange="reiniciarSistema()">
+                <label>Feriados (DD/MM/AAAA):</label>
+                <input type="text" id="feriadosInput" value="25/12/2026, 01/01/2027" placeholder="Ex: 15/11/2024" onchange="reiniciarSistema()">
+            </div>
 
-                 <div id="whatsapp-notification-container" class="mt-6 text-center hidden">
-                    <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                        Notificar Funcionários no WhatsApp
-                    </button>
-                </div>
-            </section>
-            
-            <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
-                <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <p class="text-gray-500">A carregar status dos pedidos...</p>
-                </div>
-            </section>
-
-            <section id="employee-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">👥 Gerenciamento de Funcionários</h2>
-                <form id="add-employee-form" class="grid sm:grid-cols-3 gap-4 items-end mb-6">
-                    <div>
-                        <label for="newEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label>
-                        <input type="text" id="newEmployeeRGF" placeholder="RGF do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label for="newEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                        <input type="text" id="newEmployeeName" placeholder="Nome do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Adicionar Funcionário</button>
-                </form>
-                <div id="employee-list-container" class="overflow-x-auto">
-                    <p class="text-gray-500">A carregar lista de funcionários...</p>
-                </div>
-            </section>
-
-            <section id="orders-section">
-                <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
-                    <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
-                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
-                </div>
-                <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos...</p></div>
-            </section>
+            <div style="overflow-x: auto;">
+                <table id="tabelaPedidos">
+                    <thead>
+                        <tr>
+                            <th>Funcionário</th>
+                            <th>Total</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyPedidos">
+                        </tbody>
+                </table>
+            </div>
+            <div id="emptyMsg" style="text-align:center; color:#999; margin-top:20px; display:none;">
+                Nenhum pedido realizado.
+            </div>
         </div>
     </div>
 
-    <div id="image-zoom-modal" class="modal-overlay hidden no-print cursor-zoom-out"><div class="modal-content"><img id="zoomed-image" src=""></div></div>
-    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-lg font-semibold text-gray-800 mb-2">Nome do Funcionário</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div id="edit-menu-options" class="space-y-6"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
-    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
-    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Aceder ao Painel de Administrador</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
-    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
+<script>
+    // --- ESTADO GLOBAL ---
+    let pedidosSalvos = []; // Banco de dados em memória
+    let pedidoAtual = {};   // O pedido sendo preenchido no momento
+    let currentStep = 0;    // Passo atual do Wizard
+    let diasCalculados = [];
+    let modoEdicaoAdmin = false; // Flag para saber se é o admin editando
 
-    <div id="print-report"></div>
-    <div id="app-toast"></div>
+    // Inicialização
+    document.getElementById('startDate').valueAsDate = new Date();
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    // --- FUNÇÕES AUXILIARES ---
+    function formatarData(date) {
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    function getFeriados() {
+        const val = document.getElementById('feriadosInput').value;
+        if (!val) return [];
+        return val.split(',').map(s => s.trim());
+    }
+
+    function calcularDias() {
+        const inputData = document.getElementById('startDate').value;
+        const inicio = new Date(inputData);
+        inicio.setMinutes(inicio.getMinutes() + inicio.getTimezoneOffset());
         
-        const firebaseConfig = {
-            apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
-            authDomain: "cardapio-8ddea.firebaseapp.com",
-            projectId: "cardapio-8ddea",
-            storageBucket: "cardapio-8ddea.appspot.com",
-            messagingSenderId: "1019677985212",
-            appId: "1:1019677985212:web:57c7820a62585a867dc3b9"
+        const nomes = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+        const dias = [];
+        
+        for(let i=0; i<5; i++) {
+            const d = new Date(inicio);
+            d.setDate(inicio.getDate() + i);
+            dias.push({
+                nome: nomes[i],
+                dataStr: formatarData(d)
+            });
+        }
+        return dias;
+    }
+
+    // --- CONTROLE DE ABAS ---
+    function mudarAba(aba) {
+        // Reset visual
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('userPanel').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'none';
+
+        if (aba === 'usuario') {
+            document.getElementById('tabUser').classList.add('active');
+            document.getElementById('userPanel').style.display = 'block';
+            
+            // Se NÃO estivermos no meio de uma edição de admin, reseta para um novo pedido
+            if (!modoEdicaoAdmin) {
+                iniciarNovoPedido();
+            }
+        } else {
+            document.getElementById('tabAdmin').classList.add('active');
+            document.getElementById('adminPanel').style.display = 'block';
+            
+            // Se sair para admin, cancela qualquer edição pendente
+            if (modoEdicaoAdmin) cancelarEdicaoAdmin();
+            renderAdminTable();
+        }
+    }
+
+    // --- WIZARD (LÓGICA PRINCIPAL) ---
+
+    function iniciarNovoPedido() {
+        modoEdicaoAdmin = false;
+        document.getElementById('editingBanner').style.display = 'none';
+        
+        pedidoAtual = {
+            id: null,
+            cliente: '',
+            itens: [],
+            total: 0
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        currentStep = 0;
+        diasCalculados = calcularDias();
+        renderStep();
+    }
 
-        const APP_CONFIG = {
-            ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
-        };
-        
-        const menuDocRef = doc(db, "cardapio", "semanal");
-        const pedidosCollectionRef = collection(db, "pedidosDaSemana");
-        const funcionariosCollectionRef = collection(db, "funcionarios");
-        
-        const weekDays = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-        const mealOptions = [
-            { name: "Prato Principal", emoji: "🍽️", description: "A opção do dia, conforme a imagem" },
-            { name: "Opção", emoji: "🍲", description: "A segunda opção do dia, se houver" },
-            { name: "Omelete", emoji: "🍳", description: "Opção fixa" },
-            { name: "Filé de frango", emoji: "🍗", description: "Opção fixa" }
-        ];
-
-        let weeklyMenu = {};
-        let allOrders = [];
-        let tempOrderData = {};
-        let userChoices = [];
-        let currentDayIndex = 0;
-        let fileToUpload = null;
-        let activeHolidays = [];
-        
-        function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
-
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.getElementById('app-toast');
-            if(!toast) return;
-            toast.textContent = message;
-            toast.className = 'show';
-            toast.classList.add(type);
-            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
+    function reiniciarSistema() {
+        diasCalculados = calcularDias();
+        // Se estiver na aba admin, atualiza tabela, se usuario, reinicia wizard
+        if(document.getElementById('adminPanel').style.display === 'block') {
+            renderAdminTable();
+        } else {
+            iniciarNovoPedido();
         }
+    }
+
+    function renderStep() {
+        const container = document.getElementById('wizardContent');
+        const feriados = getFeriados();
+
+        // 1. Passo: Nome
+        if (currentStep === 0) {
+            atualizarBarra(0);
+            container.innerHTML = `
+                <div class="step-title">Identificação</div>
+                <div class="step-subtitle">Quem está pedindo?</div>
+                <input type="text" id="inputNome" placeholder="Nome Completo" value="${pedidoAtual.cliente}" 
+                    style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.1em; box-sizing:border-box;">
+                <div class="controls">
+                    <button class="btn-action btn-next" onclick="proximoPasso()">Iniciar Pedido</button>
+                </div>
+            `;
+            return;
+        }
+
+        // 2. Passos: Dias da Semana (1 a 5)
+        const diaIndex = currentStep - 1;
         
-        function showCustomConfirm(message, onConfirm) {
-            const modal = document.getElementById('custom-confirm-modal');
-            const messageEl = document.getElementById('custom-confirm-message');
-            const okBtn = document.getElementById('custom-confirm-ok-btn');
+        if (diaIndex >= 5) {
+            renderResumo();
+            return;
+        }
+
+        const diaInfo = diasCalculados[diaIndex];
+
+        // --- LÓGICA DE FERIADO ---
+        if (feriados.includes(diaInfo.dataStr)) {
+            // Salva automaticamente como Feriado
+            salvarItem(diaInfo, 'Feriado', '', 0);
             
-            messageEl.textContent = message;
-            modal.classList.remove('hidden');
+            // Recursividade: Avança o contador E chama a função de novo
+            currentStep++;
+            renderStep();
+            return; // Para a execução deste frame
+        }
 
-            const newOkBtn = okBtn.cloneNode(true);
-            okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+        // Renderiza Dia Normal
+        atualizarBarra((currentStep / 5) * 100);
+        
+        // Recupera seleção anterior se houver (para edição)
+        const itemExistente = pedidoAtual.itens.find(i => i.dia === diaInfo.nome) || {};
+        const pratoSel = itemExistente.prato || '';
+        const obsSel = itemExistente.obs || '';
+
+        container.innerHTML = `
+            <div class="step-title">${diaInfo.nome}</div>
+            <div class="step-subtitle">${diaInfo.dataStr}</div>
+
+            <label class="option-card ${pratoSel === 'Tradicional' ? 'selected' : ''}" onclick="selecionarOpcao(this)">
+                <div><strong>🍛 Tradicional</strong> <br><small style="color:#666">Arroz, feijão, proteína</small></div>
+                <div>R$ 20</div>
+                <input type="radio" name="prato" value="Tradicional" ${pratoSel === 'Tradicional' ? 'checked' : ''}>
+            </label>
+
+            <label class="option-card ${pratoSel === 'Fitness' ? 'selected' : ''}" onclick="selecionarOpcao(this)">
+                <div><strong>🥗 Fitness</strong> <br><small style="color:#666">Legumes, frango grelhado</small></div>
+                <div>R$ 22</div>
+                <input type="radio" name="prato" value="Fitness" ${pratoSel === 'Fitness' ? 'checked' : ''}>
+            </label>
+
+            <label class="option-card ${pratoSel === '' ? 'selected' : ''}" onclick="selecionarOpcao(this)">
+                <div><strong>❌ Não pedir</strong></div>
+                <div>R$ 0</div>
+                <input type="radio" name="prato" value="" ${pratoSel === '' ? 'checked' : ''}>
+            </label>
+
+            <input type="text" id="inputObs" placeholder="Observação (Ex: Sem cebola)" value="${obsSel}"
+                style="width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing:border-box;">
+
+            <div class="controls">
+                <button class="btn-action btn-prev" onclick="passoAnterior()">Voltar</button>
+                <button class="btn-action btn-next" onclick="proximoPasso()">Próximo</button>
+            </div>
+        `;
+    }
+
+    function renderResumo() {
+        atualizarBarra(100);
+        
+        const total = pedidoAtual.itens.reduce((acc, i) => acc + (i.valor || 0), 0);
+        pedidoAtual.total = total;
+
+        let listaHtml = pedidoAtual.itens
+            .filter(i => i.prato && i.prato !== 'Feriado') // Não mostra vazios ou feriados no resumo
+            .map(i => `
+                <li style="margin-bottom: 5px;">
+                    <b>${i.dia}:</b> ${i.prato} 
+                    ${i.obs ? `<span style="color:#e55039">(${i.obs})</span>` : ''}
+                </li>
+            `).join('');
+
+        if(listaHtml === '') listaHtml = '<p>Nenhum prato selecionado.</p>';
+        else listaHtml = `<ul style="padding-left: 20px;">${listaHtml}</ul>`;
+
+        const btnTexto = modoEdicaoAdmin ? '💾 Salvar Alterações' : '✅ Finalizar Pedido';
+
+        document.getElementById('wizardContent').innerHTML = `
+            <div class="step-title">Confirmação</div>
+            <div class="step-subtitle">Verifique os dados</div>
             
-            newOkBtn.addEventListener('click', () => {
-                onConfirm();
-                modal.classList.add('hidden');
-            });
-        }
+            <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:15px;">
+                <strong>Funcionário:</strong> ${pedidoAtual.cliente} <br>
+                ${listaHtml}
+                <hr style="border:0; border-top:1px dashed #ccc;">
+                <h3 style="text-align:right; margin:0; color:var(--primary)">Total: R$ ${total},00</h3>
+            </div>
 
-        async function loadAndRenderEmployees() {
-            const container = document.getElementById('employee-list-container');
-            try {
-                const q = query(funcionariosCollectionRef, orderBy("nome"));
-                const snapshot = await getDocs(q);
+            <div class="controls">
+                <button class="btn-action btn-prev" onclick="passoAnterior()">Voltar</button>
+                <button class="btn-action btn-next" onclick="finalizarPedido()">${btnTexto}</button>
+            </div>
+        `;
+    }
 
-                if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcionário cadastrado.</p>';
-                    return;
-                }
-                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
-                snapshot.forEach(doc => {
-                    const employee = doc.data();
-                    tableHTML += `<tr>
-                        <td class="py-2 px-3 border-b font-mono">${doc.id}</td>
-                        <td class="py-2 px-3 border-b font-semibold">${employee.nome}</td>
-                        <td class="py-2 px-3 border-b space-x-2">
-                            <button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button>
-                            <button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button>
-                        </td>
-                    </tr>`;
-                });
-                tableHTML += '</tbody></table>';
-                container.innerHTML = tableHTML;
-            } catch (error) {
-                console.error("Erro ao carregar funcionários:", error);
-                container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcionários. Verifique as regras de segurança do Firestore.</p>`;
-                showToast("Falha ao carregar a lista de funcionários.", "error");
-            }
-        }
+    // --- CONTROLES DO WIZARD ---
 
-        async function handleAddEmployee(e) {
-            e.preventDefault();
-            const rgfInput = document.getElementById('newEmployeeRGF');
-            const nameInput = document.getElementById('newEmployeeName');
-            const rgf = rgfInput.value.trim();
-            const nome = nameInput.value.trim();
+    function selecionarOpcao(el) {
+        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        el.querySelector('input').checked = true;
+    }
 
-            if (!rgf || !nome) { showToast("Por favor, preencha o RGF e o Nome.", 'error'); return; }
-
-            try {
-                await setDoc(doc(db, "funcionarios", rgf), { nome });
-                showToast("Funcionário adicionado com sucesso!", 'success');
-                rgfInput.value = ''; nameInput.value = '';
-                loadAndRenderEmployees(); 
-            } catch (error) {
-                console.error("Erro ao adicionar funcionário: ", error);
-                showToast("Ocorreu um erro ao adicionar o funcionário.", 'error');
-            }
-        }
-
-        function handleDeleteEmployee(rgf, name) {
-            const message = `Tem a certeza que deseja excluir o funcionário ${name} (RGF: ${rgf})? Esta ação não pode ser desfeita.`;
-            showCustomConfirm(message, async () => {
-                try {
-                    await deleteDoc(doc(db, "funcionarios", rgf));
-                    showToast("Funcionário excluído com sucesso.", 'success');
-                    loadAndRenderEmployees(); 
-                } catch (error) {
-                    console.error("Erro ao excluir funcionário: ", error);
-                    showToast("Falha ao excluir o funcionário.", 'error');
-                }
-            });
-        }
-        
-        function openEmployeeEditModal(rgf, nome) {
-            document.getElementById('editEmployeeRGF').value = rgf;
-            document.getElementById('editEmployeeName').value = nome;
-            document.getElementById('edit-employee-modal').classList.remove('hidden');
-        }
-
-        async function handleSaveEmployeeChanges(e) {
-            e.preventDefault();
-            const rgf = document.getElementById('editEmployeeRGF').value;
-            const newName = document.getElementById('editEmployeeName').value.trim();
-
-            if (!newName) { showToast("O nome não pode ficar em branco.", 'error'); return; }
-            try {
-                await updateDoc(doc(db, "funcionarios", rgf), { nome: newName });
-                showToast("Funcionário atualizado com sucesso!", 'success');
-                document.getElementById('edit-employee-modal').classList.add('hidden');
-                loadAndRenderEmployees();
-            } catch (error) {
-                console.error("Erro ao salvar alterações do funcionário: ", error);
-                showToast("Falha ao salvar as alterações do funcionário.", 'error');
-            }
-        }
-        
-        async function findEmployeeByRGF(rgf) {
-            const nameInput = document.getElementById('employeeName');
-            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return; }
-            try {
-                const docSnap = await getDoc(doc(db, "funcionarios", rgf));
-                if (docSnap.exists()) {
-                    nameInput.value = docSnap.data().nome;
-                } else {
-                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
-                }
-            } catch (error) {
-                console.error("Erro ao buscar funcionário:", error);
-                nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
-                showToast("Erro ao buscar funcionário.", 'error');
-            }
-        }
-        
-        function renderWizardStep(index) {
-            const wizardContainer = document.getElementById('order-wizard-container');
-            if (index >= weekDays.length) {
-                wizardContainer.parentElement.classList.add('hidden');
-                document.getElementById('submitButtonContainer').classList.remove('hidden');
-                return;
-            }
-
-            const day = weekDays[index];
-            const dayId = getDayId(day);
-
-            // LOGICA DE FERIADO: Pula automaticamente o dia se for feriado
-            if (activeHolidays.includes(dayId)) {
-                userChoices[index] = {
-                    day: day,
-                    choice: "FERIADO",
-                    notes: ""
-                };
-                renderWizardStep(index + 1);
-                return;
-            }
-
-            document.getElementById('wizard-day-title').textContent = day;
-
-            const optionsContainer = document.getElementById('wizard-options');
-            optionsContainer.innerHTML = '';
-            mealOptions.forEach(opt => {
-                optionsContainer.innerHTML += `
-                    <button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 rounded-lg">
-                        <div class="flex items-center">
-                            <span class="text-xl mr-2">${opt.emoji}</span>
-                            <div>
-                                <p class="font-semibold text-gray-800 text-sm leading-tight">${opt.name}</p>
-                                <p class="text-xs text-gray-500">${opt.description}</p>
-                            </div>
-                        </div>
-                    </button>
-                `;
-            });
-
-            document.getElementById('wizard-notes').value = '';
-            updateWizardProgress(index);
-            wizardContainer.classList.add('fade-in');
-            setTimeout(() => wizardContainer.classList.remove('fade-in'), 300);
-        }
-
-        function updateWizardProgress(index) {
-            const progressContainer = document.getElementById('wizard-progress');
-            progressContainer.innerHTML = '';
-            for(let i=0; i < weekDays.length; i++) {
-                const dotClass = i < index ? 'bg-blue-600' : (i === index ? 'bg-blue-300' : 'bg-gray-300');
-                progressContainer.innerHTML += `<div class="w-2.5 h-2.5 rounded-full ${dotClass}"></div>`;
-            }
-        }
-        
-        function handleWizardSelection(event) {
-            const choiceBtn = event.target.closest('.wizard-btn');
-            if (!choiceBtn) return;
-
-            const choice = choiceBtn.dataset.value;
-            const notes = document.getElementById('wizard-notes').value.trim();
-
-            userChoices[currentDayIndex] = {
-                day: weekDays[currentDayIndex],
-                choice: choice,
-                notes: notes
-            };
-
-            currentDayIndex++;
-            renderWizardStep(currentDayIndex);
-        }
-
-        // Função para mostrar checkboxes de feriado no admin
-        function renderHolidayCheckboxes() {
-            const container = document.getElementById('holiday-selector');
-            if (!container) return;
-            container.innerHTML = '';
-            weekDays.forEach(day => {
-                const dayId = getDayId(day);
-                const isChecked = activeHolidays.includes(dayId) ? 'checked' : '';
-                container.innerHTML += `
-                    <label class="flex items-center space-x-2 cursor-pointer select-none bg-white p-2 rounded shadow-sm border border-gray-100 hover:bg-gray-50 transition">
-                        <input type="checkbox" value="${dayId}" class="holiday-checkbox w-5 h-5 text-blue-600 rounded focus:ring-blue-500" ${isChecked}>
-                        <span class="text-gray-700 font-medium">${day}</span>
-                    </label>
-                `;
-            });
-        }
-
-        function loadAndDisplayMenu() {
-            onSnapshot(menuDocRef, (docSnap) => {
-                // Carrega menu e feriados
-                const menuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [] };
-                
-                const menuImage = document.getElementById('menu-image');
-                activeHolidays = menuData.holidays || []; // Atualiza feriados globais
-
-                // Atualiza UI de checkboxes para o admin ver o estado atual
-                renderHolidayCheckboxes();
-
-                if (menuData.menuImageBase64) {
-                    weeklyMenu.menuImageBase64 = menuData.menuImageBase64;
-                    menuImage.src = weeklyMenu.menuImageBase64;
-                    currentDayIndex = 0;
-                    userChoices = [];
-                    renderWizardStep(0);
-                } else {
-                    weeklyMenu.menuImageBase64 = null;
-                }
-                validateForm();
-                renderOrdersTable(allOrders);
-            }, (error) => {
-                 console.error("Erro ao carregar o cardápio:", error);
-                 showToast("Erro ao carregar o cardápio.", 'error');
-            });
-        }
-        
-        function validateForm() {
-            const name = document.getElementById('employeeName')?.value.trim();
-            const rgf = document.getElementById('employeeRGF')?.value.trim();
-            const guidanceSection = document.getElementById('guidanceSection');
-            const orderSection = document.getElementById('order-section');
-
-            if (weeklyMenu.menuImageBase64) {
-                if (!name || !rgf) {
-                    orderSection.classList.add('hidden');
-                    guidanceSection.classList.remove('hidden');
-                    document.getElementById('guidanceText').textContent = 'Por favor, preencha o seu RGF para começar.';
-                } else {
-                    guidanceSection.classList.add('hidden');
-                    orderSection.classList.remove('hidden');
-                }
-            } else {
-                orderSection.classList.add('hidden');
-                guidanceSection.classList.remove('hidden');
-                document.getElementById('guidanceText').textContent = 'O administrador ainda não enviou o cardápio da semana.';
-            }
-        }
-
-        function openConfirmationModal() {
-            tempOrderData = {
-                employeeName: document.getElementById('employeeName').value.trim(),
-                employeeRGF: document.getElementById('employeeRGF').value.trim(),
-                timestamp: serverTimestamp()
-            };
-            const summaryContainer = document.getElementById('confirmation-summary');
-            summaryContainer.innerHTML = '';
-            
-            userChoices.forEach(item => {
-                const dayId = getDayId(item.day);
-                tempOrderData[dayId] = item.choice;
-                if(item.notes) {
-                    tempOrderData[`${dayId}_notes`] = item.notes;
-                }
-                const displayChoice = item.choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : item.choice;
-                const styleClass = item.choice === 'FERIADO' ? 'text-gray-400 italic' : 'text-gray-800';
-                
-                summaryContainer.innerHTML += `<p class="${styleClass}"><span class="font-bold">${item.day}:</span> ${displayChoice} ${item.notes ? `<span class="text-sm text-gray-500 italic">(${item.notes})</span>` : ''}</p>`;
-            });
-            
-            document.getElementById('confirmation-modal').classList.remove('hidden');
-        }
-
-        async function submitOrder() {
-            const button = document.getElementById('submitOrder');
-            button.disabled = true; button.textContent = 'A enviar...';
-            try {
-                await addDoc(pedidosCollectionRef, tempOrderData);
-                document.getElementById('confirmation-modal').classList.add('hidden');
-                document.getElementById('form-container').classList.add('hidden');
-                document.getElementById('success-message').classList.remove('hidden');
-                document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
-                showToast("Pedido enviado com sucesso!", 'success');
-            } catch (error) {
-                console.error("Erro ao enviar pedido: ", error);
-                showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
-            } finally {
-                button.disabled = false; button.textContent = 'Confirmar e Enviar';
-            }
-        }
-        
-        function loadAdminData() {
-            onSnapshot(pedidosCollectionRef, (snapshot) => {
-                const latestOrdersMap = new Map();
-                snapshot.forEach(doc => {
-                    const orderData = doc.data();
-                    if (orderData.employeeRGF) {
-                        const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
-                         if (!latestOrdersMap.has(orderData.employeeRGF) || timestamp > latestOrdersMap.get(orderData.employeeRGF).timestamp) {
-                             latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
-                         }
-                    }
-                });
-                
-                allOrders = Array.from(latestOrdersMap.values())
-                    .map(item => item.doc)
-                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
-                renderOrdersTable(allOrders);
-                renderOrderStatus(allOrders);
-            }, (error) => {
-                console.error("Erro ao carregar dados do administrador:", error);
-                showToast("Erro ao carregar dados do administrador.", 'error');
-            });
-        }
-        
-        async function renderOrderStatus(orders) {
-            const container = document.getElementById('order-status-container');
-            container.innerHTML = '<p class="text-gray-500">A processar...</p>';
-
-            try {
-                const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
-                const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
-
-                const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
-                const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
-
-                let html = `
-                    <div>
-                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
-                    </div>
-                `;
-                container.innerHTML = html;
-
-            } catch (error) {
-                console.error("Erro ao renderizar status de pedidos:", error);
-                container.innerHTML = '<p class="text-red-500">Falha ao carregar status dos funcionários.</p>';
-            }
-        }
-        
-        function renderOrdersTable(orders) {
-            const container = document.getElementById('ordersTableContainer');
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
-
-            if (!weeklyMenu.menuImageBase64) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
-            
-            let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
-            weekDays.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.substring(0,3)}</th>`);
-            tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
-
-            filteredOrders.forEach(doc => {
-                const order = doc.data();
-                tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
-                weekDays.forEach(day => {
-                    const dayId = getDayId(day);
-                    let choice = order[dayId] || 'N/A';
-                    const notes = order[`${dayId}_notes`];
-                    
-                    if (choice === 'FERIADO') {
-                        tableHTML += `<td class="py-2 px-3 border-b bg-gray-100 text-gray-400 text-xs text-center">FERIADO</td>`;
-                    } else {
-                        let cellContent = choice;
-                        if (notes) {
-                            cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
-                        }
-                        tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
-                    }
-                });
-                tableHTML += `<td class="py-2 px-3 border-b space-x-2"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
-            });
-            tableHTML += `</tbody></table>`;
-            container.innerHTML = tableHTML;
-        }
-
-        function generateAndPrintReport() {
-            const reportContainer = document.getElementById('print-report');
-            if (allOrders.length === 0) {
-                showToast("Não há pedidos para gerar o relatório.", "info");
-                return;
-            }
-            reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
-            
-            let allDaysHTML = '';
-            weekDays.forEach(day => {
-                const dayId = getDayId(day);
-                // Se o dia é feriado e ninguém pediu nada (o que é esperado), podemos até pular a página ou mostrar aviso
-                // Mas aqui vamos gerar a tabela normalmente. Se for feriado, vai mostrar "FERIADO"
-                
-                let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${day}</th></tr></thead><tbody>`;
-                
-                const dailyOrders = allOrders
-                    .filter(orderDoc => orderDoc.data()[dayId])
-                    .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
-                
-                dailyOrders.forEach(orderDoc => {
-                    const order = orderDoc.data();
-                    let choice = (order[dayId] || '').toUpperCase();
-                    const notes = order[`${dayId}_notes`];
-                    let choiceHTML = choice;
-
-                    if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
-                    if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
-
-                    if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
-
-                    tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
-                });
-                tableHTML += '</tbody></table></div>';
-                allDaysHTML += tableHTML;
-            });
-            reportContainer.innerHTML += allDaysHTML;
-            window.print();
-        }
-        
-        async function clearAllOrders() {
-            console.log("Iniciando a limpeza de todos os pedidos da semana...");
-            const querySnapshot = await getDocs(pedidosCollectionRef);
-            const deletionPromises = [];
-            querySnapshot.forEach((doc) => {
-                deletionPromises.push(deleteDoc(doc.ref));
-            });
-            await Promise.all(deletionPromises);
-            console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
-        }
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            fileToUpload = file;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('imagePreview').src = e.target.result;
-                document.getElementById('imagePreview').classList.remove('hidden');
-                document.getElementById('uploadImageBtn').disabled = false;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        const toBase64 = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
+    function salvarItem(diaInfo, prato, obs, valor) {
+        // Remove entrada anterior se houver
+        pedidoAtual.itens = pedidoAtual.itens.filter(i => i.dia !== diaInfo.nome);
+        // Adiciona nova
+        pedidoAtual.itens.push({
+            dia: diaInfo.nome,
+            data: diaInfo.dataStr,
+            prato: prato,
+            obs: obs,
+            valor: valor
         });
+    }
 
-        async function uploadImageAndSaveMenu() {
-            if (!fileToUpload) {
-                showToast("Nenhuma imagem selecionada.", "error");
-                return;
-            }
-
-            // Captura feriados selecionados
-            const selectedHolidays = Array.from(document.querySelectorAll('.holiday-checkbox:checked')).map(cb => cb.value);
-
-            const message = "Tem a certeza que deseja atualizar o cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente.";
-            showCustomConfirm(message, async () => {
-                const uploadBtn = document.getElementById('uploadImageBtn');
-                uploadBtn.disabled = true;
-                uploadBtn.textContent = "A enviar...";
-
-                try {
-                    const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024 };
-                    const compressedFile = await imageCompression(fileToUpload, options);
-                    const base64String = await toBase64(compressedFile);
-
-                    // Salva imagem E feriados
-                    await setDoc(menuDocRef, { 
-                        menuImageBase64: base64String,
-                        holidays: selectedHolidays 
-                    });
-                    
-                    await clearAllOrders();
-                    
-                    showToast("Cardápio e Feriados atualizados!", "success");
-                    document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-                    document.getElementById('imageUpload').value = '';
-                    document.getElementById('imagePreview').classList.add('hidden');
-                    fileToUpload = null;
-
-                } catch (error) {
-                    console.error("Erro ao processar e guardar dados:", error);
-                    showToast("Falha ao guardar. Tente novamente.", "error");
-                } finally {
-                    uploadBtn.disabled = true;
-                    uploadBtn.textContent = "Salvar Cardápio e Feriados";
-                }
-            });
+    function proximoPasso() {
+        // Passo 0: Validação de Nome
+        if (currentStep === 0) {
+            const nome = document.getElementById('inputNome').value;
+            if(!nome.trim()) { alert('Digite o nome!'); return; }
+            pedidoAtual.cliente = nome;
+            currentStep++;
+            renderStep();
+            return;
         }
 
-        function handleWhatsAppNotification() {
-            const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
-            window.open(whatsappUrl, '_blank');
-            showToast('Abra o WhatsApp para enviar a notificação.', 'info');
+        // Passos de Dia: Coleta dados
+        const radio = document.querySelector('input[name="prato"]:checked');
+        const obs = document.getElementById('inputObs').value;
+        const diaInfo = diasCalculados[currentStep - 1];
+
+        let prato = radio ? radio.value : '';
+        let valor = 0;
+        if(prato === 'Tradicional') valor = 20;
+        if(prato === 'Fitness') valor = 22;
+
+        salvarItem(diaInfo, prato, obs, valor);
+
+        currentStep++;
+        renderStep();
+    }
+
+    function passoAnterior() {
+        if (currentStep > 0) {
+            currentStep--;
+            // Se voltar para um dia que é feriado, volta mais um (recursivo)
+            const diaIndex = currentStep - 1;
+            if (diaIndex >= 0) {
+                 const diaInfo = diasCalculados[diaIndex];
+                 if (getFeriados().includes(diaInfo.dataStr)) {
+                     passoAnterior();
+                     return;
+                 }
+            }
+            renderStep();
+        }
+    }
+
+    function atualizarBarra(pct) {
+        document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    function finalizarPedido() {
+        if (pedidoAtual.id) {
+            // Atualizar Existente
+            const index = pedidosSalvos.findIndex(p => p.id === pedidoAtual.id);
+            if (index !== -1) pedidosSalvos[index] = pedidoAtual;
+            alert('Pedido atualizado com sucesso!');
+        } else {
+            // Criar Novo
+            pedidoAtual.id = Date.now();
+            pedidosSalvos.push(pedidoAtual);
+            alert('Pedido realizado!');
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.uid === APP_CONFIG.ADMIN_UID) {
-                showAdminView();
-            } else {
-                if (!auth.currentUser) {
-                    signInAnonymously(auth).catch((error) => {
-                        console.error("Erro no login anónimo:", error);
-                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
-                    });
-                }
-                showUserView();
-            }
+        // Decisão de Roteamento
+        if (modoEdicaoAdmin) {
+            // Se o admin estava editando, volta para a aba admin
+            mudarAba('admin');
+        } else {
+            // Se for usuário normal, reinicia para o próximo
+            iniciarNovoPedido();
+        }
+    }
+
+    // --- FUNÇÕES DE ADMINISTRAÇÃO ---
+
+    function renderAdminTable() {
+        const tbody = document.getElementById('tbodyPedidos');
+        const emptyMsg = document.getElementById('emptyMsg');
+        tbody.innerHTML = '';
+
+        if (pedidosSalvos.length === 0) {
+            emptyMsg.style.display = 'block';
+            return;
+        }
+        emptyMsg.style.display = 'none';
+
+        pedidosSalvos.forEach(p => {
+            const tr = document.createElement('tr');
+            
+            // Resumo curto dos pratos
+            const resumo = p.itens
+                .filter(i => i.prato && i.prato !== 'Feriado')
+                .map(i => i.dia.substring(0,3)) // Seg, Ter...
+                .join(', ');
+
+            tr.innerHTML = `
+                <td>
+                    <strong>${p.cliente}</strong><br>
+                    <small style="color:#777">${resumo || 'Sem pratos'}</small>
+                </td>
+                <td><span class="badge-total">R$ ${p.total}</span></td>
+                <td>
+                    <button class="btn-sm btn-edit" onclick="adminEditarPedido(${p.id})">✏️ Editar</button>
+                    <button class="btn-sm btn-del" onclick="adminExcluirPedido(${p.id})">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
+    }
 
-        function showUserView() {
-            document.getElementById('user-view').classList.remove('hidden');
-            document.getElementById('admin-view').classList.add('hidden');
-            document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
+    function adminExcluirPedido(id) {
+        if(confirm('Tem certeza que deseja excluir este pedido?')) {
+            pedidosSalvos = pedidosSalvos.filter(p => p.id !== id);
+            renderAdminTable();
         }
+    }
 
-        function showAdminView() {
-            document.getElementById('user-view').classList.add('hidden');
-            document.getElementById('admin-view').classList.remove('hidden');
-            document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
-            loadAdminData();
-            loadAndRenderEmployees();
-        }
+    // *** AQUI ESTÁ A LÓGICA DE EDIÇÃO DO ADMIN ***
+    function adminEditarPedido(id) {
+        const pedido = pedidosSalvos.find(p => p.id === id);
+        if (!pedido) return;
 
-        async function handleAdminLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.disabled = true; btn.textContent = 'Entrando...';
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) {
-                    await signOut(auth);
-                    showToast("Credenciais válidas, mas este usuário não é um administrador.", 'error');
-                }
-            } catch (error) {
-                console.error("Erro no login de administrador:", error);
-                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
-                showToast(msg, 'error', 5000);
-            } finally {
-                btn.disabled = false; btn.textContent = 'Entrar';
-            }
-        }
+        // 1. Clona o pedido para a variável de edição
+        // Importante usar JSON.parse/stringify para quebrar referência direta
+        pedidoAtual = JSON.parse(JSON.stringify(pedido));
+        
+        // 2. Define o modo Admin
+        modoEdicaoAdmin = true;
+        
+        // 3. Atualiza interface
+        diasCalculados = calcularDias(); // Garante datas frescas
+        
+        // Muda para a aba de usuário visualmente para usar o Wizard
+        document.getElementById('tabUser').classList.add('active');
+        document.getElementById('tabAdmin').classList.remove('active');
+        document.getElementById('userPanel').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+        
+        // Mostra banner de aviso
+        document.getElementById('editingBanner').style.display = 'block';
 
-        async function handleAdminLogout() {
-            try { 
-                await signOut(auth); 
-                showToast("Saindo do painel...", 'info');
-                // FORÇA O RECARREGAMENTO DA PÁGINA PARA LIMPAR O ESTADO
-                setTimeout(() => { window.location.reload(); }, 500);
-            } 
-            catch (error) { 
-                console.error("Erro no logout:", error); 
-                showToast("Erro ao fazer logout.", 'error'); 
-            }
-        }
+        // 4. Inicia Wizard no passo 0 (Nome) ou 1? Vamos no 0 para permitir corrigir nome.
+        currentStep = 0;
+        renderStep();
+    }
 
-        function main() {
-            const rgfInput = document.getElementById('employeeRGF');
-            rgfInput.addEventListener('input', () => {
-                findEmployeeByRGF(rgfInput.value);
-                validateForm();
-            });
-            rgfInput.addEventListener('blur', () => localStorage.setItem('employeeRGF', rgfInput.value));
-            
-            rgfInput.value = localStorage.getItem('employeeRGF') || '';
-            if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); validateForm(); }
-            
-            document.getElementById('wizard-options').addEventListener('click', handleWizardSelection);
-            document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
-            document.getElementById('submitOrder').addEventListener('click', submitOrder);
-            
-            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
-                btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
-            });
+    function cancelarEdicaoAdmin() {
+        modoEdicaoAdmin = false;
+        document.getElementById('editingBanner').style.display = 'none';
+        iniciarNovoPedido();
+    }
 
-            document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
-            document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
-            
-            document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
-            document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
-            
-            document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
-            document.getElementById('employee-list-container').addEventListener('click', (e) => {
-                if (e.target.closest('.edit-employee-btn')) { openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name); }
-                if (e.target.closest('.delete-employee-btn')) { handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name); }
-            });
-            document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
-            
-            document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
-            document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
-            
-            document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
-            
-            document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
-            document.getElementById('uploadImageBtn').addEventListener('click', uploadImageAndSaveMenu);
+    // Inicia a app
+    iniciarNovoPedido();
 
-            const zoomModal = document.getElementById('image-zoom-modal');
-            const menuImage = document.getElementById('menu-image');
-            menuImage.addEventListener('click', () => {
-                document.getElementById('zoomed-image').src = menuImage.src;
-                zoomModal.classList.remove('hidden');
-            });
-            zoomModal.addEventListener('click', () => zoomModal.classList.add('hidden'));
-        }
-
-        main();
-    </script>
+</script>
 </body>
 </html>
