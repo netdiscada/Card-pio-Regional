@@ -713,10 +713,17 @@
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 
+                // NOVO: Pula completamente a geração da tabela se o dia for um feriado
+                if (activeHolidays.includes(dayId)) return;
+                
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${day}</th></tr></thead><tbody>`;
                 
                 const dailyOrders = allOrders
-                    .filter(orderDoc => orderDoc.data()[dayId])
+                    .filter(orderDoc => {
+                        const orderData = orderDoc.data();
+                        // Certifica-se de que há um pedido válido e não é feriado
+                        return orderData[dayId] && orderData[dayId] !== 'FERIADO';
+                    })
                     .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
                 
                 dailyOrders.forEach(orderDoc => {
@@ -940,7 +947,8 @@
                     const selectEl = document.getElementById(`edit-choice-${dayId}`);
                     const notesEl = document.getElementById(`edit-notes-${dayId}`);
                     
-                    if (selectEl && selectEl.value) { // Se escolheu alguma opção (ignora vazios se quiser)
+                    if (selectEl) { 
+                        // Agora ele salva a opção, mesmo se for vazio ('') para resetar o prato
                         updateData[dayId] = selectEl.value;
                         updateData[`${dayId}_notes`] = notesEl.value.trim();
                     }
