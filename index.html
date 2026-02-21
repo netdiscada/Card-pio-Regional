@@ -959,29 +959,45 @@
             if (user) {
                 // LÓGICA DE NÍVEIS DE ACESSO
                 try {
-                    // Verifica se há configuração de Admin Regional na BD (usuarios_adm)
-                    const adminDocRef = doc(db, 'usuarios_adm', user.uid);
-                    const adminDoc = await getDoc(adminDocRef);
-                    
-                    if (adminDoc.exists()) {
-                        const data = adminDoc.data();
-                        currentAdminRole = data.role; // 'super_adm' ou 'regional_adm'
-                        currentAdminRegional = data.regionalId || 'todas';
-                    } else if (user.uid === APP_CONFIG.SUPER_ADMIN_UID) {
-                        // Fallback para o dono principal
+                    let isAdmin = false;
+
+                    // 1. Tenta verificar se tem configuração na BD (usuarios_adm)
+                    try {
+                        const adminDocRef = doc(db, 'usuarios_adm', user.uid);
+                        const adminDoc = await getDoc(adminDocRef);
+                        
+                        if (adminDoc.exists()) {
+                            const data = adminDoc.data();
+                            currentAdminRole = data.role; // 'super_adm' ou 'regional_adm'
+                            currentAdminRegional = data.regionalId || 'todas';
+                            isAdmin = true;
+                        }
+                    } catch (dbError) {
+                        console.warn("Aviso (Normal): Não foi possível ler a coleção usuarios_adm (regras de segurança). Verificando ADM PRÓ direto...");
+                    }
+
+                    // 2. Se a BD falhou ou não tem o utilizador lá, verifica se é o Dono/Super Admin (Configurado no topo do código)
+                    if (!isAdmin && user.uid === APP_CONFIG.SUPER_ADMIN_UID) {
                         currentAdminRole = 'super_adm';
                         currentAdminRegional = 'todas';
+                        isAdmin = true;
+                    } 
+                    
+                    // 3. Valida o resultado final
+                    if (isAdmin) {
+                        applyAdminRoleUI();
+                        showAdminView();
                     } else {
-                        // Login válido, mas sem acesso ADM configurado
+                        // Login válido, mas sem acesso ADM
                         await signOut(auth);
                         showToast("Acesso Negado. Contacte o Super Admin.", "error");
                         showUserView();
-                        return;
                     }
                     
-                    applyAdminRoleUI();
-                    showAdminView();
-                } catch(e) { console.error("Erro na auth", e); }
+                } catch(e) { 
+                    console.error("Erro geral na auth", e); 
+                    showUserView();
+                }
             } else {
                 if (!auth.currentUser) signInAnonymously(auth);
                 showUserView();
