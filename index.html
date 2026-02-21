@@ -80,6 +80,21 @@
                         </div>
                     </div>
 
+                    <!-- NOVO CONTAINER: Resumo do Pedido Existente -->
+                    <div id="existing-order-container" class="hidden bg-white rounded-xl shadow-sm p-6 sm:p-8 mb-6 border-2 border-green-100 fade-in">
+                        <div class="text-center mb-6">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800">Pedido da Semana Registado!</h3>
+                            <p class="text-gray-600 mt-2">Você já realizou o seu pedido. Consulte abaixo as suas escolhas para esta semana:</p>
+                        </div>
+                        <div id="existing-order-details" class="space-y-3">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                    <!-- FIM DO NOVO CONTAINER -->
+
                     <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                         <div id="order-wizard">
                             <h3 id="wizard-day-title" class="text-2xl font-bold text-blue-600 mb-4 text-center"></h3>
@@ -95,7 +110,7 @@
                 <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
                 <div id="submitButtonContainer" class="hidden text-center mt-6"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
-            <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Fazer Novo Pedido</button></div>
+            <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Retornar ao Início</button></div>
         </div>
 
         <div id="admin-view" class="hidden no-print">
@@ -206,7 +221,8 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // IMPORTANTE: Foi adicionado o 'where' nas importações do firestore
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         const firebaseConfig = {
@@ -363,25 +379,107 @@
         
         async function findEmployeeByRGF(rgf) {
             const nameInput = document.getElementById('employeeName');
-            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return; }
+            if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return false; }
             try {
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
                     nameInput.value = docSnap.data().nome;
+                    return true;
                 } else {
                     nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
+                    return false;
                 }
             } catch (error) {
                 console.error("Erro ao buscar funcionário:", error);
                 nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
                 showToast("Erro ao buscar funcionário.", 'error');
+                return false;
+            }
+        }
+
+        // NOVO: Exibe as informações de um pedido já realizado na tela
+        function displayExistingOrder(orderData) {
+            const detailsContainer = document.getElementById('existing-order-details');
+            detailsContainer.innerHTML = '';
+            
+            weekDays.forEach(day => {
+                const dayId = getDayId(day);
+                const choice = orderData[dayId];
+                const notes = orderData[`${dayId}_notes`];
+                
+                if (choice) {
+                    let displayChoice = choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : `🍽️ ${choice}`;
+                    let notesHtml = notes ? `<span class="text-sm text-gray-500 italic block sm:inline mt-1 sm:mt-0 sm:ml-2">(${notes})</span>` : '';
+                    let styleClass = choice === 'FERIADO' ? 'bg-gray-50 text-gray-500 border-gray-200' : 'bg-green-50 text-green-800 border-green-200';
+                    
+                    detailsContainer.innerHTML += `
+                        <div class="p-4 rounded-xl border ${styleClass} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 transition-all hover:shadow-md">
+                            <span class="font-bold text-gray-700 w-full sm:w-1/3">${day}</span>
+                            <div class="w-full sm:w-2/3 text-left sm:text-right font-medium">
+                                ${displayChoice} ${notesHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // NOVO: Verifica no firebase se aquele RGF já fez pedido para essa semana
+        async function checkExistingOrder(rgf) {
+            if (!rgf) return;
+            try {
+                const q = query(pedidosCollectionRef, where("employeeRGF", "==", rgf));
+                const snapshot = await getDocs(q);
+                
+                const wizardContainer = document.getElementById('order-wizard-container');
+                const existingContainer = document.getElementById('existing-order-container');
+                const submitBtnContainer = document.getElementById('submitButtonContainer');
+                
+                if (!snapshot.empty) {
+                    // Pega o pedido mais recente se houver algum vestígio duplo
+                    let latestOrder = null;
+                    let latestTime = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const time = data.timestamp ? data.timestamp.toMillis() : 0;
+                        if (time >= latestTime) {
+                            latestTime = time;
+                            latestOrder = data;
+                        }
+                    });
+
+                    if (latestOrder) {
+                        displayExistingOrder(latestOrder);
+                        // Esconde o formulario normal, e mostra o resumo do pedido
+                        wizardContainer.classList.add('hidden');
+                        submitBtnContainer.classList.add('hidden');
+                        existingContainer.classList.remove('hidden');
+                        return;
+                    }
+                }
+                
+                // Se não tem pedido, certificar que a visualização do Wizard está normal
+                existingContainer.classList.add('hidden');
+                
+                // Se o funcionário ainda não terminou as escolhas (Wizard), exibe, caso contrario exibe submit
+                if (currentDayIndex >= weekDays.length) {
+                    wizardContainer.classList.add('hidden');
+                    submitBtnContainer.classList.remove('hidden');
+                } else {
+                    wizardContainer.classList.remove('hidden');
+                    submitBtnContainer.classList.add('hidden');
+                }
+                
+            } catch (error) {
+                console.error("Erro ao verificar pedido existente:", error);
             }
         }
         
         function renderWizardStep(index) {
             const wizardContainer = document.getElementById('order-wizard-container');
             if (index >= weekDays.length) {
-                wizardContainer.parentElement.classList.add('hidden');
+                // MODIFICADO: Escondemos apenas o wizard, mantendo a imagem à vista
+                wizardContainer.classList.add('hidden'); 
                 document.getElementById('submitButtonContainer').classList.remove('hidden');
                 return;
             }
@@ -389,14 +487,13 @@
             const day = weekDays[index];
             const dayId = getDayId(day);
 
-            // CORREÇÃO: Pula o dia automaticamente e atualiza o index global
             if (activeHolidays.includes(dayId)) {
                 userChoices[index] = {
                     day: day,
                     choice: "FERIADO",
                     notes: ""
                 };
-                currentDayIndex = index + 1; // IMPORTANTE: Sincroniza o index para evitar repetições
+                currentDayIndex = index + 1; 
                 renderWizardStep(currentDayIndex);
                 return;
             }
@@ -468,7 +565,7 @@
         }
 
         function loadAndDisplayMenu() {
-            onSnapshot(menuDocRef, (docSnap) => {
+            onSnapshot(menuDocRef, async (docSnap) => {
                 const menuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [] };
                 
                 const menuImage = document.getElementById('menu-image');
@@ -485,7 +582,8 @@
                 } else {
                     weeklyMenu.menuImageBase64 = null;
                 }
-                validateForm();
+                
+                await validateForm();
                 renderOrdersTable(allOrders);
             }, (error) => {
                  console.error("Erro ao carregar o cardápio:", error);
@@ -493,20 +591,25 @@
             });
         }
         
-        function validateForm() {
-            const name = document.getElementById('employeeName')?.value.trim();
-            const rgf = document.getElementById('employeeRGF')?.value.trim();
+        // MODIFICADO: Transforma em async/await para dar tempo de verificar o pedido e exibir a tela correta.
+        async function validateForm() {
+            const nameInput = document.getElementById('employeeName');
+            const rgfInput = document.getElementById('employeeRGF');
+            const name = nameInput?.value.trim();
+            const rgf = rgfInput?.value.trim();
             const guidanceSection = document.getElementById('guidanceSection');
             const orderSection = document.getElementById('order-section');
 
             if (weeklyMenu.menuImageBase64) {
-                if (!name || !rgf) {
+                if (!name || !rgf || nameInput.placeholder === 'RGF não encontrado') {
                     orderSection.classList.add('hidden');
                     guidanceSection.classList.remove('hidden');
-                    document.getElementById('guidanceText').textContent = 'Por favor, preencha o seu RGF para começar.';
+                    document.getElementById('guidanceText').textContent = 'Por favor, insira o seu RGF para começar.';
                 } else {
                     guidanceSection.classList.add('hidden');
                     orderSection.classList.remove('hidden');
+                    // NOVO: Verifica se já tem pedido para exibir a tela de confirmação
+                    await checkExistingOrder(rgf); 
                 }
             } else {
                 orderSection.classList.add('hidden');
@@ -643,14 +746,12 @@
                         tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
                     }
                 });
-                // Botões de Editar/Excluir (agora com suas funcionalidades implementadas)
                 tableHTML += `<td class="py-2 px-3 border-b space-x-2 whitespace-nowrap"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
             });
             tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
         }
 
-        // --- CORREÇÃO: NOVAS FUNÇÕES DE EDIÇÃO E EXCLUSÃO DE PEDIDOS ---
         function openEditOrderModal(orderId) {
             const orderDoc = allOrders.find(doc => doc.id === orderId);
             if (!orderDoc) return;
@@ -665,13 +766,11 @@
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 
-                // Se for feriado, não mostramos os campos de edição deste dia
                 if (activeHolidays.includes(dayId)) return; 
 
                 const currentChoice = order[dayId] || '';
                 const currentNotes = order[`${dayId}_notes`] || '';
 
-                // Montar o select com as opções baseadas no cardápio
                 let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm bg-white">
                     <option value="">(Nenhuma opção selecionada)</option>
                     ${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}
@@ -699,7 +798,6 @@
                 }
             });
         }
-        // -------------------------------------------------------------
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
@@ -713,7 +811,6 @@
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 
-                // NOVO: Pula completamente a geração da tabela se o dia for um feriado
                 if (activeHolidays.includes(dayId)) return;
                 
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${day}</th></tr></thead><tbody>`;
@@ -721,7 +818,6 @@
                 const dailyOrders = allOrders
                     .filter(orderDoc => {
                         const orderData = orderDoc.data();
-                        // Certifica-se de que há um pedido válido e não é feriado
                         return orderData[dayId] && orderData[dayId] !== 'FERIADO';
                     })
                     .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
@@ -893,14 +989,23 @@
 
         function main() {
             const rgfInput = document.getElementById('employeeRGF');
-            rgfInput.addEventListener('input', () => {
-                findEmployeeByRGF(rgfInput.value);
-                validateForm();
+            
+            // MODIFICADO: A validação e busca agora são assíncronas para garantir o correto fluxo
+            rgfInput.addEventListener('input', async () => {
+                const rgfValue = rgfInput.value.trim();
+                await findEmployeeByRGF(rgfValue);
+                await validateForm();
             });
+            
             rgfInput.addEventListener('blur', () => localStorage.setItem('employeeRGF', rgfInput.value));
             
             rgfInput.value = localStorage.getItem('employeeRGF') || '';
-            if(rgfInput.value) { findEmployeeByRGF(rgfInput.value); validateForm(); }
+            if(rgfInput.value) { 
+                (async () => {
+                    await findEmployeeByRGF(rgfInput.value); 
+                    await validateForm(); 
+                })();
+            }
             
             document.getElementById('wizard-options').addEventListener('click', handleWizardSelection);
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
@@ -923,7 +1028,6 @@
             });
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
             
-            // CORREÇÃO: Listener para os botões Editar e Excluir Pedidos na tabela de Administração
             document.getElementById('ordersTableContainer').addEventListener('click', (e) => {
                 if (e.target.closest('.edit-order-btn')) { 
                     openEditOrderModal(e.target.closest('.edit-order-btn').dataset.id); 
@@ -933,7 +1037,6 @@
                 }
             });
 
-            // CORREÇÃO: Listener para salvar as edições feitas no modal de pedido
             document.getElementById('edit-order-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const orderId = document.getElementById('edit-order-id').value;
@@ -942,13 +1045,12 @@
                 const updateData = {};
                 weekDays.forEach(day => {
                     const dayId = getDayId(day);
-                    if (activeHolidays.includes(dayId)) return; // Ignora feriados
+                    if (activeHolidays.includes(dayId)) return; 
                     
                     const selectEl = document.getElementById(`edit-choice-${dayId}`);
                     const notesEl = document.getElementById(`edit-notes-${dayId}`);
                     
                     if (selectEl) { 
-                        // Agora ele salva a opção, mesmo se for vazio ('') para resetar o prato
                         updateData[dayId] = selectEl.value;
                         updateData[`${dayId}_notes`] = notesEl.value.trim();
                     }
