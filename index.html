@@ -2,7 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3703/3703377.png">
+    
     <title>Cardápio Quatinga</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,7 +66,18 @@
         <!-- VISÃO DO USUÁRIO -->
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <p class="text-center mt-2 mb-8 text-md text-gray-500">O seu cardápio da semana está servido!</p>
+                <p class="text-center mt-2 mb-6 text-md text-gray-500">O seu cardápio da semana está servido!</p>
+
+                <!-- CARDÁPIO VISÍVEL NO TOPO (Fora do form para ser sempre visto) -->
+                <div id="menu-image-container" class="mb-8 hidden fade-in">
+                    <h2 class="text-xl font-bold text-gray-800 mb-3 text-center">📸 Cardápio desta Semana</h2>
+                    <div class="relative max-w-md mx-auto">
+                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto rounded-xl shadow-lg border-4 border-white cursor-pointer hover:opacity-95 transition-opacity">
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
@@ -71,17 +87,8 @@
                     </div>
                 </div>
 
-                <!-- Secção de Menu e Pedido -->
+                <!-- Secção de Pedido -->
                 <div id="order-section" class="hidden">
-                    <div id="menu-image-container" class="mb-4">
-                        <div class="relative">
-                            <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto rounded-xl shadow-lg border-4 border-white cursor-pointer">
-                            <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-                            </div>
-                        </div>
-                    </div>
-
                     <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                         <div id="order-wizard">
                             <h3 id="wizard-day-title" class="text-2xl font-bold text-blue-600 mb-4 text-center"></h3>
@@ -128,21 +135,57 @@
                 <div id="admin-regional-filter-container" class="hidden flex items-center gap-2">
                     <label class="text-sm font-semibold text-gray-700">Filtrar Visão:</label>
                     <select id="adminRegionalFilter" class="px-3 py-1 border rounded bg-white text-sm">
-                        <option value="todas">Todas as Regionais</option>
-                        <option value="Quatinga">Quatinga</option>
-                        <option value="Matriz">Matriz</option>
+                        <!-- Injetado via JS -->
                     </select>
                 </div>
             </div>
+
+            <!-- NOVA SECÇÃO EXCLUSIVA SUPER ADM: CRIAR ADMS E REGIONAIS -->
+            <section id="super-admin-management" class="bg-white rounded-xl shadow-sm p-6 mb-8 border-l-4 border-purple-500 hidden fade-in">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">⚙️ Configurações do Sistema</h2>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Gerir Regionais -->
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-2">🏢 Regionais Ativas</h3>
+                        <div id="regionais-list" class="flex flex-wrap gap-2 mb-4"></div>
+                        <div class="flex gap-2">
+                            <input type="text" id="newRegionalInput" placeholder="Nome da Nova Regional" class="w-full border px-3 py-2 rounded-lg text-sm">
+                            <button id="addRegionalBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold text-sm">Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- Criar ADMs -->
+                    <div class="border-t md:border-t-0 md:border-l md:pl-8 pt-4 md:pt-0">
+                        <h3 class="font-bold text-gray-700 mb-2">👮‍♂️ Criar Novo Administrador</h3>
+                        <form id="create-adm-form" class="space-y-3">
+                            <div><input type="email" id="newAdmEmail" placeholder="Email de acesso" class="w-full border rounded-lg p-2 text-sm" required></div>
+                            <div><input type="text" id="newAdmPassword" placeholder="Senha (Mín. 6 letras/números)" class="w-full border rounded-lg p-2 text-sm" required minlength="6"></div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <select id="newAdmRole" class="w-full border rounded-lg p-2 text-sm">
+                                        <option value="regional_adm">ADM Regional</option>
+                                        <option value="super_adm">ADM PRÓ (Tudo)</option>
+                                    </select>
+                                </div>
+                                <div id="newAdmRegionalContainer">
+                                    <select id="newAdmRegional" class="w-full border rounded-lg p-2 text-sm"></select>
+                                </div>
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white p-2 rounded-lg font-bold w-full text-sm">Criar Administrador</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
             
             <!-- SECÇÃO ADM PRÓ: UPLOAD E BLOQUEIO -->
-            <section id="menu-image-uploader-section" class="bg-white rounded-xl shadow-sm p-6 mb-8 border-l-4 border-blue-500">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">👑 ADM PRÓ: Gestão Global</h2>
+            <section id="menu-image-uploader-section" class="bg-white rounded-xl shadow-sm p-6 mb-8 border-l-4 border-blue-500 hidden">
+                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">👑 ADM PRÓ: Gestão Global do Cardápio</h2>
                 
                 <div class="grid md:grid-cols-2 gap-8">
                     <div>
                         <h3 class="font-semibold text-gray-700 mb-2">🖼️ Novo Cardápio</h3>
-                        <p class="text-sm text-gray-600 mb-2">Enviar imagem. Isto limpará os pedidos anteriores.</p>
+                        <p class="text-sm text-gray-600 mb-2">Enviar imagem. Isto limpará todos os pedidos anteriores.</p>
                         <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                         <img id="imagePreview" class="mt-4 rounded-lg max-h-40 hidden border" />
                         <button id="uploadImageBtn" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400" disabled>Salvar Imagem e Feriados</button>
@@ -197,10 +240,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Regional</label>
-                        <select id="newEmployeeRegional" class="mt-1 w-full px-3 py-2 border rounded-lg" required>
-                            <option value="Quatinga">Quatinga</option>
-                            <option value="Matriz">Matriz</option>
-                        </select>
+                        <select id="newEmployeeRegional" class="mt-1 w-full px-3 py-2 border rounded-lg" required></select>
                     </div>
                     <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Adicionar</button>
                 </form>
@@ -247,7 +287,7 @@
             <form id="edit-employee-form">
                 <div class="mb-4"><label class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div>
                 <div class="mb-4"><label class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div>
-                <div class="mb-4"><label class="block text-sm font-medium text-gray-700">Regional</label><select id="editEmployeeRegional" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"><option value="Quatinga">Quatinga</option><option value="Matriz">Matriz</option></select></div>
+                <div class="mb-4"><label class="block text-sm font-medium text-gray-700">Regional</label><select id="editEmployeeRegional" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></select></div>
                 <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <label class="flex items-center space-x-3 cursor-pointer">
                         <input type="checkbox" id="editEmployeeFerias" class="w-5 h-5 text-blue-600 rounded">
@@ -272,7 +312,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, where, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Importando a função createUserWithEmailAndPassword
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
@@ -286,15 +327,15 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // CONFIGURAÇÃO DO SUPER ADM (Padrão de Segurança)
+        // CONFIGURAÇÃO DO SUPER ADM 
         const APP_CONFIG = {
-            SUPER_ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2', // O seu UID mestre
-            REGIONAIS: ['Quatinga', 'Matriz'] // Adicione mais regionais aqui se necessário
+            SUPER_ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2'
         };
         
         const menuDocRef = doc(db, "cardapio", "semanal");
         const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
+        const configDocRef = doc(db, "config", "gerais"); // Nova coleção para as Regionais dinâmicas
         
         const weekDays = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
         const mealOptions = [
@@ -311,11 +352,35 @@
         let currentDayIndex = 0;
         let fileToUpload = null;
         let activeHolidays = [];
-        let currentUserEmployeeData = null; // Dados do funcionário que está a pedir
+        let currentUserEmployeeData = null; 
         
-        // ESTADOS DO ADMINISTRADOR
-        let currentAdminRole = null; // 'super_adm' ou 'regional_adm'
-        let currentAdminRegional = 'todas'; // 'todas' ou 'Quatinga', etc.
+        let regionaisAtivas = ['Quatinga', 'Matriz']; // Fallback local
+        let currentAdminRole = null; 
+        let currentAdminRegional = 'todas'; 
+
+        // --- INJEÇÃO DINÂMICA PWA (APP MOBILE) ---
+        function setupPWA() {
+            // Gera um manifesto web em tempo de execução sem precisar do arquivo json físico!
+            const manifest = {
+                "name": "Delícias Urbanas - Cardápio",
+                "short_name": "Cardápio DU",
+                "start_url": "./",
+                "display": "standalone",
+                "background_color": "#f8fafc",
+                "theme_color": "#2563eb",
+                "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/3703/3703377.png", "sizes": "512x512", "type": "image/png" }]
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${URL.createObjectURL(manifestBlob)}">`);
+
+            // Gera um Service Worker vazio (Apenas para habilitar o botão de Instalação App)
+            const swCode = `self.addEventListener('fetch', (e) => {});`;
+            const swBlob = new Blob([swCode], {type: 'application/javascript'});
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>console.log('SW setup'));
+            }
+        }
+        setupPWA();
 
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
 
@@ -337,6 +402,41 @@
             newOkBtn.addEventListener('click', () => { onConfirm(); modal.classList.add('hidden'); });
         }
 
+        // --- CARREGAR CONFIGURAÇÕES (REGIONAIS DINÂMICAS) ---
+        function loadConfigurations() {
+            onSnapshot(configDocRef, (docSnap) => {
+                if(docSnap.exists()) {
+                    regionaisAtivas = docSnap.data().regionais || ['Quatinga', 'Matriz'];
+                } else if (currentAdminRole === 'super_adm') {
+                    // Inicializa a BD caso não exista
+                    setDoc(configDocRef, { regionais: regionaisAtivas });
+                }
+                updateRegionalDropdowns();
+            });
+        }
+
+        function updateRegionalDropdowns() {
+            // Renderiza as tags das regionais
+            const listContainer = document.getElementById('regionais-list');
+            if (listContainer) {
+                listContainer.innerHTML = regionaisAtivas.map(r => `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-semibold">${r}</span>`).join('');
+            }
+
+            // Atualiza todos os selects do sistema
+            const selects = ['adminRegionalFilter', 'newEmployeeRegional', 'editEmployeeRegional', 'newAdmRegional'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if(!el) return;
+                const currentVal = el.value;
+                let html = '';
+                if(id === 'adminRegionalFilter') html += '<option value="todas">Todas as Regionais</option>';
+                regionaisAtivas.forEach(reg => html += `<option value="${reg}">${reg}</option>`);
+                el.innerHTML = html;
+                if(currentVal && regionaisAtivas.includes(currentVal)) el.value = currentVal;
+                else if (id === 'adminRegionalFilter' && currentVal === 'todas') el.value = 'todas';
+            });
+        }
+
         // --- GESTÃO DE MENU & BLOQUEIO ---
         function loadAndDisplayMenu() {
             onSnapshot(menuDocRef, (docSnap) => {
@@ -351,31 +451,29 @@
                 if (menuData.menuImageBase64) {
                     weeklyMenu.menuImageBase64 = menuData.menuImageBase64;
                     document.getElementById('menu-image').src = weeklyMenu.menuImageBase64;
+                    document.getElementById('menu-image-container').classList.remove('hidden'); 
                     currentDayIndex = 0;
                     userChoices = [];
                     renderWizardStep(0);
+                    
+                    const rgf = document.getElementById('employeeRGF').value.trim();
+                    if(rgf) {
+                        checkIfUserAlreadyOrdered(rgf);
+                    }
                 } else {
                     weeklyMenu.menuImageBase64 = null;
+                    document.getElementById('menu-image-container').classList.add('hidden');
                 }
                 validateForm(); 
-            }, (error) => {
-                 console.error("Erro ao carregar o cardápio:", error);
-                 showToast("Erro ao sincronizar cardápio.", 'error');
-            });
+            }, (error) => { console.error("Erro ao carregar cardápio:", error); });
         }
 
         async function toggleMenuLock() {
             const newState = !weeklyMenu.bloqueado;
             const message = newState ? "Deseja BLOQUEAR o cardápio? Ninguém poderá enviar pedidos." : "Deseja DESBLOQUEAR o cardápio?";
-            
             showCustomConfirm(message, async () => {
-                try {
-                    await updateDoc(menuDocRef, { bloqueado: newState });
-                    showToast(newState ? "Cardápio Bloqueado!" : "Cardápio Aberto!", "success");
-                } catch (error) {
-                    console.error("Erro ao alterar bloqueio:", error);
-                    showToast("Falha ao alterar estado do cardápio.", "error");
-                }
+                try { await updateDoc(menuDocRef, { bloqueado: newState }); showToast(newState ? "Cardápio Bloqueado!" : "Aberto!", "success"); } 
+                catch (error) { showToast("Falha ao alterar.", "error"); }
             });
         }
 
@@ -383,17 +481,13 @@
             const btn = document.getElementById('toggleMenuLockBtn');
             const icon = document.getElementById('lockBtnIcon');
             const text = document.getElementById('lockBtnText');
-            
             if (!btn) return;
-            
             if (weeklyMenu.bloqueado) {
-                btn.className = "w-full bg-red-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-600 flex items-center justify-center gap-2 transition-colors";
-                icon.textContent = "🔒";
-                text.textContent = "Pedidos Encerrados (Clique para Abrir)";
+                btn.className = "w-full bg-red-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-600 flex items-center justify-center gap-2";
+                icon.textContent = "🔒"; text.textContent = "Pedidos Encerrados (Clique para Abrir)";
             } else {
-                btn.className = "w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 transition-colors";
-                icon.textContent = "🔓";
-                text.textContent = "Cardápio Aberto (Clique para Bloquear)";
+                btn.className = "w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2";
+                icon.textContent = "🔓"; text.textContent = "Cardápio Aberto (Clique para Bloquear)";
             }
         }
 
@@ -403,43 +497,22 @@
             try {
                 const q = query(funcionariosCollectionRef, orderBy("nome"));
                 const snapshot = await getDocs(q);
-                
                 let employees = [];
                 snapshot.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
 
-                // Filtro Regional para ADM
                 const viewRegional = document.getElementById('adminRegionalFilter').value;
-                if (viewRegional !== 'todas') {
-                    employees = employees.filter(emp => emp.regionalId === viewRegional);
-                }
+                if (viewRegional !== 'todas') employees = employees.filter(emp => emp.regionalId === viewRegional);
 
-                if (employees.length === 0) {
-                    container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcionário encontrado para esta visão.</p>';
-                    return;
-                }
+                if (employees.length === 0) { container.innerHTML = '<p class="text-gray-500 py-4">Nenhum funcionário encontrado.</p>'; return; }
 
                 let tableHTML = `<table class="min-w-full bg-white border text-sm"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Regional</th><th class="py-2 px-3 border-b text-center">Status</th><th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
-                
                 employees.forEach(emp => {
                     const statusBadge = emp.emFerias ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-bold">🌴 Férias</span>' : '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-bold">Ativo</span>';
-                    
-                    tableHTML += `<tr>
-                        <td class="py-2 px-3 border-b font-mono text-gray-600">${emp.id}</td>
-                        <td class="py-2 px-3 border-b font-semibold">${emp.nome}</td>
-                        <td class="py-2 px-3 border-b text-gray-600">${emp.regionalId || 'N/A'}</td>
-                        <td class="py-2 px-3 border-b text-center">${statusBadge}</td>
-                        <td class="py-2 px-3 border-b space-x-2">
-                            <button data-id="${emp.id}" class="edit-employee-btn text-blue-600 hover:text-blue-800 font-semibold">Editar</button>
-                            <button data-id="${emp.id}" data-name="${emp.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 font-semibold">Excluir</button>
-                        </td>
-                    </tr>`;
+                    tableHTML += `<tr><td class="py-2 px-3 border-b font-mono">${emp.id}</td><td class="py-2 px-3 border-b font-semibold">${emp.nome}</td><td class="py-2 px-3 border-b">${emp.regionalId || 'N/A'}</td><td class="py-2 px-3 border-b text-center">${statusBadge}</td><td class="py-2 px-3 border-b space-x-2"><button data-id="${emp.id}" class="edit-employee-btn text-blue-600 font-semibold">Editar</button><button data-id="${emp.id}" data-name="${emp.nome}" class="delete-employee-btn text-red-600 font-semibold">Excluir</button></td></tr>`;
                 });
                 tableHTML += '</tbody></table>';
                 container.innerHTML = tableHTML;
-            } catch (error) {
-                console.error("Erro ao carregar funcionários:", error);
-                container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcionários.</p>`;
-            }
+            } catch (error) { container.innerHTML = `<p class="text-red-500">Falha ao carregar funcionários.</p>`; }
         }
 
         async function handleAddEmployee(e) {
@@ -447,31 +520,19 @@
             const rgf = document.getElementById('newEmployeeRGF').value.trim();
             const nome = document.getElementById('newEmployeeName').value.trim();
             let regional = document.getElementById('newEmployeeRegional').value;
-            
-            if (currentAdminRole === 'regional_adm') {
-                regional = currentAdminRegional; // Força a regional do ADM
-            }
-
-            if (!rgf || !nome) { showToast("Preencha o RGF e o Nome.", 'error'); return; }
+            if (currentAdminRole === 'regional_adm') regional = currentAdminRegional;
 
             try {
                 await setDoc(doc(db, "funcionarios", rgf), { nome, regionalId: regional, emFerias: false });
                 showToast("Funcionário adicionado!", 'success');
-                e.target.reset();
-                loadAndRenderEmployees(); 
-            } catch (error) {
-                console.error("Erro:", error);
-                showToast("Ocorreu um erro ao adicionar.", 'error');
-            }
+                e.target.reset(); loadAndRenderEmployees(); 
+            } catch (error) { showToast("Erro ao adicionar.", 'error'); }
         }
 
         function handleDeleteEmployee(rgf, name) {
             showCustomConfirm(`Excluir o funcionário ${name} (RGF: ${rgf})?`, async () => {
-                try {
-                    await deleteDoc(doc(db, "funcionarios", rgf));
-                    showToast("Funcionário excluído.", 'success');
-                    loadAndRenderEmployees(); 
-                } catch (error) { showToast("Falha ao excluir.", 'error'); }
+                try { await deleteDoc(doc(db, "funcionarios", rgf)); showToast("Funcionário excluído.", 'success'); loadAndRenderEmployees(); } 
+                catch (error) { showToast("Falha ao excluir.", 'error'); }
             });
         }
         
@@ -482,13 +543,9 @@
                     const emp = docSnap.data();
                     document.getElementById('editEmployeeRGF').value = rgf;
                     document.getElementById('editEmployeeName').value = emp.nome;
-                    document.getElementById('editEmployeeRegional').value = emp.regionalId || 'Quatinga';
+                    document.getElementById('editEmployeeRegional').value = emp.regionalId || regionaisAtivas[0];
                     document.getElementById('editEmployeeFerias').checked = emp.emFerias || false;
-                    
-                    if (currentAdminRole === 'regional_adm') {
-                        document.getElementById('editEmployeeRegional').disabled = true;
-                    }
-                    
+                    document.getElementById('editEmployeeRegional').disabled = currentAdminRole === 'regional_adm';
                     document.getElementById('edit-employee-modal').classList.remove('hidden');
                 }
             } catch(e) { showToast("Erro ao abrir funcionário.", 'error'); }
@@ -500,14 +557,11 @@
             const nome = document.getElementById('editEmployeeName').value.trim();
             const regionalId = document.getElementById('editEmployeeRegional').value;
             const emFerias = document.getElementById('editEmployeeFerias').checked;
-
-            if (!nome) return;
             try {
                 await updateDoc(doc(db, "funcionarios", rgf), { nome, regionalId, emFerias });
                 showToast("Atualizado com sucesso!", 'success');
                 document.getElementById('edit-employee-modal').classList.add('hidden');
-                loadAndRenderEmployees();
-                renderOrderStatus(allOrders); // Atualiza os status se as férias mudaram
+                loadAndRenderEmployees(); renderOrderStatus(allOrders);
             } catch (error) { showToast("Falha ao salvar.", 'error'); }
         }
         
@@ -518,40 +572,27 @@
             document.getElementById('user-already-ordered-section').classList.add('hidden');
             
             if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return; }
-            
             try {
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) {
                     currentUserEmployeeData = { rgf: rgf, ...docSnap.data() };
                     nameInput.value = currentUserEmployeeData.nome;
-                    
-                    // Verifica se já tem pedido esta semana
                     checkIfUserAlreadyOrdered(rgf);
-                } else {
-                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
-                }
-            } catch (error) {
-                console.error("Erro na busca:", error);
-                nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
-            }
+                } else { nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado'; validateForm(); }
+            } catch (error) { nameInput.value = ''; nameInput.placeholder = 'Erro na busca'; }
         }
 
         async function checkIfUserAlreadyOrdered(rgf) {
-            // Se o menu ainda não foi carregado ou não existe, ignora
-            if (!weeklyMenu.menuImageBase64) return;
-            
             try {
-                // Procura o pedido deste RGF
                 const q = query(pedidosCollectionRef, where("employeeRGF", "==", rgf));
                 const snapshot = await getDocs(q);
-                
                 if (!snapshot.empty) {
-                    const orderData = snapshot.docs[0].data();
-                    showUserAlreadyOrderedSummary(orderData);
+                    showUserAlreadyOrderedSummary(snapshot.docs[0].data());
                 } else {
-                    validateForm(); // Continua o fluxo normal se não tiver pedido
+                    document.getElementById('user-already-ordered-section').classList.add('hidden');
+                    validateForm(); 
                 }
-            } catch(error) { console.error("Erro ao checar pedido existente", error); }
+            } catch(error) { console.error(error); }
         }
 
         function showUserAlreadyOrderedSummary(order) {
@@ -562,16 +603,13 @@
             
             const summaryDiv = document.getElementById('user-order-summary');
             summaryDiv.innerHTML = '';
-            
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 if (activeHolidays.includes(dayId)) return;
-                
                 const choice = order[dayId] || 'Nenhuma Opção';
                 const notes = order[`${dayId}_notes`] ? ` <span class="text-sm italic text-gray-500">(${order[`${dayId}_notes`]})</span>` : '';
                 summaryDiv.innerHTML += `<p class="border-b pb-1"><strong class="text-gray-800">${day}:</strong> ${choice}${notes}</p>`;
             });
-
             document.getElementById('user-already-ordered-section').classList.remove('hidden');
         }
         
@@ -582,31 +620,21 @@
                 document.getElementById('submitButtonContainer').classList.remove('hidden');
                 return;
             }
-
             const day = weekDays[index];
             const dayId = getDayId(day);
-
             if (activeHolidays.includes(dayId)) {
                 userChoices[index] = { day: day, choice: "FERIADO", notes: "" };
-                currentDayIndex = index + 1;
-                renderWizardStep(currentDayIndex);
-                return;
+                currentDayIndex = index + 1; renderWizardStep(currentDayIndex); return;
             }
-
             document.getElementById('wizard-day-title').textContent = day;
             const optionsContainer = document.getElementById('wizard-options');
             optionsContainer.innerHTML = '';
             mealOptions.forEach(opt => {
-                optionsContainer.innerHTML += `
-                    <button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 rounded-lg">
-                        <div class="flex items-center"><span class="text-xl mr-2">${opt.emoji}</span><div><p class="font-semibold text-gray-800 text-sm">${opt.name}</p><p class="text-xs text-gray-500">${opt.description}</p></div></div>
-                    </button>`;
+                optionsContainer.innerHTML += `<button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 rounded-lg"><div class="flex items-center"><span class="text-xl mr-2">${opt.emoji}</span><div><p class="font-semibold text-gray-800 text-sm">${opt.name}</p><p class="text-xs text-gray-500">${opt.description}</p></div></div></button>`;
             });
-
             document.getElementById('wizard-notes').value = '';
             updateWizardProgress(index);
-            wizardContainer.classList.add('fade-in');
-            setTimeout(() => wizardContainer.classList.remove('fade-in'), 300);
+            wizardContainer.classList.add('fade-in'); setTimeout(() => wizardContainer.classList.remove('fade-in'), 300);
         }
 
         function updateWizardProgress(index) {
@@ -621,13 +649,8 @@
         function handleWizardSelection(event) {
             const choiceBtn = event.target.closest('.wizard-btn');
             if (!choiceBtn) return;
-            userChoices[currentDayIndex] = {
-                day: weekDays[currentDayIndex],
-                choice: choiceBtn.dataset.value,
-                notes: document.getElementById('wizard-notes').value.trim()
-            };
-            currentDayIndex++;
-            renderWizardStep(currentDayIndex);
+            userChoices[currentDayIndex] = { day: weekDays[currentDayIndex], choice: choiceBtn.dataset.value, notes: document.getElementById('wizard-notes').value.trim() };
+            currentDayIndex++; renderWizardStep(currentDayIndex);
         }
 
         function renderHolidayCheckboxes() {
@@ -637,12 +660,7 @@
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 const isChecked = activeHolidays.includes(dayId) ? 'checked' : '';
-                container.innerHTML += `
-                    <label class="flex items-center space-x-1 cursor-pointer bg-white p-1 rounded border">
-                        <input type="checkbox" value="${dayId}" class="holiday-checkbox text-blue-600" ${isChecked}>
-                        <span>${day.substring(0,3)}</span>
-                    </label>
-                `;
+                container.innerHTML += `<label class="flex items-center space-x-1 cursor-pointer bg-white p-1 rounded border"><input type="checkbox" value="${dayId}" class="holiday-checkbox text-blue-600" ${isChecked}><span>${day.substring(0,3)}</span></label>`;
             });
         }
 
@@ -652,56 +670,44 @@
             const guidanceSection = document.getElementById('guidanceSection');
             const orderSection = document.getElementById('order-section');
             const lockedSection = document.getElementById('lockedSection');
+            
             const alreadyOrdered = !document.getElementById('user-already-ordered-section').classList.contains('hidden');
 
-            if (alreadyOrdered) return; // Se já pediu, a UI já foi tratada.
+            if (alreadyOrdered) {
+                orderSection.classList.add('hidden'); 
+                guidanceSection.classList.add('hidden'); 
+                lockedSection.classList.add('hidden');
+                return; 
+            }
 
             if (weeklyMenu.menuImageBase64) {
                 if (weeklyMenu.bloqueado) {
-                    orderSection.classList.add('hidden');
-                    guidanceSection.classList.add('hidden');
-                    lockedSection.classList.remove('hidden');
+                    orderSection.classList.add('hidden'); guidanceSection.classList.add('hidden'); lockedSection.classList.remove('hidden');
                 } else if (!name || !rgf) {
-                    orderSection.classList.add('hidden');
-                    lockedSection.classList.add('hidden');
-                    guidanceSection.classList.remove('hidden');
-                    document.getElementById('guidanceText').textContent = 'Por favor, preencha o seu RGF para começar.';
+                    orderSection.classList.add('hidden'); lockedSection.classList.add('hidden'); guidanceSection.classList.remove('hidden');
+                    document.getElementById('guidanceText').textContent = 'Por favor, preencha o seu RGF para fazer o pedido.';
                 } else {
-                    guidanceSection.classList.add('hidden');
-                    lockedSection.classList.add('hidden');
-                    orderSection.classList.remove('hidden');
+                    guidanceSection.classList.add('hidden'); lockedSection.classList.add('hidden'); orderSection.classList.remove('hidden');
                 }
             } else {
-                orderSection.classList.add('hidden');
-                lockedSection.classList.add('hidden');
-                guidanceSection.classList.remove('hidden');
+                orderSection.classList.add('hidden'); lockedSection.classList.add('hidden'); guidanceSection.classList.remove('hidden');
                 document.getElementById('guidanceText').textContent = 'O administrador ainda não enviou o cardápio da semana.';
             }
         }
 
         function openConfirmationModal() {
             if (!currentUserEmployeeData) return;
-            
-            tempOrderData = {
-                employeeName: currentUserEmployeeData.nome,
-                employeeRGF: currentUserEmployeeData.rgf,
-                regionalId: currentUserEmployeeData.regionalId || 'Quatinga',
-                timestamp: serverTimestamp()
-            };
-            
+            tempOrderData = { employeeName: currentUserEmployeeData.nome, employeeRGF: currentUserEmployeeData.rgf, regionalId: currentUserEmployeeData.regionalId || regionaisAtivas[0], timestamp: serverTimestamp() };
             const summaryContainer = document.getElementById('confirmation-summary');
             summaryContainer.innerHTML = '';
-            
             userChoices.forEach(item => {
                 const dayId = getDayId(item.day);
                 tempOrderData[dayId] = item.choice;
                 if(item.notes) tempOrderData[`${dayId}_notes`] = item.notes;
-                
                 const displayChoice = item.choice === 'FERIADO' ? '🏖️ FERIADO' : item.choice;
                 const styleClass = item.choice === 'FERIADO' ? 'text-gray-400 italic' : 'text-gray-800';
                 summaryContainer.innerHTML += `<p class="${styleClass}"><span class="font-bold">${item.day}:</span> ${displayChoice} ${item.notes ? `<span class="text-sm">(${item.notes})</span>` : ''}</p>`;
             });
-            
             document.getElementById('confirmation-modal').classList.remove('hidden');
         }
 
@@ -714,11 +720,8 @@
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-message').classList.remove('hidden');
                 document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado!`;
-            } catch (error) {
-                showToast("Ocorreu um erro ao enviar.", 'error');
-            } finally {
-                button.disabled = false; button.textContent = 'Confirmar e Enviar';
-            }
+            } catch (error) { showToast("Ocorreu um erro ao enviar.", 'error'); } 
+            finally { button.disabled = false; button.textContent = 'Confirmar e Enviar'; }
         }
         
         // --- PROCESSAMENTO DE DADOS (ADM) ---
@@ -736,65 +739,43 @@
                 });
                 
                 let rawOrders = Array.from(latestOrdersMap.values()).map(item => item.doc);
-
-                // Aplica Filtro Regional (se não for "todas")
                 const viewRegional = document.getElementById('adminRegionalFilter').value;
-                if (viewRegional !== 'todas') {
-                    rawOrders = rawOrders.filter(doc => doc.data().regionalId === viewRegional);
-                }
+                if (viewRegional !== 'todas') rawOrders = rawOrders.filter(doc => doc.data().regionalId === viewRegional);
 
                 allOrders = rawOrders.sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
-                renderOrdersTable(allOrders);
-                renderOrderStatus(allOrders);
-                renderKitchenSummary(allOrders);
+                renderOrdersTable(allOrders); renderOrderStatus(allOrders); renderKitchenSummary(allOrders);
             });
         }
         
         async function renderOrderStatus(orders) {
             const container = document.getElementById('order-status-container');
             const viewRegional = document.getElementById('adminRegionalFilter').value;
-            
             try {
                 const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
                 let allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                if (viewRegional !== 'todas') {
-                    allEmployees = allEmployees.filter(emp => emp.regionalId === viewRegional);
-                }
+                if (viewRegional !== 'todas') allEmployees = allEmployees.filter(emp => emp.regionalId === viewRegional);
                 
                 const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
-
-                // Lógica de Férias implementada aqui
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
-                const onVacation = allEmployees.filter(emp => emp.emFerias && !orderedRGFs.has(emp.id)); // Férias e não pediram
-                const haveNotOrdered = allEmployees.filter(emp => !emp.emFerias && !orderedRGFs.has(emp.id)); // Ativos e não pediram
+                const onVacation = allEmployees.filter(emp => emp.emFerias && !orderedRGFs.has(emp.id));
+                const haveNotOrdered = allEmployees.filter(emp => !emp.emFerias && !orderedRGFs.has(emp.id));
 
-                container.innerHTML = `
-                    <div><h3 class="font-bold text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3><ul class="text-sm space-y-1">${haveOrdered.map(e => `<li class="p-1 bg-green-50 rounded">${e.nome}</li>`).join('') || 'Ninguém'}</ul></div>
-                    <div><h3 class="font-bold text-red-600 mb-2">❌ Faltam Pedir (${haveNotOrdered.length})</h3><ul class="text-sm space-y-1">${haveNotOrdered.map(e => `<li class="p-1 bg-red-50 rounded">${e.nome}</li>`).join('') || 'Equipa completa!'}</ul></div>
-                    <div><h3 class="font-bold text-yellow-600 mb-2">🌴 Em Férias (${onVacation.length})</h3><ul class="text-sm space-y-1">${onVacation.map(e => `<li class="p-1 bg-yellow-50 rounded">${e.nome}</li>`).join('') || 'Nenhum'}</ul></div>
-                `;
+                container.innerHTML = `<div><h3 class="font-bold text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3><ul class="text-sm space-y-1">${haveOrdered.map(e => `<li class="p-1 bg-green-50 rounded">${e.nome}</li>`).join('') || 'Ninguém'}</ul></div><div><h3 class="font-bold text-red-600 mb-2">❌ Faltam Pedir (${haveNotOrdered.length})</h3><ul class="text-sm space-y-1">${haveNotOrdered.map(e => `<li class="p-1 bg-red-50 rounded">${e.nome}</li>`).join('') || 'Equipa completa!'}</ul></div><div><h3 class="font-bold text-yellow-600 mb-2">🌴 Em Férias (${onVacation.length})</h3><ul class="text-sm space-y-1">${onVacation.map(e => `<li class="p-1 bg-yellow-50 rounded">${e.nome}</li>`).join('') || 'Nenhum'}</ul></div>`;
             } catch (error) { container.innerHTML = '<p class="text-red-500">Erro ao carregar status.</p>'; }
         }
 
         function renderKitchenSummary(orders) {
             const container = document.getElementById('kitchen-summary-container');
-            if (orders.length === 0) { container.innerHTML = '<p class="text-gray-500">Sem pedidos para resumir.</p>'; return; }
+            if (orders.length === 0) { container.innerHTML = '<p class="text-gray-500">Sem pedidos.</p>'; return; }
 
             const summary = {};
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 if (activeHolidays.includes(dayId)) return;
-                
-                summary[dayId] = {};
-                mealOptions.forEach(opt => summary[dayId][opt.name] = 0);
-                
+                summary[dayId] = {}; mealOptions.forEach(opt => summary[dayId][opt.name] = 0);
                 orders.forEach(orderDoc => {
                     const choice = orderDoc.data()[dayId];
-                    if (choice && summary[dayId][choice] !== undefined) {
-                        summary[dayId][choice]++;
-                    }
+                    if (choice && summary[dayId][choice] !== undefined) summary[dayId][choice]++;
                 });
             });
 
@@ -802,7 +783,6 @@
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 if (activeHolidays.includes(dayId)) return;
-
                 html += `<div class="bg-gray-50 border rounded-lg p-3"><h4 class="font-bold text-blue-700 border-b pb-1 mb-2">${day.substring(0,3)}</h4><ul class="text-sm space-y-1">`;
                 mealOptions.forEach(opt => {
                     const count = summary[dayId][opt.name];
@@ -810,8 +790,7 @@
                 });
                 html += '</ul></div>';
             });
-            html += '</div>';
-            container.innerHTML = html;
+            container.innerHTML = html + '</div>';
         }
         
         function renderOrdersTable(orders) {
@@ -820,7 +799,7 @@
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
             if (!weeklyMenu.menuImageBase64) { container.innerHTML = '<p class="text-gray-500">Aguardando cardápio...</p>'; return; }
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500">Nenhum pedido encontrado.</p>'; return; }
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500">Nenhum pedido.</p>'; return; }
             
             let tableHTML = `<table class="min-w-full bg-white border text-sm"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Reg.</th>`;
             weekDays.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.substring(0,3)}</th>`);
@@ -833,39 +812,32 @@
                     const dayId = getDayId(day);
                     let choice = order[dayId] || '';
                     if (activeHolidays.includes(dayId)) choice = 'FERIADO';
-
                     if (choice === 'FERIADO') {
                         tableHTML += `<td class="py-2 px-3 border-b bg-gray-100 text-gray-400 text-xs text-center">FERIADO</td>`;
                     } else {
-                        let content = choice.split(' ')[0]; // Mostra só primeira palavra pra caber na tabela
+                        let content = choice.split(' ')[0];
                         if (order[`${dayId}_notes`]) content += ` <span title="${order[`${dayId}_notes`]}" class="cursor-help text-blue-500 font-bold">*</span>`;
                         tableHTML += `<td class="py-2 px-3 border-b">${content || '-'}</td>`;
                     }
                 });
                 tableHTML += `<td class="py-2 px-3 border-b space-x-2 whitespace-nowrap"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 font-semibold">Editar</button><button data-id="${doc.id}" class="delete-order-btn text-red-600 hover:text-red-800 font-semibold">Excluir</button></td></tr>`;
             });
-            tableHTML += `</tbody></table>`;
-            container.innerHTML = tableHTML;
+            container.innerHTML = tableHTML + `</tbody></table>`;
         }
 
         function openEditOrderModal(orderId) {
             const orderDoc = allOrders.find(doc => doc.id === orderId);
             if (!orderDoc) return;
             const order = orderDoc.data();
-
             document.getElementById('edit-order-id').value = orderId;
             document.getElementById('edit-order-employeeName').value = order.employeeName;
-
             const optionsContainer = document.getElementById('edit-menu-options');
             optionsContainer.innerHTML = '';
-
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 if (activeHolidays.includes(dayId)) return; 
-
                 const currentChoice = order[dayId] || '';
                 const currentNotes = order[`${dayId}_notes`] || '';
-
                 let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border rounded-lg mb-2 text-sm bg-white"><option value="">(Nenhuma)</option>${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}</select>`;
                 optionsContainer.innerHTML += `<div class="p-3 border rounded-lg bg-gray-50 border-gray-200"><label class="block font-semibold text-gray-700 mb-2">${day}</label>${selectHTML}<input type="text" id="edit-notes-${dayId}" value="${currentNotes}" placeholder="Anotações" class="w-full px-3 py-2 border rounded-lg text-sm bg-white"></div>`;
             });
@@ -873,23 +845,17 @@
         }
 
         function generateAndPrintReport() {
-            const reportContainer = document.getElementById('print-report');
             if (allOrders.length === 0) { showToast("Não há pedidos.", "info"); return; }
-            
+            const reportContainer = document.getElementById('print-report');
             const viewRegional = document.getElementById('adminRegionalFilter').value;
             const tituloReg = viewRegional === 'todas' ? 'Todas as Regionais' : `Regional: ${viewRegional}`;
-            
             reportContainer.innerHTML = `<h1>Cardápio da Semana - ${tituloReg}</h1>`;
-            
             let allDaysHTML = '';
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 if (activeHolidays.includes(dayId)) return;
-                
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${day}</th></tr></thead><tbody>`;
-                
                 const dailyOrders = allOrders.filter(doc => doc.data()[dayId] && doc.data()[dayId] !== 'FERIADO');
-                
                 dailyOrders.forEach(orderDoc => {
                     const order = orderDoc.data();
                     let choice = (order[dayId] || '').toUpperCase();
@@ -897,11 +863,9 @@
                     if (order[`${dayId}_notes`]) choice += ` <span style="font-style: italic; font-weight: normal;">(${order[`${dayId}_notes`]})</span>`;
                     tableHTML += `<tr><td>${order.employeeRGF || '-'}</td><td>${order.employeeName}</td><td>${choice}</td></tr>`;
                 });
-                tableHTML += '</tbody></table></div>';
-                allDaysHTML += tableHTML;
+                allDaysHTML += tableHTML + '</tbody></table></div>';
             });
-            reportContainer.innerHTML += allDaysHTML;
-            window.print();
+            reportContainer.innerHTML += allDaysHTML; window.print();
         }
         
         async function clearAllOrders() {
@@ -911,7 +875,7 @@
             await Promise.all(deletionPromises);
         }
 
-        // --- UPLOAD E LOGIN ---
+        // --- UPLOAD ---
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -928,78 +892,70 @@
         async function uploadImageAndSaveMenu() {
             if (!fileToUpload) return;
             const selectedHolidays = Array.from(document.querySelectorAll('.holiday-checkbox:checked')).map(cb => cb.value);
-
             showCustomConfirm("Deseja atualizar o cardápio? TODOS os pedidos anteriores serão excluídos.", async () => {
                 const btn = document.getElementById('uploadImageBtn');
                 btn.disabled = true; btn.textContent = "A enviar...";
                 try {
                     const compressedFile = await imageCompression(fileToUpload, { maxSizeMB: 0.5, maxWidthOrHeight: 1024 });
                     const base64String = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(compressedFile);
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = error => reject(error);
+                        const reader = new FileReader(); reader.readAsDataURL(compressedFile);
+                        reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error);
                     });
-
-                    // IMPORTANTE: Ao criar novo cardápio, bloqueado volta a false
                     await setDoc(menuDocRef, { menuImageBase64: base64String, holidays: selectedHolidays, bloqueado: false });
                     await clearAllOrders();
-                    
                     showToast("Cardápio e Feriados atualizados!", "success");
                     document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-                    document.getElementById('imageUpload').value = '';
-                    fileToUpload = null;
+                    document.getElementById('imageUpload').value = ''; fileToUpload = null;
                 } catch (error) { showToast("Falha ao guardar.", "error"); } 
                 finally { btn.disabled = true; btn.textContent = "Salvar Imagem e Feriados"; }
             });
         }
 
-        // --- GESTÃO DE SESSÃO ---
+        // --- GESTÃO DE SESSÃO E ACESSOS ---
+        let isAuthenticating = false;
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // LÓGICA DE NÍVEIS DE ACESSO
+                // Se for utilizador anónimo (funcionário normal), apenas mostra a visão de utilizador e para aqui.
+                if (user.isAnonymous) {
+                    showUserView();
+                    return;
+                }
+
                 try {
                     let isAdmin = false;
-
-                    // 1. Tenta verificar se tem configuração na BD (usuarios_adm)
                     try {
                         const adminDocRef = doc(db, 'usuarios_adm', user.uid);
                         const adminDoc = await getDoc(adminDocRef);
-                        
                         if (adminDoc.exists()) {
                             const data = adminDoc.data();
-                            currentAdminRole = data.role; // 'super_adm' ou 'regional_adm'
+                            currentAdminRole = data.role; 
                             currentAdminRegional = data.regionalId || 'todas';
                             isAdmin = true;
                         }
-                    } catch (dbError) {
-                        console.warn("Aviso (Normal): Não foi possível ler a coleção usuarios_adm (regras de segurança). Verificando ADM PRÓ direto...");
-                    }
+                    } catch (dbError) { console.warn("Lendo BD (normal se sem regra)..."); }
 
-                    // 2. Se a BD falhou ou não tem o utilizador lá, verifica se é o Dono/Super Admin (Configurado no topo do código)
                     if (!isAdmin && user.uid === APP_CONFIG.SUPER_ADMIN_UID) {
-                        currentAdminRole = 'super_adm';
-                        currentAdminRegional = 'todas';
-                        isAdmin = true;
+                        currentAdminRole = 'super_adm'; currentAdminRegional = 'todas'; isAdmin = true;
                     } 
                     
-                    // 3. Valida o resultado final
                     if (isAdmin) {
-                        applyAdminRoleUI();
-                        showAdminView();
+                        applyAdminRoleUI(); showAdminView();
                     } else {
-                        // Login válido, mas sem acesso ADM
-                        await signOut(auth);
-                        showToast("Acesso Negado. Contacte o Super Admin.", "error");
-                        showUserView();
+                        await signOut(auth); showToast("Acesso Negado a conta de Administrador.", "error"); showUserView();
                     }
-                    
-                } catch(e) { 
-                    console.error("Erro geral na auth", e); 
-                    showUserView();
-                }
+                } catch(e) { showUserView(); }
             } else {
-                if (!auth.currentUser) signInAnonymously(auth);
+                if (!auth.currentUser && !isAuthenticating) {
+                    isAuthenticating = true;
+                    signInAnonymously(auth).catch(err => {
+                        console.error("Erro no login anónimo:", err);
+                        if (err.code === 'auth/too-many-requests') {
+                            showToast("Muitos acessos detectados. Aguarde um instante para o sistema estabilizar.", "error");
+                        }
+                    }).finally(() => {
+                        isAuthenticating = false;
+                    });
+                }
                 showUserView();
             }
         });
@@ -1009,47 +965,36 @@
             const uploaderSection = document.getElementById('menu-image-uploader-section');
             const filterContainer = document.getElementById('admin-regional-filter-container');
             const regionalSelectAdd = document.getElementById('newEmployeeRegional');
+            const superAdminSection = document.getElementById('super-admin-management');
             
             if (currentAdminRole === 'super_adm') {
                 badge.textContent = '👑 ADM PRÓ (Todas Regionais)';
                 badge.className = "text-sm font-bold mt-2 inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800";
                 uploaderSection.classList.remove('hidden');
                 filterContainer.classList.remove('hidden');
+                superAdminSection.classList.remove('hidden'); // Exibe gestão de regionais/utilizadores
                 document.getElementById('adminRegionalFilter').value = 'todas';
             } else {
                 badge.textContent = `📍 ADM Regional (${currentAdminRegional})`;
                 badge.className = "text-sm font-bold mt-2 inline-block px-3 py-1 rounded-full bg-green-100 text-green-800";
-                uploaderSection.classList.add('hidden'); // ADM regional não mexe no cardápio
+                uploaderSection.classList.add('hidden'); 
                 filterContainer.classList.add('hidden');
-                document.getElementById('adminRegionalFilter').value = currentAdminRegional; // Força filtro
-                regionalSelectAdd.value = currentAdminRegional; // Força regional no cadastro
+                superAdminSection.classList.add('hidden'); 
+                document.getElementById('adminRegionalFilter').value = currentAdminRegional; 
+                regionalSelectAdd.value = currentAdminRegional; 
                 regionalSelectAdd.disabled = true;
             }
+            loadConfigurations(); // Recarrega para mostrar as selects
         }
 
-        function showUserView() {
-            document.getElementById('user-view').classList.remove('hidden');
-            document.getElementById('admin-view').classList.add('hidden');
-            document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
-        }
-
-        function showAdminView() {
-            document.getElementById('user-view').classList.add('hidden');
-            document.getElementById('admin-view').classList.remove('hidden');
-            document.getElementById('admin-login-modal').classList.add('hidden');
-            loadAndDisplayMenu(); 
-            loadAdminData();
-            loadAndRenderEmployees();
-        }
+        function showUserView() { document.getElementById('user-view').classList.remove('hidden'); document.getElementById('admin-view').classList.add('hidden'); document.getElementById('admin-login-modal').classList.add('hidden'); loadAndDisplayMenu(); }
+        function showAdminView() { document.getElementById('user-view').classList.add('hidden'); document.getElementById('admin-view').classList.remove('hidden'); document.getElementById('admin-login-modal').classList.add('hidden'); loadAndDisplayMenu(); loadAdminData(); loadAndRenderEmployees(); }
 
         async function handleAdminLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
             const btn = e.target.querySelector('button[type="submit"]');
             btn.disabled = true; btn.textContent = 'Entrando...';
-            try { await signInWithEmailAndPassword(auth, email, password); } 
+            try { await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value, document.getElementById('adminPassword').value); } 
             catch (error) { showToast("Email ou senha incorretos.", 'error'); } 
             finally { btn.disabled = false; btn.textContent = 'Entrar'; }
         }
@@ -1065,65 +1010,85 @@
             document.getElementById('wizard-options').addEventListener('click', handleWizardSelection);
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
-            
-            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
-                btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
-            });
-
+            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => { btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden')); });
             document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
-            
             document.getElementById('adminLogoutBtn').addEventListener('click', async () => { await signOut(auth); window.location.reload(); });
             document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
-            
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
                 if (e.target.closest('.edit-employee-btn')) openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id);
                 if (e.target.closest('.delete-employee-btn')) handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name);
             });
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
-            
             document.getElementById('ordersTableContainer').addEventListener('click', (e) => {
                 if (e.target.closest('.edit-order-btn')) openEditOrderModal(e.target.closest('.edit-order-btn').dataset.id); 
-                if (e.target.closest('.delete-order-btn')) {
-                    const id = e.target.closest('.delete-order-btn').dataset.id;
-                    showCustomConfirm("Excluir pedido?", async () => { await deleteDoc(doc(db, "pedidosDaSemana", id)); showToast("Pedido excluído", 'success'); });
-                }
+                if (e.target.closest('.delete-order-btn')) showCustomConfirm("Excluir pedido?", async () => { await deleteDoc(doc(db, "pedidosDaSemana", e.target.closest('.delete-order-btn').dataset.id)); showToast("Pedido excluído", 'success'); });
             });
-
             document.getElementById('edit-order-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const id = document.getElementById('edit-order-id').value;
-                const updateData = {};
+                e.preventDefault(); const id = document.getElementById('edit-order-id').value; const updateData = {};
                 weekDays.forEach(day => {
-                    const dayId = getDayId(day);
-                    if (activeHolidays.includes(dayId)) return;
+                    const dayId = getDayId(day); if (activeHolidays.includes(dayId)) return;
                     const sel = document.getElementById(`edit-choice-${dayId}`);
                     if (sel) { updateData[dayId] = sel.value; updateData[`${dayId}_notes`] = document.getElementById(`edit-notes-${dayId}`).value; }
                 });
-                await updateDoc(doc(db, "pedidosDaSemana", id), updateData);
-                showToast("Atualizado!", 'success');
-                document.getElementById('edit-order-modal').classList.add('hidden');
+                await updateDoc(doc(db, "pedidosDaSemana", id), updateData); showToast("Atualizado!", 'success'); document.getElementById('edit-order-modal').classList.add('hidden');
             });
-            
-            document.getElementById('adminRegionalFilter').addEventListener('change', () => {
-                loadAndRenderEmployees();
-                loadAdminData(); // Recarrega os pedidos filtrados
-            });
-
+            document.getElementById('adminRegionalFilter').addEventListener('change', () => { loadAndRenderEmployees(); loadAdminData(); });
             document.getElementById('toggleMenuLockBtn').addEventListener('click', toggleMenuLock);
-            
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
             document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', () => window.open(`https://api.whatsapp.com/send?text=O%20card%C3%A1pio%20da%20semana%20foi%20atualizado!%20%E2%9C%A8%20%0A%0A%F0%9F%91%89%20${encodeURIComponent(window.location.href)}`));
-            
             document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
             document.getElementById('uploadImageBtn').addEventListener('click', uploadImageAndSaveMenu);
 
-            const zoomModal = document.getElementById('image-zoom-modal');
-            const menuImg = document.getElementById('menu-image');
+            const zoomModal = document.getElementById('image-zoom-modal'); const menuImg = document.getElementById('menu-image');
             menuImg.addEventListener('click', () => { document.getElementById('zoomed-image').src = menuImg.src; zoomModal.classList.remove('hidden'); });
             zoomModal.addEventListener('click', () => zoomModal.classList.add('hidden'));
+
+            // --- LÓGICA DE SUPER ADMIN (Criar Regional e ADMs) ---
+            document.getElementById('addRegionalBtn').addEventListener('click', async () => {
+                const val = document.getElementById('newRegionalInput').value.trim();
+                if(!val) return;
+                if(regionaisAtivas.includes(val)) { showToast('Regional já existe!', 'error'); return; }
+                const novasReg = [...regionaisAtivas, val];
+                try { await updateDoc(configDocRef, { regionais: novasReg }); document.getElementById('newRegionalInput').value = ''; showToast('Regional adicionada!', 'success'); } 
+                catch(e) { showToast('Erro ao adicionar.', 'error'); }
+            });
+
+            document.getElementById('newAdmRole').addEventListener('change', (e) => {
+                document.getElementById('newAdmRegionalContainer').style.display = e.target.value === 'super_adm' ? 'none' : 'block';
+            });
+
+            document.getElementById('create-adm-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('newAdmEmail').value.trim();
+                const pwd = document.getElementById('newAdmPassword').value;
+                const role = document.getElementById('newAdmRole').value;
+                const reg = document.getElementById('newAdmRegional').value;
+                const btn = e.target.querySelector('button');
+                btn.disabled = true; btn.textContent = 'A criar...';
+                
+                try {
+                    // Usamos uma app Firebase secundária para criar o ADM sem deslogar o Super ADM atual!
+                    const secondaryApp = initializeApp(firebaseConfig, "SecondaryAppToCreateUsers");
+                    const secondaryAuth = getAuth(secondaryApp);
+                    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pwd);
+                    
+                    await setDoc(doc(db, "usuarios_adm", cred.user.uid), {
+                        email: email, role: role, regionalId: role === 'super_adm' ? 'todas' : reg
+                    });
+                    
+                    await signOut(secondaryAuth);
+                    showToast("Administrador criado com sucesso!", "success");
+                    e.target.reset();
+                } catch(err) {
+                    console.error(err);
+                    showToast("Erro ao criar utilizador. A senha tem mais de 6 caracteres?", "error");
+                } finally {
+                    btn.disabled = false; btn.textContent = 'Criar Administrador';
+                }
+            });
         }
         main();
     </script>
