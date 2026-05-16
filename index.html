@@ -60,7 +60,13 @@
         
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <p class="text-center mt-2 mb-8 text-md text-gray-500">O seu cardápio da semana está servido!</p>
+                <p class="text-center mt-2 mb-4 text-md text-gray-500">O seu cardápio está servido!</p>
+
+                <!-- Alternador de Semana para o Usuário -->
+                <div id="week-toggle-container" class="hidden mb-6 bg-white p-2 rounded-xl shadow-sm flex flex-col sm:flex-row gap-2 border border-gray-100 fade-in">
+                    <button id="btn-current-week" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold shadow transition-colors">🍲 Cardápio Desta Semana</button>
+                    <button id="btn-next-week" class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-bold transition-colors border border-gray-200">📅 Fazer Pedido (Próx. Semana)</button>
+                </div>
 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
@@ -80,20 +86,19 @@
                         </div>
                     </div>
 
-                    <!-- NOVO CONTAINER: Resumo do Pedido Existente -->
+                    <!-- Resumo do Pedido Existente -->
                     <div id="existing-order-container" class="hidden bg-white rounded-xl shadow-sm p-6 sm:p-8 mb-6 border-2 border-green-100 fade-in">
                         <div class="text-center mb-6">
                             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
                                 <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </div>
-                            <h3 class="text-2xl font-bold text-gray-800">Pedido da Semana Registado!</h3>
-                            <p class="text-gray-600 mt-2">Você já realizou o seu pedido. Consulte abaixo as suas escolhas para esta semana:</p>
+                            <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800">Pedido Registado!</h3>
+                            <p class="text-gray-600 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
                         </div>
                         <div id="existing-order-details" class="space-y-3">
                             <!-- Preenchido via JS -->
                         </div>
                     </div>
-                    <!-- FIM DO NOVO CONTAINER -->
 
                     <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                         <div id="order-wizard">
@@ -125,32 +130,54 @@
                 <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
             
-            <section id="menu-image-uploader-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">🖼️ Novo Cardápio da Semana</h2>
-                <p class="text-gray-600 mb-4">Envie a imagem do novo cardápio. Isso limpará os pedidos da semana anterior.</p>
-                <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                <img id="imagePreview" class="mt-4 rounded-lg max-h-80 hidden border" />
-                
-                <div class="mt-6 border-t pt-4">
-                    <h3 class="font-semibold text-gray-700 mb-2">📅 Marcar Feriados (Não haverá pedido nestes dias)</h3>
-                    <div id="holiday-selector" class="flex flex-wrap gap-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+            <!-- NOVA SEÇÃO DE GESTÃO DE SEMANAS -->
+            <section id="menu-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-6">🖼️ Gerenciar Semanas e Cardápios</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    
+                    <!-- Current Week -->
+                    <div class="border border-gray-200 rounded-xl p-5 bg-gray-50 flex flex-col">
+                        <h3 class="font-bold text-lg text-gray-800 mb-3 flex items-center gap-2"><span>📌</span> Cardápio Atual (Ativo)</h3>
+                        <div class="flex-1">
+                            <img id="admin-current-image" class="w-full h-40 object-cover rounded-lg mb-4 border shadow-sm hidden" />
+                            <p id="admin-current-status" class="text-sm text-gray-500 mb-4 italic">Nenhum cardápio ativo.</p>
                         </div>
-                </div>
+                        <button id="btn-turn-week" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-600 transition shadow-md flex justify-center items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                            Atualizar (Iniciar Nova Semana)
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2 text-center">Clique na segunda-feira para transformar o cardápio da "Próxima Semana" no atual.</p>
+                        <div class="text-center mt-4 pt-4 border-t border-gray-200">
+                             <button id="btn-clear-current-orders" class="text-xs text-red-500 hover:text-red-700 underline font-semibold">⚠️ Apagar todos os pedidos da semana atual</button>
+                        </div>
+                    </div>
 
-                <div class="mt-6 text-center">
-                    <button id="uploadImageBtn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md transition-colors" disabled>Salvar Cardápio e Feriados</button>
-                </div>
-
-                 <div id="whatsapp-notification-container" class="mt-6 text-center hidden">
-                    <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                        Notificar Funcionários no WhatsApp
-                    </button>
+                    <!-- Next Week Setup -->
+                    <div class="border-2 border-blue-100 rounded-xl p-5 bg-blue-50/40 flex flex-col">
+                        <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center gap-2"><span>🚀</span> Preparar Próxima Semana</h3>
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-600 mb-4">Envie o cardápio (ex: na quinta-feira) para que já possam fazer os pedidos sem apagar a semana atual.</p>
+                            <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-4"/>
+                            <img id="imagePreview" class="w-full h-32 object-cover rounded-lg border hidden mb-4 shadow-sm" />
+                            
+                            <h4 class="font-semibold text-sm text-gray-700 mb-2">Feriados da Próxima Semana</h4>
+                            <div id="holiday-selector" class="flex flex-wrap gap-2 mb-4 bg-white p-2 rounded-lg border border-gray-200"></div>
+                        </div>
+                        <button id="uploadImageBtn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md" disabled>
+                            Salvar Cardápio para a Próxima Semana
+                        </button>
+                        <div id="whatsapp-notification-container" class="mt-4 hidden">
+                            <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                Avisar no WhatsApp
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
             
             <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">📊 Status de Pedidos da Semana</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="status-section-title">📊 Status de Pedidos</h2>
                 <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <p class="text-gray-500">A carregar status dos pedidos...</p>
                 </div>
@@ -175,8 +202,15 @@
             </section>
 
             <section id="orders-section">
-                <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-b pb-4">
                     <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
+                    <!-- Toggle de Visualização de Pedidos para Admin -->
+                    <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+                        <button id="admin-view-current" class="px-4 py-1.5 bg-white shadow-sm rounded-md text-sm font-bold text-blue-600 transition-colors">Esta Semana</button>
+                        <button id="admin-view-next" class="px-4 py-1.5 text-gray-600 hover:bg-gray-200 rounded-md text-sm font-semibold transition-colors">Próxima Semana</button>
+                    </div>
+                </div>
+                <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
                     <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
                 </div>
@@ -197,9 +231,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Nome do Funcionário</label>
                     <input type="text" id="edit-order-employeeName" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 font-bold" readonly>
                 </div>
-                <div id="edit-menu-options" class="space-y-4 max-h-[50vh] overflow-y-auto p-1">
-                    <!-- Opções geradas dinamicamente via JS -->
-                </div>
+                <div id="edit-menu-options" class="space-y-4 max-h-[50vh] overflow-y-auto p-1"></div>
                 <div class="mt-6 flex justify-end space-x-4">
                     <button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Salvar Alterações</button>
@@ -221,8 +253,8 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // IMPORTANTE: Foi adicionado o 'where' nas importações do firestore
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Importado writeBatch para operações atômicas na troca de semanas
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         const firebaseConfig = {
@@ -242,7 +274,6 @@
         };
         
         const menuDocRef = doc(db, "cardapio", "semanal");
-        const pedidosCollectionRef = collection(db, "pedidosDaSemana");
         const funcionariosCollectionRef = collection(db, "funcionarios");
         
         const weekDays = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
@@ -253,15 +284,30 @@
             { name: "Filé de frango", emoji: "🍗", description: "Opção fixa" }
         ];
 
+        // Estado do Menu e Interface
+        let currentMenuData = { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [] };
         let weeklyMenu = {};
+        let userActiveHolidays = [];
+        
+        let viewingNextWeek = false; // Controle do usuário (Desta Semana / Próxima)
+        let adminViewingNextWeek = false; // Controle do admin na listagem de pedidos
+        let adminUnsubscribe = null;
+
         let allOrders = [];
         let tempOrderData = {};
         let userChoices = [];
         let currentDayIndex = 0;
         let fileToUpload = null;
-        let activeHolidays = [];
         
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
+
+        // Retorna a coleção correta dependendo do que o usuário ou admin estão visualizando
+        function getUserOrdersRef() {
+            return viewingNextWeek ? collection(db, "pedidosProximaSemana") : collection(db, "pedidosDaSemana");
+        }
+        function getAdminOrdersRef() {
+            return adminViewingNextWeek ? collection(db, "pedidosProximaSemana") : collection(db, "pedidosDaSemana");
+        }
 
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.getElementById('app-toast');
@@ -289,6 +335,7 @@
             });
         }
 
+        // Funções de Funcionários
         async function loadAndRenderEmployees() {
             const container = document.getElementById('employee-list-container');
             try {
@@ -302,21 +349,13 @@
                 let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
                 snapshot.forEach(doc => {
                     const employee = doc.data();
-                    tableHTML += `<tr>
-                        <td class="py-2 px-3 border-b font-mono">${doc.id}</td>
-                        <td class="py-2 px-3 border-b font-semibold">${employee.nome}</td>
-                        <td class="py-2 px-3 border-b space-x-2">
-                            <button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button>
-                            <button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button>
-                        </td>
-                    </tr>`;
+                    tableHTML += `<tr><td class="py-2 px-3 border-b font-mono">${doc.id}</td><td class="py-2 px-3 border-b font-semibold">${employee.nome}</td><td class="py-2 px-3 border-b space-x-2"><button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
                 });
                 tableHTML += '</tbody></table>';
                 container.innerHTML = tableHTML;
             } catch (error) {
                 console.error("Erro ao carregar funcionários:", error);
-                container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcionários. Verifique as regras de segurança do Firestore.</p>`;
-                showToast("Falha ao carregar a lista de funcionários.", "error");
+                container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcionários.</p>`;
             }
         }
 
@@ -326,31 +365,19 @@
             const nameInput = document.getElementById('newEmployeeName');
             const rgf = rgfInput.value.trim();
             const nome = nameInput.value.trim();
-
-            if (!rgf || !nome) { showToast("Por favor, preencha o RGF e o Nome.", 'error'); return; }
-
+            if (!rgf || !nome) { showToast("Preencha o RGF e o Nome.", 'error'); return; }
             try {
                 await setDoc(doc(db, "funcionarios", rgf), { nome });
-                showToast("Funcionário adicionado com sucesso!", 'success');
+                showToast("Funcionário adicionado!", 'success');
                 rgfInput.value = ''; nameInput.value = '';
                 loadAndRenderEmployees(); 
-            } catch (error) {
-                console.error("Erro ao adicionar funcionário: ", error);
-                showToast("Ocorreu um erro ao adicionar o funcionário.", 'error');
-            }
+            } catch (error) { showToast("Erro ao adicionar funcionário.", 'error'); }
         }
 
         function handleDeleteEmployee(rgf, name) {
-            const message = `Tem a certeza que deseja excluir o funcionário ${name} (RGF: ${rgf})? Esta ação não pode ser desfeita.`;
-            showCustomConfirm(message, async () => {
-                try {
-                    await deleteDoc(doc(db, "funcionarios", rgf));
-                    showToast("Funcionário excluído com sucesso.", 'success');
-                    loadAndRenderEmployees(); 
-                } catch (error) {
-                    console.error("Erro ao excluir funcionário: ", error);
-                    showToast("Falha ao excluir o funcionário.", 'error');
-                }
+            showCustomConfirm(`Tem a certeza que deseja excluir ${name} (RGF: ${rgf})?`, async () => {
+                try { await deleteDoc(doc(db, "funcionarios", rgf)); showToast("Funcionário excluído.", 'success'); loadAndRenderEmployees(); } 
+                catch (error) { showToast("Falha ao excluir.", 'error'); }
             });
         }
         
@@ -364,17 +391,13 @@
             e.preventDefault();
             const rgf = document.getElementById('editEmployeeRGF').value;
             const newName = document.getElementById('editEmployeeName').value.trim();
-
-            if (!newName) { showToast("O nome não pode ficar em branco.", 'error'); return; }
+            if (!newName) return;
             try {
                 await updateDoc(doc(db, "funcionarios", rgf), { nome: newName });
-                showToast("Funcionário atualizado com sucesso!", 'success');
+                showToast("Atualizado com sucesso!", 'success');
                 document.getElementById('edit-employee-modal').classList.add('hidden');
                 loadAndRenderEmployees();
-            } catch (error) {
-                console.error("Erro ao salvar alterações do funcionário: ", error);
-                showToast("Falha ao salvar as alterações do funcionário.", 'error');
-            }
+            } catch (error) { showToast("Falha ao salvar.", 'error'); }
         }
         
         async function findEmployeeByRGF(rgf) {
@@ -382,25 +405,16 @@
             if (!rgf) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return false; }
             try {
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
-                if (docSnap.exists()) {
-                    nameInput.value = docSnap.data().nome;
-                    return true;
-                } else {
-                    nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado';
-                    return false;
-                }
-            } catch (error) {
-                console.error("Erro ao buscar funcionário:", error);
-                nameInput.value = ''; nameInput.placeholder = 'Erro na busca';
-                showToast("Erro ao buscar funcionário.", 'error');
-                return false;
-            }
+                if (docSnap.exists()) { nameInput.value = docSnap.data().nome; return true; } 
+                else { nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado'; return false; }
+            } catch (error) { nameInput.value = ''; nameInput.placeholder = 'Erro na busca'; return false; }
         }
 
-        // NOVO: Exibe as informações de um pedido já realizado na tela
         function displayExistingOrder(orderData) {
             const detailsContainer = document.getElementById('existing-order-details');
             detailsContainer.innerHTML = '';
+            
+            document.getElementById('existing-order-title').textContent = viewingNextWeek ? "Pedido da Próxima Semana Registado!" : "Pedido Registado!";
             
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
@@ -415,20 +429,18 @@
                     detailsContainer.innerHTML += `
                         <div class="p-4 rounded-xl border ${styleClass} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 transition-all hover:shadow-md">
                             <span class="font-bold text-gray-700 w-full sm:w-1/3">${day}</span>
-                            <div class="w-full sm:w-2/3 text-left sm:text-right font-medium">
-                                ${displayChoice} ${notesHtml}
-                            </div>
+                            <div class="w-full sm:w-2/3 text-left sm:text-right font-medium">${displayChoice} ${notesHtml}</div>
                         </div>
                     `;
                 }
             });
         }
 
-        // NOVO: Verifica no firebase se aquele RGF já fez pedido para essa semana
         async function checkExistingOrder(rgf) {
             if (!rgf) return;
             try {
-                const q = query(pedidosCollectionRef, where("employeeRGF", "==", rgf));
+                // Utiliza a referência que respeita o toggle "Próxima Semana" do usuário
+                const q = query(getUserOrdersRef(), where("employeeRGF", "==", rgf));
                 const snapshot = await getDocs(q);
                 
                 const wizardContainer = document.getElementById('order-wizard-container');
@@ -436,21 +448,16 @@
                 const submitBtnContainer = document.getElementById('submitButtonContainer');
                 
                 if (!snapshot.empty) {
-                    // Pega o pedido mais recente se houver algum vestígio duplo
                     let latestOrder = null;
                     let latestTime = 0;
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const time = data.timestamp ? data.timestamp.toMillis() : 0;
-                        if (time >= latestTime) {
-                            latestTime = time;
-                            latestOrder = data;
-                        }
+                        if (time >= latestTime) { latestTime = time; latestOrder = data; }
                     });
 
                     if (latestOrder) {
                         displayExistingOrder(latestOrder);
-                        // Esconde o formulario normal, e mostra o resumo do pedido
                         wizardContainer.classList.add('hidden');
                         submitBtnContainer.classList.add('hidden');
                         existingContainer.classList.remove('hidden');
@@ -458,10 +465,8 @@
                     }
                 }
                 
-                // Se não tem pedido, certificar que a visualização do Wizard está normal
                 existingContainer.classList.add('hidden');
                 
-                // Se o funcionário ainda não terminou as escolhas (Wizard), exibe, caso contrario exibe submit
                 if (currentDayIndex >= weekDays.length) {
                     wizardContainer.classList.add('hidden');
                     submitBtnContainer.classList.remove('hidden');
@@ -470,15 +475,12 @@
                     submitBtnContainer.classList.add('hidden');
                 }
                 
-            } catch (error) {
-                console.error("Erro ao verificar pedido existente:", error);
-            }
+            } catch (error) { console.error("Erro ao verificar pedido existente:", error); }
         }
         
         function renderWizardStep(index) {
             const wizardContainer = document.getElementById('order-wizard-container');
             if (index >= weekDays.length) {
-                // MODIFICADO: Escondemos apenas o wizard, mantendo a imagem à vista
                 wizardContainer.classList.add('hidden'); 
                 document.getElementById('submitButtonContainer').classList.remove('hidden');
                 return;
@@ -487,19 +489,14 @@
             const day = weekDays[index];
             const dayId = getDayId(day);
 
-            if (activeHolidays.includes(dayId)) {
-                userChoices[index] = {
-                    day: day,
-                    choice: "FERIADO",
-                    notes: ""
-                };
+            if (userActiveHolidays.includes(dayId)) {
+                userChoices[index] = { day: day, choice: "FERIADO", notes: "" };
                 currentDayIndex = index + 1; 
                 renderWizardStep(currentDayIndex);
                 return;
             }
 
             document.getElementById('wizard-day-title').textContent = day;
-
             const optionsContainer = document.getElementById('wizard-options');
             optionsContainer.innerHTML = '';
             mealOptions.forEach(opt => {
@@ -534,16 +531,11 @@
         function handleWizardSelection(event) {
             const choiceBtn = event.target.closest('.wizard-btn');
             if (!choiceBtn) return;
-
-            const choice = choiceBtn.dataset.value;
-            const notes = document.getElementById('wizard-notes').value.trim();
-
             userChoices[currentDayIndex] = {
                 day: weekDays[currentDayIndex],
-                choice: choice,
-                notes: notes
+                choice: choiceBtn.dataset.value,
+                notes: document.getElementById('wizard-notes').value.trim()
             };
-
             currentDayIndex++;
             renderWizardStep(currentDayIndex);
         }
@@ -552,9 +544,11 @@
             const container = document.getElementById('holiday-selector');
             if (!container) return;
             container.innerHTML = '';
+            // Na parte do Admin de upload, estamos configurando a PRÓXIMA semana
+            const savedNextHolidays = currentMenuData.nextHolidays || [];
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
-                const isChecked = activeHolidays.includes(dayId) ? 'checked' : '';
+                const isChecked = savedNextHolidays.includes(dayId) ? 'checked' : '';
                 container.innerHTML += `
                     <label class="flex items-center space-x-2 cursor-pointer select-none bg-white p-2 rounded shadow-sm border border-gray-100 hover:bg-gray-50 transition">
                         <input type="checkbox" value="${dayId}" class="holiday-checkbox w-5 h-5 text-blue-600 rounded focus:ring-blue-500" ${isChecked}>
@@ -566,32 +560,73 @@
 
         function loadAndDisplayMenu() {
             onSnapshot(menuDocRef, async (docSnap) => {
-                const menuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [] };
+                currentMenuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [] };
                 
-                const menuImage = document.getElementById('menu-image');
-                activeHolidays = menuData.holidays || []; 
+                // Configuração da UI de usuário (Alternador de semanas)
+                const toggleContainer = document.getElementById('week-toggle-container');
+                if (toggleContainer) {
+                    if (currentMenuData.nextMenuImageBase64) {
+                        toggleContainer.classList.remove('hidden');
+                    } else {
+                        toggleContainer.classList.add('hidden');
+                        viewingNextWeek = false; 
+                    }
+                }
+
+                // Configuração da UI de Admin (Cardápio Atual)
+                const currentImg = document.getElementById('admin-current-image');
+                const currentStatus = document.getElementById('admin-current-status');
+                if (currentMenuData.menuImageBase64) {
+                    currentImg.src = currentMenuData.menuImageBase64;
+                    currentImg.classList.remove('hidden');
+                    currentStatus.textContent = "Cardápio atual está ativo.";
+                } else {
+                    currentImg.classList.add('hidden');
+                    currentStatus.textContent = "Nenhum cardápio ativo no momento.";
+                }
 
                 renderHolidayCheckboxes();
-
-                if (menuData.menuImageBase64) {
-                    weeklyMenu.menuImageBase64 = menuData.menuImageBase64;
-                    menuImage.src = weeklyMenu.menuImageBase64;
-                    currentDayIndex = 0;
-                    userChoices = [];
-                    renderWizardStep(0);
-                } else {
-                    weeklyMenu.menuImageBase64 = null;
-                }
+                updateUserViewUI();
                 
-                await validateForm();
-                renderOrdersTable(allOrders);
-            }, (error) => {
-                 console.error("Erro ao carregar o cardápio:", error);
-                 showToast("Erro ao carregar o cardápio.", 'error');
-            });
+            }, (error) => { showToast("Erro ao carregar o cardápio.", 'error'); });
+        }
+
+        // Nova função para atualizar a interface do usuário dependendo da semana selecionada
+        function updateUserViewUI() {
+            const btnCurrent = document.getElementById('btn-current-week');
+            const btnNext = document.getElementById('btn-next-week');
+
+            if (viewingNextWeek) {
+                btnNext.classList.replace('bg-gray-100', 'bg-blue-600');
+                btnNext.classList.replace('text-gray-700', 'text-white');
+                btnCurrent.classList.replace('bg-blue-600', 'bg-gray-100');
+                btnCurrent.classList.replace('text-white', 'text-gray-700');
+                
+                weeklyMenu.menuImageBase64 = currentMenuData.nextMenuImageBase64;
+                userActiveHolidays = currentMenuData.nextHolidays || [];
+            } else {
+                btnCurrent.classList.replace('bg-gray-100', 'bg-blue-600');
+                btnCurrent.classList.replace('text-gray-700', 'text-white');
+                btnNext.classList.replace('bg-blue-600', 'bg-gray-100');
+                btnNext.classList.replace('text-white', 'text-gray-700');
+                
+                weeklyMenu.menuImageBase64 = currentMenuData.menuImageBase64;
+                userActiveHolidays = currentMenuData.holidays || [];
+            }
+
+            const menuImage = document.getElementById('menu-image');
+            if (weeklyMenu.menuImageBase64) {
+                menuImage.src = weeklyMenu.menuImageBase64;
+                currentDayIndex = 0;
+                userChoices = [];
+                renderWizardStep(0);
+            } else {
+                menuImage.src = '';
+            }
+
+            validateForm();
         }
         
-        // MODIFICADO: Transforma em async/await para dar tempo de verificar o pedido e exibir a tela correta.
         async function validateForm() {
             const nameInput = document.getElementById('employeeName');
             const rgfInput = document.getElementById('employeeRGF');
@@ -608,13 +643,12 @@
                 } else {
                     guidanceSection.classList.add('hidden');
                     orderSection.classList.remove('hidden');
-                    // NOVO: Verifica se já tem pedido para exibir a tela de confirmação
                     await checkExistingOrder(rgf); 
                 }
             } else {
                 orderSection.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
-                document.getElementById('guidanceText').textContent = 'O administrador ainda não enviou o cardápio da semana.';
+                document.getElementById('guidanceText').textContent = 'Nenhum cardápio disponível para a seleção atual.';
             }
         }
 
@@ -630,15 +664,11 @@
             userChoices.forEach(item => {
                 const dayId = getDayId(item.day);
                 tempOrderData[dayId] = item.choice;
-                if(item.notes) {
-                    tempOrderData[`${dayId}_notes`] = item.notes;
-                }
+                if(item.notes) tempOrderData[`${dayId}_notes`] = item.notes;
                 const displayChoice = item.choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : item.choice;
                 const styleClass = item.choice === 'FERIADO' ? 'text-gray-400 italic' : 'text-gray-800';
-                
                 summaryContainer.innerHTML += `<p class="${styleClass}"><span class="font-bold">${item.day}:</span> ${displayChoice} ${item.notes ? `<span class="text-sm text-gray-500 italic">(${item.notes})</span>` : ''}</p>`;
             });
-            
             document.getElementById('confirmation-modal').classList.remove('hidden');
         }
 
@@ -646,14 +676,13 @@
             const button = document.getElementById('submitOrder');
             button.disabled = true; button.textContent = 'A enviar...';
             try {
-                await addDoc(pedidosCollectionRef, tempOrderData);
+                await addDoc(getUserOrdersRef(), tempOrderData);
                 document.getElementById('confirmation-modal').classList.add('hidden');
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-message').classList.remove('hidden');
                 document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
                 showToast("Pedido enviado com sucesso!", 'success');
             } catch (error) {
-                console.error("Erro ao enviar pedido: ", error);
                 showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
             } finally {
                 button.disabled = false; button.textContent = 'Confirmar e Enviar';
@@ -661,7 +690,11 @@
         }
         
         function loadAdminData() {
-            onSnapshot(pedidosCollectionRef, (snapshot) => {
+            if (adminUnsubscribe) adminUnsubscribe();
+
+            document.getElementById('status-section-title').textContent = adminViewingNextWeek ? "📊 Status de Pedidos (Próxima Semana)" : "📊 Status de Pedidos (Esta Semana)";
+
+            adminUnsubscribe = onSnapshot(getAdminOrdersRef(), (snapshot) => {
                 const latestOrdersMap = new Map();
                 snapshot.forEach(doc => {
                     const orderData = doc.data();
@@ -679,16 +712,12 @@
 
                 renderOrdersTable(allOrders);
                 renderOrderStatus(allOrders);
-            }, (error) => {
-                console.error("Erro ao carregar dados do administrador:", error);
-                showToast("Erro ao carregar dados do administrador.", 'error');
-            });
+            }, (error) => { showToast("Erro ao carregar dados do administrador.", 'error'); });
         }
         
         async function renderOrderStatus(orders) {
             const container = document.getElementById('order-status-container');
             container.innerHTML = '<p class="text-gray-500">A processar...</p>';
-
             try {
                 const employeeSnapshot = await getDocs(query(funcionariosCollectionRef, orderBy("nome")));
                 const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -709,11 +738,7 @@
                     </div>
                 `;
                 container.innerHTML = html;
-
-            } catch (error) {
-                console.error("Erro ao renderizar status de pedidos:", error);
-                container.innerHTML = '<p class="text-red-500">Falha ao carregar status dos funcionários.</p>';
-            }
+            } catch (error) { container.innerHTML = '<p class="text-red-500">Falha ao carregar status.</p>'; }
         }
         
         function renderOrdersTable(orders) {
@@ -721,8 +746,7 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            if (!weeklyMenu.menuImageBase64) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Aguardando cardápio...</p>'; return; }
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado.</p>'; return; }
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado nesta seleção.</p>'; return; }
             
             let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
             weekDays.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.substring(0,3)}</th>`);
@@ -740,9 +764,7 @@
                         tableHTML += `<td class="py-2 px-3 border-b bg-gray-100 text-gray-400 text-xs text-center">FERIADO</td>`;
                     } else {
                         let cellContent = choice;
-                        if (notes) {
-                            cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
-                        }
+                        if (notes) cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
                         tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
                     }
                 });
@@ -762,64 +784,48 @@
 
             const optionsContainer = document.getElementById('edit-menu-options');
             optionsContainer.innerHTML = '';
+            const editHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
 
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
-                
-                if (activeHolidays.includes(dayId)) return; 
+                if (editHolidays.includes(dayId)) return; 
 
                 const currentChoice = order[dayId] || '';
                 const currentNotes = order[`${dayId}_notes`] || '';
 
-                let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm bg-white">
-                    <option value="">(Nenhuma opção selecionada)</option>
-                    ${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}
-                </select>`;
+                let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm bg-white"><option value="">(Nenhuma opção selecionada)</option>${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}</select>`;
 
-                optionsContainer.innerHTML += `
-                    <div class="p-3 border rounded-lg bg-gray-50 border-gray-200">
-                        <label class="block font-semibold text-gray-700 mb-2">${day}</label>
-                        ${selectHTML}
-                        <input type="text" id="edit-notes-${dayId}" value="${currentNotes}" placeholder="Anotações (ex: sem cebola)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
-                    </div>
-                `;
+                optionsContainer.innerHTML += `<div class="p-3 border rounded-lg bg-gray-50 border-gray-200"><label class="block font-semibold text-gray-700 mb-2">${day}</label>${selectHTML}<input type="text" id="edit-notes-${dayId}" value="${currentNotes}" placeholder="Anotações (ex: sem cebola)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"></div>`;
             });
             document.getElementById('edit-order-modal').classList.remove('hidden');
         }
 
         function handleDeleteOrder(orderId, employeeName) {
-            showCustomConfirm(`Tem a certeza que deseja excluir o pedido de ${employeeName}?`, async () => {
+            showCustomConfirm(`Deseja excluir o pedido de ${employeeName} (Semana selecionada)?`, async () => {
                 try {
-                    await deleteDoc(doc(db, "pedidosDaSemana", orderId));
+                    await deleteDoc(doc(getAdminOrdersRef(), orderId));
                     showToast("Pedido excluído com sucesso!", 'success');
-                } catch (error) {
-                    console.error("Erro ao excluir pedido:", error);
-                    showToast("Erro ao excluir o pedido.", 'error');
-                }
+                } catch (error) { showToast("Erro ao excluir o pedido.", 'error'); }
             });
         }
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            if (allOrders.length === 0) {
-                showToast("Não há pedidos para gerar o relatório.", "info");
-                return;
-            }
-            reportContainer.innerHTML = '<h1>Regional Quatinga</h1>';
+            if (allOrders.length === 0) { showToast("Não há pedidos para gerar o relatório.", "info"); return; }
+            const subTitle = adminViewingNextWeek ? "(Próxima Semana)" : "(Esta Semana)";
+            reportContainer.innerHTML = `<h1>Regional Quatinga <br><span style="font-size:12pt;font-weight:normal">${subTitle}</span></h1>`;
             
+            const printHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
             let allDaysHTML = '';
+            
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
-                
-                if (activeHolidays.includes(dayId)) return;
+                if (printHolidays.includes(dayId)) return;
                 
                 let tableHTML = `<div class="report-day-section"><table class="report-table"><thead><tr><th class="rgf-col">RGF</th><th class="nome-col">NOME</th><th class="pedido-col">${day}</th></tr></thead><tbody>`;
                 
                 const dailyOrders = allOrders
-                    .filter(orderDoc => {
-                        const orderData = orderDoc.data();
-                        return orderData[dayId] && orderData[dayId] !== 'FERIADO';
-                    })
+                    .filter(orderDoc => { const orderData = orderDoc.data(); return orderData[dayId] && orderData[dayId] !== 'FERIADO'; })
                     .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
                 
                 dailyOrders.forEach(orderDoc => {
@@ -827,12 +833,9 @@
                     let choice = (order[dayId] || '').toUpperCase();
                     const notes = order[`${dayId}_notes`];
                     let choiceHTML = choice;
-
                     if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
                     if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
-
-                    if (notes) { choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`; }
-
+                    if (notes) choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
                 });
                 tableHTML += '</tbody></table></div>';
@@ -841,22 +844,10 @@
             reportContainer.innerHTML += allDaysHTML;
             window.print();
         }
-        
-        async function clearAllOrders() {
-            console.log("Iniciando a limpeza de todos os pedidos da semana...");
-            const querySnapshot = await getDocs(pedidosCollectionRef);
-            const deletionPromises = [];
-            querySnapshot.forEach((doc) => {
-                deletionPromises.push(deleteDoc(doc.ref));
-            });
-            await Promise.all(deletionPromises);
-            console.log(`${deletionPromises.length} pedidos foram excluídos com sucesso.`);
-        }
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             fileToUpload = file;
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -874,66 +865,105 @@
             reader.onerror = error => reject(error);
         });
 
-        async function uploadImageAndSaveMenu() {
-            if (!fileToUpload) {
-                showToast("Nenhuma imagem selecionada.", "error");
-                return;
-            }
-
+        // Modificado para salvar apenas como "Próxima Semana" e não deletar nada
+        async function uploadNextWeekMenu() {
+            if (!fileToUpload) { showToast("Nenhuma imagem selecionada.", "error"); return; }
+            
             const selectedHolidays = Array.from(document.querySelectorAll('.holiday-checkbox:checked')).map(cb => cb.value);
+            const uploadBtn = document.getElementById('uploadImageBtn');
+            uploadBtn.disabled = true; uploadBtn.textContent = "A enviar...";
 
-            const message = "Tem a certeza que deseja atualizar o cardápio? TODOS os pedidos da semana anterior serão excluídos permanentemente.";
+            try {
+                const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024 };
+                const compressedFile = await imageCompression(fileToUpload, options);
+                const base64String = await toBase64(compressedFile);
+
+                // Salva no documento apenas nas propriedades 'nextMenuImageBase64' e 'nextHolidays'
+                await setDoc(menuDocRef, { 
+                    nextMenuImageBase64: base64String,
+                    nextHolidays: selectedHolidays 
+                }, { merge: true });
+                
+                showToast("Cardápio da Próxima Semana salvo e disponível!", "success");
+                document.getElementById('whatsapp-notification-container').classList.remove('hidden');
+                document.getElementById('imageUpload').value = '';
+                document.getElementById('imagePreview').classList.add('hidden');
+                fileToUpload = null;
+            } catch (error) { showToast("Falha ao guardar. Tente novamente.", "error"); } 
+            finally { uploadBtn.disabled = true; uploadBtn.textContent = "Salvar Cardápio para a Próxima Semana"; }
+        }
+
+        // Nova Função: Promove a Próxima Semana para Semana Atual
+        async function turnWeek() {
+            const message = "Tem certeza? O cardápio e os pedidos da 'Próxima Semana' substituirão integralmente a 'Semana Atual'.";
             showCustomConfirm(message, async () => {
-                const uploadBtn = document.getElementById('uploadImageBtn');
-                uploadBtn.disabled = true;
-                uploadBtn.textContent = "A enviar...";
+                const btn = document.getElementById('btn-turn-week');
+                btn.disabled = true; btn.innerHTML = '⏳ Atualizando...';
 
                 try {
-                    const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024 };
-                    const compressedFile = await imageCompression(fileToUpload, options);
-                    const base64String = await toBase64(compressedFile);
+                    const docSnap = await getDoc(menuDocRef);
+                    const data = docSnap.exists() ? docSnap.data() : {};
 
-                    await setDoc(menuDocRef, { 
-                        menuImageBase64: base64String,
-                        holidays: selectedHolidays 
+                    if (!data.nextMenuImageBase64) {
+                        showToast("Não há cardápio da próxima semana para iniciar.", "error");
+                        btn.disabled = false; btn.innerHTML = '🔄 Atualizar (Iniciar Nova Semana)';
+                        return;
+                    }
+
+                    const batch = writeBatch(db);
+
+                    // 1. Apagar pedidos da semana atual
+                    const currentOrdersSnap = await getDocs(collection(db, "pedidosDaSemana"));
+                    currentOrdersSnap.forEach(d => batch.delete(d.ref));
+
+                    // 2. Mover pedidos da próxima semana para a semana atual
+                    const nextOrdersSnap = await getDocs(collection(db, "pedidosProximaSemana"));
+                    nextOrdersSnap.forEach(d => {
+                        const newDocRef = doc(collection(db, "pedidosDaSemana"), d.id);
+                        batch.set(newDocRef, d.data());
+                        batch.delete(d.ref); // deleta da próxima semana
                     });
-                    
-                    await clearAllOrders();
-                    
-                    showToast("Cardápio e Feriados atualizados!", "success");
-                    document.getElementById('whatsapp-notification-container').classList.remove('hidden');
-                    document.getElementById('imageUpload').value = '';
-                    document.getElementById('imagePreview').classList.add('hidden');
-                    fileToUpload = null;
 
+                    // 3. Atualizar o Documento Base
+                    batch.set(menuDocRef, {
+                        menuImageBase64: data.nextMenuImageBase64,
+                        holidays: data.nextHolidays || [],
+                        nextMenuImageBase64: '',
+                        nextHolidays: []
+                    }, { merge: true });
+
+                    await batch.commit();
+                    showToast("Nova semana iniciada com sucesso!", "success");
+                    adminViewingNextWeek = false; // Volta a view do admin pro padrao
+                    loadAdminData();
                 } catch (error) {
-                    console.error("Erro ao processar e guardar dados:", error);
-                    showToast("Falha ao guardar. Tente novamente.", "error");
+                    console.error(error); showToast("Falha ao iniciar a semana.", "error");
                 } finally {
-                    uploadBtn.disabled = true;
-                    uploadBtn.textContent = "Salvar Cardápio e Feriados";
+                    btn.disabled = false; btn.innerHTML = '🔄 Atualizar (Iniciar Nova Semana)';
                 }
             });
         }
 
+        async function clearCurrentOrders() {
+            showCustomConfirm("⚠️ Atenção: Isso vai APAGAR TODOS os pedidos cadastrados na Semana Atual. Deseja continuar?", async () => {
+                const snap = await getDocs(collection(db, "pedidosDaSemana"));
+                const batch = writeBatch(db);
+                snap.forEach(d => batch.delete(d.ref));
+                await batch.commit();
+                showToast("Pedidos apagados com sucesso.", "success");
+            });
+        }
+
         function handleWhatsAppNotification() {
-            const message = `O cardápio da semana foi atualizado! ✨ Confira as delícias e faça seu pedido: ${window.location.href}`;
+            const message = `O cardápio da próxima semana já está disponível! ✨ Faça o seu pedido com antecedência: ${window.location.href}`;
             const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
-            window.open(whatsappUrl, '_blank');
-            showToast('Abra o WhatsApp para enviar a notificação.', 'info');
+            window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
         }
 
         onAuthStateChanged(auth, (user) => {
-            if (user && user.uid === APP_CONFIG.ADMIN_UID) {
-                showAdminView();
-            } else {
-                if (!auth.currentUser) {
-                    signInAnonymously(auth).catch((error) => {
-                        console.error("Erro no login anónimo:", error);
-                        showToast("Não foi possível conectar-se. Verifique a sua ligação.", "error");
-                    });
-                }
+            if (user && user.uid === APP_CONFIG.ADMIN_UID) { showAdminView(); } 
+            else {
+                if (!auth.currentUser) signInAnonymously(auth).catch(() => showToast("Falha de conexão.", "error"));
                 showUserView();
             }
         });
@@ -962,50 +992,45 @@
             btn.disabled = true; btn.textContent = 'Entrando...';
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) {
-                    await signOut(auth);
-                    showToast("Credenciais válidas, mas este usuário não é um administrador.", 'error');
-                }
-            } catch (error) {
-                console.error("Erro no login de administrador:", error);
-                const msg = (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') ? "Email ou senha incorretos." : "Ocorreu um erro no login.";
-                showToast(msg, 'error', 5000);
-            } finally {
-                btn.disabled = false; btn.textContent = 'Entrar';
-            }
+                if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) { await signOut(auth); showToast("Acesso Negado.", 'error'); }
+            } catch (error) { showToast("Email ou senha incorretos.", 'error', 5000); } 
+            finally { btn.disabled = false; btn.textContent = 'Entrar'; }
         }
 
         async function handleAdminLogout() {
-            try { 
-                await signOut(auth); 
-                showToast("Saindo do painel...", 'info');
-                setTimeout(() => { window.location.reload(); }, 500);
-            } 
-            catch (error) { 
-                console.error("Erro no logout:", error); 
-                showToast("Erro ao fazer logout.", 'error'); 
-            }
+            try { await signOut(auth); showToast("Saindo do painel...", 'info'); setTimeout(() => { window.location.reload(); }, 500); } 
+            catch (error) { showToast("Erro ao fazer logout.", 'error'); }
         }
 
         function main() {
-            const rgfInput = document.getElementById('employeeRGF');
-            
-            // MODIFICADO: A validação e busca agora são assíncronas para garantir o correto fluxo
-            rgfInput.addEventListener('input', async () => {
-                const rgfValue = rgfInput.value.trim();
-                await findEmployeeByRGF(rgfValue);
-                await validateForm();
+            // Eventos do Toggle de Semanas - USUÁRIO
+            document.getElementById('btn-current-week').addEventListener('click', () => { viewingNextWeek = false; updateUserViewUI(); });
+            document.getElementById('btn-next-week').addEventListener('click', () => { viewingNextWeek = true; updateUserViewUI(); });
+
+            // Eventos do Toggle de Semanas - ADMIN
+            document.getElementById('admin-view-current').addEventListener('click', (e) => {
+                adminViewingNextWeek = false;
+                e.target.classList.add('bg-white', 'shadow-sm', 'text-blue-600'); e.target.classList.remove('text-gray-600', 'hover:bg-gray-200');
+                const nextBtn = document.getElementById('admin-view-next'); nextBtn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600'); nextBtn.classList.add('text-gray-600', 'hover:bg-gray-200');
+                loadAdminData();
             });
-            
+            document.getElementById('admin-view-next').addEventListener('click', (e) => {
+                adminViewingNextWeek = true;
+                e.target.classList.add('bg-white', 'shadow-sm', 'text-blue-600'); e.target.classList.remove('text-gray-600', 'hover:bg-gray-200');
+                const curBtn = document.getElementById('admin-view-current'); curBtn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600'); curBtn.classList.add('text-gray-600', 'hover:bg-gray-200');
+                loadAdminData();
+            });
+
+            // Botão Mágico (Atualizar para a Próxima Semana na segunda-feira) e Limpar Semana Atual
+            document.getElementById('btn-turn-week').addEventListener('click', turnWeek);
+            document.getElementById('btn-clear-current-orders').addEventListener('click', clearCurrentOrders);
+
+            const rgfInput = document.getElementById('employeeRGF');
+            rgfInput.addEventListener('input', async () => { await findEmployeeByRGF(rgfInput.value.trim()); await validateForm(); });
             rgfInput.addEventListener('blur', () => localStorage.setItem('employeeRGF', rgfInput.value));
             
             rgfInput.value = localStorage.getItem('employeeRGF') || '';
-            if(rgfInput.value) { 
-                (async () => {
-                    await findEmployeeByRGF(rgfInput.value); 
-                    await validateForm(); 
-                })();
-            }
+            if(rgfInput.value) { (async () => { await findEmployeeByRGF(rgfInput.value); await validateForm(); })(); }
             
             document.getElementById('wizard-options').addEventListener('click', handleWizardSelection);
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
@@ -1026,15 +1051,12 @@
                 if (e.target.closest('.edit-employee-btn')) { openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name); }
                 if (e.target.closest('.delete-employee-btn')) { handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name); }
             });
+
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
             
             document.getElementById('ordersTableContainer').addEventListener('click', (e) => {
-                if (e.target.closest('.edit-order-btn')) { 
-                    openEditOrderModal(e.target.closest('.edit-order-btn').dataset.id); 
-                }
-                if (e.target.closest('.delete-order-btn')) { 
-                    handleDeleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name); 
-                }
+                if (e.target.closest('.edit-order-btn')) { openEditOrderModal(e.target.closest('.edit-order-btn').dataset.id); }
+                if (e.target.closest('.delete-order-btn')) { handleDeleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name); }
             });
 
             document.getElementById('edit-order-form').addEventListener('submit', async (e) => {
@@ -1043,33 +1065,24 @@
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 
                 const updateData = {};
+                const editHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
+
                 weekDays.forEach(day => {
                     const dayId = getDayId(day);
-                    if (activeHolidays.includes(dayId)) return; 
+                    if (editHolidays.includes(dayId)) return; 
                     
                     const selectEl = document.getElementById(`edit-choice-${dayId}`);
                     const notesEl = document.getElementById(`edit-notes-${dayId}`);
-                    
-                    if (selectEl) { 
-                        updateData[dayId] = selectEl.value;
-                        updateData[`${dayId}_notes`] = notesEl.value.trim();
-                    }
+                    if (selectEl) { updateData[dayId] = selectEl.value; updateData[`${dayId}_notes`] = notesEl.value.trim(); }
                 });
 
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Salvando...';
-
+                submitBtn.disabled = true; submitBtn.textContent = 'Salvando...';
                 try {
-                    await updateDoc(doc(db, "pedidosDaSemana", orderId), updateData);
+                    await updateDoc(doc(getAdminOrdersRef(), orderId), updateData);
                     showToast("Pedido atualizado com sucesso!", 'success');
                     document.getElementById('edit-order-modal').classList.add('hidden');
-                } catch (error) {
-                    console.error("Erro ao atualizar pedido:", error);
-                    showToast("Erro ao salvar as edições do pedido.", 'error');
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Salvar Alterações';
-                }
+                } catch (error) { showToast("Erro ao salvar.", 'error'); } 
+                finally { submitBtn.disabled = false; submitBtn.textContent = 'Salvar Alterações'; }
             });
             
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
@@ -1078,7 +1091,8 @@
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
             
             document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
-            document.getElementById('uploadImageBtn').addEventListener('click', uploadImageAndSaveMenu);
+            // Agora o botão de Upload salva os dados APENAS para a PRÓXIMA semana
+            document.getElementById('uploadImageBtn').addEventListener('click', uploadNextWeekMenu);
 
             const zoomModal = document.getElementById('image-zoom-modal');
             const menuImage = document.getElementById('menu-image');
@@ -1093,5 +1107,3 @@
     </script>
 </body>
 </html>
-
-
