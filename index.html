@@ -15,12 +15,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         html { scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
-        .font-brand { font-family: 'Lobster Two', cursive; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .no-print { }
@@ -59,11 +58,12 @@
 
     <!-- Botão ADM Flutuante e Pequeno (Não ocupa espaço no topo) -->
     <div class="absolute top-0 right-0 z-50 p-2 no-print">
-        <button id="switchToAdmin" class="text-xs bg-white/90 backdrop-blur-md text-gray-600 font-bold py-1 px-3 rounded-lg shadow-sm border border-gray-200">⚙️ ADM</button>
+        <button id="switchToAdmin" class="text-xs bg-white/90 backdrop-blur-md text-gray-600 font-bold py-1 px-3 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-100">⚙️ ADM</button>
     </div>
 
     <div id="app-container" class="container mx-auto max-w-4xl p-2 sm:p-6 pb-20 mt-6 sm:mt-2">
         
+        <!-- ================= VISÃO DO USUÁRIO ================= -->
         <div id="user-view" class="no-print">
             <div id="form-container">
                 <!-- Alternador de Semana para o Usuário -->
@@ -126,23 +126,9 @@
             <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Retornar ao Início</button></div>
         </div>
 
+        <!-- ================= VISÃO DO ADMINISTRADOR ================= -->
         <div id="admin-view" class="hidden no-print">
             <header class="text-center border-b pb-6 mb-6 mt-8">
-                            <div id="submitButtonContainer" class="hidden w-full mt-auto">
-                                <button id="openConfirmationModal" class="w-full bg-green-500 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
-                            </div>
-                            
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
-            </div>
-            <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Retornar ao Início</button></div>
-        </div>
-
-        <div id="admin-view" class="hidden no-print">
-            <header class="text-center border-b pb-6 mb-6">
                 <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
                 <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
                 <div class="mt-4">
@@ -315,12 +301,11 @@
         let adminViewingNextWeek = false; 
         let autoSwitchDone = false; 
         
-        // Listeners e Controle
         let menuUnsubscribe = null;
         let adminUnsubscribe = null;
         let anonymousLoginPromise = null;
         let isLoggingInAsAdmin = false;
-        let isRotatingWeekLock = false; // Trava para impedir rotações duplicadas na automação
+        let isRotatingWeekLock = false; 
 
         let allOrders = [];
         let tempOrderData = {};
@@ -343,7 +328,8 @@
                     icons: [{
                         src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle' fill='white'%3E🍲%3C/text%3E%3C/svg%3E",
                         sizes: "192x192",
-                        type: "image/svg+xml"
+                        type: "image/svg+xml",
+                        purpose: "any maskable"
                     }]
                 };
                 const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
@@ -354,7 +340,7 @@
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
                 }
-            } catch (e) { console.log("PWA setup falhou, mas não afeta o site."); }
+            } catch (e) { console.log("PWA setup falhou"); }
         }
         setupPWA();
 
@@ -403,7 +389,7 @@
                 tableHTML += '</tbody></table>';
                 container.innerHTML = tableHTML;
             } catch (error) {
-                console.error("Erro ao carregar funcionários:", error);
+                console.error("Erro:", error);
                 container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcionários.</p>`;
             }
         }
@@ -421,13 +407,13 @@
                 showToast("Funcionário adicionado!", 'success');
                 rgfInput.value = ''; nameInput.value = '';
                 loadAndRenderEmployees(); 
-            } catch (error) { showToast("Erro ao adicionar funcionário.", 'error'); }
+            } catch (error) { showToast("Erro ao adicionar.", 'error'); }
         }
 
         function handleDeleteEmployee(rgf, name) {
-            showCustomConfirm(`Tem a certeza que deseja excluir ${name} (RGF: ${rgf})?`, async () => {
+            showCustomConfirm(`Tem a certeza que deseja excluir ${name}?`, async () => {
                 if (!auth.currentUser) return;
-                try { await deleteDoc(doc(db, "funcionarios", rgf)); showToast("Funcionário excluído.", 'success'); loadAndRenderEmployees(); } 
+                try { await deleteDoc(doc(db, "funcionarios", rgf)); showToast("Excluído.", 'success'); loadAndRenderEmployees(); } 
                 catch (error) { showToast("Falha ao excluir.", 'error'); }
             });
         }
@@ -446,7 +432,7 @@
             if (!newName) return;
             try {
                 await updateDoc(doc(db, "funcionarios", rgf), { nome: newName });
-                showToast("Atualizado com sucesso!", 'success');
+                showToast("Atualizado!", 'success');
                 document.getElementById('edit-employee-modal').classList.add('hidden');
                 loadAndRenderEmployees();
             } catch (error) { showToast("Falha ao salvar.", 'error'); }
@@ -459,7 +445,7 @@
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
                 if (docSnap.exists()) { nameInput.value = docSnap.data().nome; return true; } 
                 else { nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado'; return false; }
-            } catch (error) { nameInput.value = ''; nameInput.placeholder = 'Erro na busca'; return false; }
+            } catch (error) { nameInput.value = ''; nameInput.placeholder = 'Erro'; return false; }
         }
 
         function displayExistingOrder(orderData) {
@@ -505,13 +491,9 @@
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const isNext = !!data.isNextWeek;
-                        
                         if (isNext === viewingNextWeek) {
                             const time = data.timestamp ? data.timestamp.toMillis() : 0;
-                            if (time >= latestTime) { 
-                                latestTime = time; 
-                                latestOrder = data; 
-                            }
+                            if (time >= latestTime) { latestTime = time; latestOrder = data; }
                         }
                     });
                 }
@@ -525,7 +507,6 @@
                 }
                 
                 existingContainer.classList.add('hidden');
-                
                 if (currentDayIndex >= weekDays.length) {
                     wizardContainer.classList.add('hidden');
                     submitBtnContainer.classList.remove('hidden');
@@ -533,8 +514,7 @@
                     wizardContainer.classList.remove('hidden');
                     submitBtnContainer.classList.add('hidden');
                 }
-                
-            } catch (error) { console.error("Erro ao verificar pedido existente:", error); }
+            } catch (error) { console.error(error); }
         }
         
         function renderWizardStep(index) {
@@ -616,11 +596,9 @@
             });
         }
 
-        // --- FUNÇÃO DO ROBÔ DE AUTOMAÇÃO DE SEGUNDA-FEIRA ---
         async function autoTurnWeek(menuData) {
             try {
                 const batch = writeBatch(db);
-                
                 const ordersSnap = await getDocs(collection(db, "pedidosDaSemana"));
                 ordersSnap.forEach(d => {
                     const orderData = d.data();
@@ -636,34 +614,27 @@
                     holidays: menuData.nextHolidays || [],
                     nextMenuImageBase64: '',
                     nextHolidays: [],
-                    targetRotationDate: null // Limpa o agendamento
+                    targetRotationDate: null
                 }, { merge: true });
 
                 await batch.commit();
-                console.log("Robô ativado: Semana atualizada automaticamente com sucesso!");
                 showToast("A semana virou automaticamente!", "success");
-            } catch (error) {
-                // Se der erro por permissão do usuario anônimo nas regras do Firebase, a proxima pessoa autenticada engatilha o robo.
-                console.warn("Automação em pausa (aguardando liberação/permissão).", error);
-            }
+            } catch (error) { console.warn("Automação em pausa.", error); }
         }
 
         function loadAndDisplayMenu() {
             if (!auth.currentUser) return;
-            
             if (menuUnsubscribe) menuUnsubscribe();
             
             menuUnsubscribe = onSnapshot(menuDocRef, async (docSnap) => {
                 currentMenuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null };
                 
-                // --- CHECAGEM DO ROBÔ DE AUTOMAÇÃO ---
-                // Se existe uma data agendada E o momento atual é maior ou igual à segunda-feira meia-noite agendada
                 if (currentMenuData.targetRotationDate && Date.now() >= currentMenuData.targetRotationDate) {
                     if (!isRotatingWeekLock) {
-                        isRotatingWeekLock = true; // Trava pra não rodar duas vezes no mesmo aparelho
+                        isRotatingWeekLock = true; 
                         autoTurnWeek(currentMenuData).finally(() => { isRotatingWeekLock = false; });
                     }
-                    return; // Interrompe a renderização visual pra evitar "flicks" até a rotação terminar
+                    return; 
                 }
 
                 const toggleContainer = document.getElementById('week-toggle-container');
@@ -704,7 +675,6 @@
 
                 renderHolidayCheckboxes();
                 updateUserViewUI();
-                
             }, (error) => { showToast("Erro ao carregar o cardápio.", 'error'); });
         }
 
@@ -718,7 +688,6 @@
                     btnNext.classList.replace('text-gray-700', 'text-white');
                     btnCurrent.classList.replace('bg-blue-600', 'bg-gray-100');
                     btnCurrent.classList.replace('text-white', 'text-gray-700');
-                    
                     weeklyMenu.menuImageBase64 = currentMenuData.nextMenuImageBase64;
                     userActiveHolidays = currentMenuData.nextHolidays || [];
                 } else {
@@ -726,7 +695,6 @@
                     btnCurrent.classList.replace('text-gray-700', 'text-white');
                     btnNext.classList.replace('bg-blue-600', 'bg-gray-100');
                     btnNext.classList.replace('text-white', 'text-gray-700');
-                    
                     weeklyMenu.menuImageBase64 = currentMenuData.menuImageBase64;
                     userActiveHolidays = currentMenuData.holidays || [];
                 }
@@ -743,7 +711,6 @@
                     menuImage.src = '';
                 }
             }
-
             validateForm();
         }
         
@@ -758,29 +725,20 @@
             
             const isValidUser = name && rgf && nameInput.placeholder !== 'RGF não encontrado';
 
-            // Auto-Switch Lógica da Próxima Semana executada PRIMEIRO
             if (isValidUser && !autoSwitchDone && currentMenuData.nextMenuImageBase64) {
                 try {
                     const q = query(collection(db, "pedidosDaSemana"), where("employeeRGF", "==", rgf));
                     const snap = await getDocs(q);
                     let hasNextOrder = false;
-                    
-                    snap.forEach(doc => {
-                        if (doc.data().isNextWeek === true) hasNextOrder = true;
-                    });
+                    snap.forEach(doc => { if (doc.data().isNextWeek === true) hasNextOrder = true; });
 
                     if (!hasNextOrder) {
                         viewingNextWeek = true;
                         autoSwitchDone = true;
                         updateUserViewUI(); 
-                        return; // A interface foi recarregada para a proxima semana, interrompe a checagem dupla
-                    } else {
-                        autoSwitchDone = true; 
-                    }
-                } catch (err) {
-                    console.error("Erro no auto-switch:", err);
-                    autoSwitchDone = true; 
-                }
+                        return; 
+                    } else { autoSwitchDone = true; }
+                } catch (err) { autoSwitchDone = true; }
             }
 
             if (weeklyMenu.menuImageBase64) {
@@ -793,7 +751,7 @@
                     orderSection.classList.remove('hidden');
                     await checkExistingOrder(rgf); 
                     
-                    // Auto-Scroll mágico para pular o nome e exibir a imagem inteira
+                    // Auto-Scroll suave para mostrar a imagem no topo
                     setTimeout(() => {
                         document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 150);
@@ -830,28 +788,19 @@
             const button = document.getElementById('submitOrder');
             button.disabled = true; button.textContent = 'A enviar...';
             try {
-                if (viewingNextWeek) {
-                    tempOrderData.isNextWeek = true;
-                } else {
-                    tempOrderData.isNextWeek = false;
-                }
-                
+                tempOrderData.isNextWeek = viewingNextWeek;
                 await addDoc(collection(db, "pedidosDaSemana"), tempOrderData);
                 document.getElementById('confirmation-modal').classList.add('hidden');
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-message').classList.remove('hidden');
                 document.getElementById('success-text').textContent = `Obrigado, ${tempOrderData.employeeName}. O seu pedido foi registado com sucesso.`;
                 showToast("Pedido enviado com sucesso!", 'success');
-            } catch (error) {
-                showToast("Ocorreu um erro ao enviar o seu pedido.", 'error');
-            } finally {
-                button.disabled = false; button.textContent = 'Confirmar e Enviar';
-            }
+            } catch (error) { showToast("Erro ao enviar pedido.", 'error'); } 
+            finally { button.disabled = false; button.textContent = 'Confirmar e Enviar'; }
         }
         
         function loadAdminData() {
             if (!auth.currentUser) return;
-            
             if (adminUnsubscribe) adminUnsubscribe();
 
             document.getElementById('status-section-title').textContent = adminViewingNextWeek ? "📊 Status de Pedidos (Próxima Semana)" : "📊 Status de Pedidos (Esta Semana)";
@@ -864,7 +813,6 @@
                     const orderData = doc.data();
                     if (orderData.employeeRGF) {
                         const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
-                        
                         if (orderData.isNextWeek === true) {
                             if (!latestNextOrdersMap.has(orderData.employeeRGF) || timestamp > latestNextOrdersMap.get(orderData.employeeRGF).timestamp) {
                                 latestNextOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
@@ -878,14 +826,10 @@
                 });
                 
                 const targetMap = adminViewingNextWeek ? latestNextOrdersMap : latestCurrentOrdersMap;
-                
-                allOrders = Array.from(targetMap.values())
-                    .map(item => item.doc)
-                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
+                allOrders = Array.from(targetMap.values()).map(item => item.doc).sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
                 renderOrdersTable(allOrders);
                 renderOrderStatus(allOrders);
-            }, (error) => { showToast("Erro ao carregar dados do administrador.", 'error'); });
+            }, (error) => { showToast("Erro ao carregar dados.", 'error'); });
         }
         
         async function renderOrderStatus(orders) {
@@ -896,7 +840,6 @@
                 const allEmployees = employeeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 const orderedRGFs = new Set(orders.map(orderDoc => orderDoc.data().employeeRGF));
-
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
                 const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
 
@@ -974,18 +917,18 @@
         }
 
         function handleDeleteOrder(orderId, employeeName) {
-            showCustomConfirm(`Deseja excluir o pedido de ${employeeName} (Semana selecionada)?`, async () => {
+            showCustomConfirm(`Deseja excluir o pedido de ${employeeName}?`, async () => {
                 if (!auth.currentUser) return;
                 try {
                     await deleteDoc(doc(collection(db, "pedidosDaSemana"), orderId));
-                    showToast("Pedido excluído com sucesso!", 'success');
-                } catch (error) { showToast("Erro ao excluir o pedido.", 'error'); }
+                    showToast("Pedido excluído!", 'success');
+                } catch (error) { showToast("Erro ao excluir.", 'error'); }
             });
         }
 
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
-            if (allOrders.length === 0) { showToast("Não há pedidos para gerar o relatório.", "info"); return; }
+            if (allOrders.length === 0) { showToast("Sem pedidos para gerar relatório.", "info"); return; }
             
             reportContainer.innerHTML = `<h1>Regional Quatinga</h1>`;
             
@@ -1052,18 +995,17 @@
                 const compressedFile = await imageCompression(fileToUpload, options);
                 const base64String = await toBase64(compressedFile);
 
-                // --- CALCULA A DATA DA PRÓXIMA SEGUNDA FEIRA ---
                 const now = new Date();
                 let daysUntilMonday = (1 + 7 - now.getDay()) % 7;
-                if (daysUntilMonday === 0) daysUntilMonday = 7; // Se estivermos na segunda, agenda pra PRÓXIMA segunda
+                if (daysUntilMonday === 0) daysUntilMonday = 7; 
                 
                 const nextMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilMonday);
-                nextMonday.setHours(0, 0, 0, 0); // Exatamente às 00:00h da madrugada
+                nextMonday.setHours(0, 0, 0, 0); 
 
                 await setDoc(menuDocRef, { 
                     nextMenuImageBase64: base64String,
                     nextHolidays: selectedHolidays,
-                    targetRotationDate: nextMonday.getTime() // Guarda o Agendamento no banco de dados!
+                    targetRotationDate: nextMonday.getTime() 
                 }, { merge: true });
                 
                 showToast("Cardápio da Próxima Semana salvo e disponível!", "success");
@@ -1076,8 +1018,7 @@
         }
 
         async function turnWeek() {
-            const message = "Tem certeza? O cardápio e os pedidos da 'Próxima Semana' substituirão integralmente a 'Semana Atual'.";
-            showCustomConfirm(message, async () => {
+            showCustomConfirm("Tem certeza? O cardápio e os pedidos da 'Próxima Semana' substituirão integralmente a 'Semana Atual'.", async () => {
                 if (!auth.currentUser) return;
                 const btn = document.getElementById('btn-turn-week');
                 btn.disabled = true; btn.innerHTML = '⏳ Atualizando...';
@@ -1088,20 +1029,15 @@
 
                     if (!data.nextMenuImageBase64) {
                         showToast("Não há cardápio da próxima semana para iniciar.", "error");
-                        btn.disabled = false; btn.innerHTML = '🔄 Atualizar (Iniciar Nova Semana)';
+                        btn.disabled = false; btn.innerHTML = '🔄 Forçar Atualização de Semana';
                         return;
                     }
 
                     const batch = writeBatch(db);
-
                     const ordersSnap = await getDocs(collection(db, "pedidosDaSemana"));
                     ordersSnap.forEach(d => {
-                        const orderData = d.data();
-                        if (orderData.isNextWeek === true) {
-                            batch.update(d.ref, { isNextWeek: false }); 
-                        } else {
-                            batch.delete(d.ref); 
-                        }
+                        if (d.data().isNextWeek === true) batch.update(d.ref, { isNextWeek: false }); 
+                        else batch.delete(d.ref); 
                     });
 
                     batch.set(menuDocRef, {
@@ -1109,18 +1045,15 @@
                         holidays: data.nextHolidays || [],
                         nextMenuImageBase64: '',
                         nextHolidays: [],
-                        targetRotationDate: null // Limpa o agendamento ao forçar manualmente
+                        targetRotationDate: null 
                     }, { merge: true });
 
                     await batch.commit();
                     showToast("Nova semana iniciada com sucesso!", "success");
                     adminViewingNextWeek = false; 
                     loadAdminData();
-                } catch (error) {
-                    console.error(error); showToast("Falha ao iniciar a semana.", "error");
-                } finally {
-                    btn.disabled = false; btn.innerHTML = '🔄 Atualizar (Iniciar Nova Semana)';
-                }
+                } catch (error) { showToast("Falha ao iniciar a semana.", "error"); } 
+                finally { btn.disabled = false; btn.innerHTML = '🔄 Forçar Atualização de Semana'; }
             });
         }
 
@@ -1129,11 +1062,7 @@
                 if (!auth.currentUser) return;
                 const snap = await getDocs(collection(db, "pedidosDaSemana"));
                 const batch = writeBatch(db);
-                snap.forEach(d => {
-                    if (!d.data().isNextWeek) {
-                        batch.delete(d.ref);
-                    }
-                });
+                snap.forEach(d => { if (!d.data().isNextWeek) batch.delete(d.ref); });
                 await batch.commit();
                 showToast("Pedidos apagados com sucesso.", "success");
             });
@@ -1145,33 +1074,23 @@
             window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
         }
 
-        // --- SISTEMA DE LOGIN SEGURO E SEM RACE CONDITIONS ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                if (user.uid === APP_CONFIG.ADMIN_UID) { 
-                    showAdminView(); 
-                } else { 
-                    showUserView(); 
-                }
+                if (user.uid === APP_CONFIG.ADMIN_UID) { showAdminView(); } 
+                else { showUserView(); }
             } else {
                 if (!isLoggingInAsAdmin) {
                     try {
                         anonymousLoginPromise = signInAnonymously(auth);
                         await anonymousLoginPromise;
-                    } catch (error) {
-                        console.error("Erro no login anónimo:", error);
-                    } finally {
-                        anonymousLoginPromise = null;
-                    }
+                    } catch (error) { console.error("Erro no login anónimo:", error); } 
+                    finally { anonymousLoginPromise = null; }
                 }
             }
         });
 
         async function showUserView() {
-            if (adminUnsubscribe) {
-                adminUnsubscribe();
-                adminUnsubscribe = null;
-            }
+            if (adminUnsubscribe) { adminUnsubscribe(); adminUnsubscribe = null; }
             allOrders = [];
             const containerOrders = document.getElementById('ordersTableContainer');
             if (containerOrders) containerOrders.innerHTML = '<p class="text-gray-500">A carregar pedidos...</p>';
@@ -1181,12 +1100,8 @@
             document.getElementById('admin-login-modal').classList.add('hidden');
             
             const rgfInput = document.getElementById('employeeRGF');
-            if (!rgfInput.value && localStorage.getItem('employeeRGF')) {
-                rgfInput.value = localStorage.getItem('employeeRGF');
-            }
-            if (rgfInput.value) {
-                await findEmployeeByRGF(rgfInput.value);
-            }
+            if (!rgfInput.value && localStorage.getItem('employeeRGF')) { rgfInput.value = localStorage.getItem('employeeRGF'); }
+            if (rgfInput.value) { await findEmployeeByRGF(rgfInput.value); }
 
             loadAndDisplayMenu(); 
         }
@@ -1211,9 +1126,7 @@
             isLoggingInAsAdmin = true;
 
             try {
-                if (anonymousLoginPromise) {
-                    await anonymousLoginPromise;
-                }
+                if (anonymousLoginPromise) await anonymousLoginPromise;
                 
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 
@@ -1227,33 +1140,17 @@
                      showAdminView();
                 }
             } catch (error) { 
-                console.error("Erro detalhado do Firebase Auth:", error);
-                
                 let msg = "Email ou senha incorretos.";
-                if (error.code === 'auth/unauthorized-domain') {
-                    msg = `Bloqueado! Adicione o domínio "${window.location.hostname}" no Firebase.`;
-                } else if (error.code === 'auth/invalid-credential') {
-                    msg = "E-mail ou senha incorretos. (Verifique se não há espaços em branco no final)";
-                } else if (error.code) {
-                    msg = `Erro: ${error.code}`;
-                }
+                if (error.code === 'auth/unauthorized-domain') msg = `Bloqueado! Adicione o domínio "${window.location.hostname}" no Firebase.`;
+                else if (error.code === 'auth/invalid-credential') msg = "E-mail ou senha incorretos.";
                 showToast(msg, 'error', 6000); 
             } 
-            finally { 
-                isLoggingInAsAdmin = false;
-                btn.disabled = false; 
-                btn.textContent = 'Entrar'; 
-            }
+            finally { isLoggingInAsAdmin = false; btn.disabled = false; btn.textContent = 'Entrar'; }
         }
 
         async function handleAdminLogout() {
-            try { 
-                await signOut(auth); 
-                showToast("Saindo do painel...", 'info'); 
-                showUserView();
-            } catch (error) { 
-                showToast("Erro ao fazer logout.", 'error'); 
-            }
+            try { await signOut(auth); showToast("Saindo do painel...", 'info'); showUserView(); } 
+            catch (error) { showToast("Erro ao fazer logout.", 'error'); }
         }
 
         function main() {
@@ -1281,7 +1178,6 @@
             
             rgfInput.addEventListener('input', () => { 
                 clearTimeout(rgfDebounceTimeout);
-                // O Debounce aguarda 400ms após o utilizador parar de escrever antes de processar a BD
                 rgfDebounceTimeout = setTimeout(async () => {
                     autoSwitchDone = false;
                     await findEmployeeByRGF(rgfInput.value.trim()); 
@@ -1300,21 +1196,20 @@
 
             document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
-            
             document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
             document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
             
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
-                if (e.target.closest('.edit-employee-btn')) { openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name); }
-                if (e.target.closest('.delete-employee-btn')) { handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name); }
+                if (e.target.closest('.edit-employee-btn')) openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name);
+                if (e.target.closest('.delete-employee-btn')) handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name);
             });
 
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
             
             document.getElementById('ordersTableContainer').addEventListener('click', (e) => {
-                if (e.target.closest('.edit-order-btn')) { openEditOrderModal(e.target.closest('.edit-order-btn').dataset.id); }
-                if (e.target.closest('.delete-order-btn')) { handleDeleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name); }
+                if (e.target.closest('.edit-order-btn')) openEditOrderModal(e.target.closest('.edit-order-btn').dataset.id);
+                if (e.target.closest('.delete-order-btn')) handleDeleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name);
             });
 
             document.getElementById('edit-order-form').addEventListener('submit', async (e) => {
@@ -1322,14 +1217,12 @@
                 if (!auth.currentUser) return;
                 const orderId = document.getElementById('edit-order-id').value;
                 const submitBtn = e.target.querySelector('button[type="submit"]');
-                
                 const updateData = {};
                 const editHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
 
                 weekDays.forEach(day => {
                     const dayId = getDayId(day);
                     if (editHolidays.includes(dayId)) return; 
-                    
                     const selectEl = document.getElementById(`edit-choice-${dayId}`);
                     const notesEl = document.getElementById(`edit-notes-${dayId}`);
                     if (selectEl) { updateData[dayId] = selectEl.value; updateData[`${dayId}_notes`] = notesEl.value.trim(); }
@@ -1346,39 +1239,25 @@
             
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
             document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
-            
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
             
             document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
             document.getElementById('uploadImageBtn').addEventListener('click', uploadNextWeekMenu);
             
-            // Lógica do botão de apagar Próxima Semana
             document.getElementById('deleteNextWeekBtn')?.addEventListener('click', async () => {
-                showCustomConfirm("Tem a certeza? Isso vai apagar o cardápio da próxima semana e todos os pedidos feitos antecipadamente para ela.", async () => {
+                showCustomConfirm("Tem a certeza? Isso vai apagar o cardápio da próxima semana e todos os pedidos já feitos antecipadamente.", async () => {
                     if (!auth.currentUser) return;
                     const btn = document.getElementById('deleteNextWeekBtn');
                     btn.disabled = true; btn.textContent = "A apagar...";
                     try {
-                        await updateDoc(menuDocRef, {
-                            nextMenuImageBase64: '',
-                            nextHolidays: [],
-                            targetRotationDate: null
-                        });
-                        
+                        await updateDoc(menuDocRef, { nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null });
                         const snap = await getDocs(collection(db, "pedidosDaSemana"));
                         const batch = writeBatch(db);
-                        snap.forEach(d => {
-                            if (d.data().isNextWeek === true) batch.delete(d.ref);
-                        });
+                        snap.forEach(d => { if (d.data().isNextWeek === true) batch.delete(d.ref); });
                         await batch.commit();
-                        
-                        showToast("Cardápio da próxima semana apagado.", "success");
-                    } catch (error) {
-                        console.error(error);
-                        showToast("Erro ao apagar.", "error");
-                    } finally {
-                        btn.disabled = false; btn.textContent = "🗑️ Cancelar / Apagar Próxima Semana";
-                    }
+                        showToast("Próxima semana apagada.", "success");
+                    } catch (error) { showToast("Erro ao apagar.", "error"); } 
+                    finally { btn.disabled = false; btn.textContent = "🗑️ Cancelar / Apagar Próxima Semana"; }
                 });
             });
 
