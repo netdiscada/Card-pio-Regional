@@ -165,6 +165,9 @@
                         <button id="uploadImageBtn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md" disabled>
                             Salvar Cardápio para a Próxima Semana
                         </button>
+                        <button id="deleteNextWeekBtn" class="mt-2 w-full bg-red-100 text-red-600 font-bold py-2 px-4 rounded-xl hover:bg-red-200 transition shadow-sm hidden">
+                            🗑️ Cancelar / Apagar Próxima Semana
+                        </button>
                         <div id="whatsapp-notification-container" class="mt-4 hidden">
                             <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 text-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
@@ -613,13 +616,15 @@
                 }
 
                 const toggleContainer = document.getElementById('week-toggle-container');
-                if (toggleContainer) {
-                    if (currentMenuData.nextMenuImageBase64) {
-                        toggleContainer.classList.remove('hidden');
-                    } else {
-                        toggleContainer.classList.add('hidden');
-                        viewingNextWeek = false; 
-                    }
+                const deleteNextWeekBtn = document.getElementById('deleteNextWeekBtn');
+                
+                if (currentMenuData.nextMenuImageBase64) {
+                    if (toggleContainer) toggleContainer.classList.remove('hidden');
+                    if (deleteNextWeekBtn) deleteNextWeekBtn.classList.remove('hidden');
+                } else {
+                    if (toggleContainer) toggleContainer.classList.add('hidden');
+                    if (deleteNextWeekBtn) deleteNextWeekBtn.classList.add('hidden');
+                    viewingNextWeek = false; 
                 }
 
                 const currentImg = document.getElementById('admin-current-image');
@@ -688,38 +693,40 @@
             const rgf = rgfInput?.value.trim();
             const guidanceSection = document.getElementById('guidanceSection');
             const orderSection = document.getElementById('order-section');
+            
+            const isValidUser = name && rgf && nameInput.placeholder !== 'RGF não encontrado';
+
+            // Auto-Switch Lógica da Próxima Semana executada PRIMEIRO
+            if (isValidUser && !autoSwitchDone && currentMenuData.nextMenuImageBase64) {
+                try {
+                    const q = query(collection(db, "pedidosDaSemana"), where("employeeRGF", "==", rgf));
+                    const snap = await getDocs(q);
+                    let hasNextOrder = false;
+                    
+                    snap.forEach(doc => {
+                        if (doc.data().isNextWeek === true) hasNextOrder = true;
+                    });
+
+                    if (!hasNextOrder) {
+                        viewingNextWeek = true;
+                        autoSwitchDone = true;
+                        updateUserViewUI(); 
+                        return; // A interface foi recarregada para a proxima semana, interrompe a checagem dupla
+                    } else {
+                        autoSwitchDone = true; 
+                    }
+                } catch (err) {
+                    console.error("Erro no auto-switch:", err);
+                    autoSwitchDone = true; 
+                }
+            }
 
             if (weeklyMenu.menuImageBase64) {
-                if (!name || !rgf || nameInput.placeholder === 'RGF não encontrado') {
+                if (!isValidUser) {
                     orderSection.classList.add('hidden');
                     guidanceSection.classList.remove('hidden');
                     document.getElementById('guidanceText').textContent = 'Por favor, insira o seu RGF para começar.';
                 } else {
-                    // Auto-Switch Lógica da Próxima Semana
-                    if (!autoSwitchDone && currentMenuData.nextMenuImageBase64) {
-                        try {
-                            const q = query(collection(db, "pedidosDaSemana"), where("employeeRGF", "==", rgf));
-                            const snap = await getDocs(q);
-                            let hasNextOrder = false;
-                            
-                            snap.forEach(doc => {
-                                if (doc.data().isNextWeek === true) hasNextOrder = true;
-                            });
-
-                            if (!hasNextOrder) {
-                                viewingNextWeek = true;
-                                autoSwitchDone = true;
-                                updateUserViewUI(); 
-                                return; 
-                            } else {
-                                autoSwitchDone = true; 
-                            }
-                        } catch (err) {
-                            console.error("Erro no auto-switch:", err);
-                            autoSwitchDone = true; 
-                        }
-                    }
-
                     guidanceSection.classList.add('hidden');
                     orderSection.classList.remove('hidden');
                     await checkExistingOrder(rgf); 
@@ -1203,10 +1210,16 @@
             document.getElementById('btn-clear-current-orders').addEventListener('click', clearCurrentOrders);
 
             const rgfInput = document.getElementById('employeeRGF');
-            rgfInput.addEventListener('input', async () => { 
-                autoSwitchDone = false;
-                await findEmployeeByRGF(rgfInput.value.trim()); 
-                await validateForm(); 
+            let rgfDebounceTimeout;
+            
+            rgfInput.addEventListener('input', () => { 
+                clearTimeout(rgfDebounceTimeout);
+                // O Debounce aguarda 400ms após o utilizador parar de escrever antes de processar a BD
+                rgfDebounceTimeout = setTimeout(async () => {
+                    autoSwitchDone = false;
+                    await findEmployeeByRGF(rgfInput.value.trim()); 
+                    await validateForm(); 
+                }, 400); 
             });
             rgfInput.addEventListener('blur', () => localStorage.setItem('employeeRGF', rgfInput.value));
             
@@ -1271,6 +1284,36 @@
             
             document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
             document.getElementById('uploadImageBtn').addEventListener('click', uploadNextWeekMenu);
+            
+            // Lógica do botão de apagar Próxima Semana
+            document.getElementById('deleteNextWeekBtn')?.addEventListener('click', async () => {
+                showCustomConfirm("Tem a certeza? Isso vai apagar o cardápio da próxima semana e todos os pedidos feitos antecipadamente para ela.", async () => {
+                    if (!auth.currentUser) return;
+                    const btn = document.getElementById('deleteNextWeekBtn');
+                    btn.disabled = true; btn.textContent = "A apagar...";
+                    try {
+                        await updateDoc(menuDocRef, {
+                            nextMenuImageBase64: '',
+                            nextHolidays: [],
+                            targetRotationDate: null
+                        });
+                        
+                        const snap = await getDocs(collection(db, "pedidosDaSemana"));
+                        const batch = writeBatch(db);
+                        snap.forEach(d => {
+                            if (d.data().isNextWeek === true) batch.delete(d.ref);
+                        });
+                        await batch.commit();
+                        
+                        showToast("Cardápio da próxima semana apagado.", "success");
+                    } catch (error) {
+                        console.error(error);
+                        showToast("Erro ao apagar.", "error");
+                    } finally {
+                        btn.disabled = false; btn.textContent = "🗑️ Cancelar / Apagar Próxima Semana";
+                    }
+                });
+            });
 
             const zoomModal = document.getElementById('image-zoom-modal');
             const menuImage = document.getElementById('menu-image');
