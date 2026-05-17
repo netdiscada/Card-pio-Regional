@@ -143,9 +143,9 @@
                         </div>
                         <button id="btn-turn-week" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-600 transition shadow-md flex justify-center items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                            Atualizar (Iniciar Nova Semana)
+                            Forçar Atualização de Semana
                         </button>
-                        <p class="text-xs text-gray-500 mt-2 text-center">Clique na segunda-feira para transformar o cardápio da "Próxima Semana" no atual.</p>
+                        <p class="text-xs text-gray-500 mt-2 text-center">A virada de semana ocorrerá <b class="text-green-600">automaticamente</b> na próxima segunda-feira. Você também pode forçar a virada agora clicando acima.</p>
                         <div class="text-center mt-4 pt-4 border-t border-gray-200">
                              <button id="btn-clear-current-orders" class="text-xs text-red-500 hover:text-red-700 underline font-semibold">⚠️ Apagar todos os pedidos da semana atual</button>
                         </div>
@@ -281,19 +281,20 @@
             { name: "Filé de frango", emoji: "🍗", description: "Opção fixa" }
         ];
 
-        let currentMenuData = { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [] };
+        let currentMenuData = { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null };
         let weeklyMenu = {};
         let userActiveHolidays = [];
         
         let viewingNextWeek = false; 
         let adminViewingNextWeek = false; 
-        let autoSwitchDone = false; // Controle da inovação: Evita loops ao trocar de aba automaticamente
+        let autoSwitchDone = false; 
         
-        // Listeners e Controle de Login
+        // Listeners e Controle
         let menuUnsubscribe = null;
         let adminUnsubscribe = null;
         let anonymousLoginPromise = null;
         let isLoggingInAsAdmin = false;
+        let isRotatingWeekLock = false; // Trava para impedir rotações duplicadas na automação
 
         let allOrders = [];
         let tempOrderData = {};
@@ -561,15 +562,56 @@
             });
         }
 
+        // --- FUNÇÃO DO ROBÔ DE AUTOMAÇÃO DE SEGUNDA-FEIRA ---
+        async function autoTurnWeek(menuData) {
+            try {
+                const batch = writeBatch(db);
+                
+                const ordersSnap = await getDocs(collection(db, "pedidosDaSemana"));
+                ordersSnap.forEach(d => {
+                    const orderData = d.data();
+                    if (orderData.isNextWeek === true) {
+                        batch.update(d.ref, { isNextWeek: false }); 
+                    } else {
+                        batch.delete(d.ref); 
+                    }
+                });
+
+                batch.set(menuDocRef, {
+                    menuImageBase64: menuData.nextMenuImageBase64,
+                    holidays: menuData.nextHolidays || [],
+                    nextMenuImageBase64: '',
+                    nextHolidays: [],
+                    targetRotationDate: null // Limpa o agendamento
+                }, { merge: true });
+
+                await batch.commit();
+                console.log("Robô ativado: Semana atualizada automaticamente com sucesso!");
+                showToast("A semana virou automaticamente!", "success");
+            } catch (error) {
+                // Se der erro por permissão do usuario anônimo nas regras do Firebase, a proxima pessoa autenticada engatilha o robo.
+                console.warn("Automação em pausa (aguardando liberação/permissão).", error);
+            }
+        }
+
         function loadAndDisplayMenu() {
             if (!auth.currentUser) return;
             
-            // Garante que não teremos listeners duplicados engolindo processamento
             if (menuUnsubscribe) menuUnsubscribe();
             
             menuUnsubscribe = onSnapshot(menuDocRef, async (docSnap) => {
-                currentMenuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [] };
+                currentMenuData = (docSnap.exists() && docSnap.data()) ? docSnap.data() : { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null };
                 
+                // --- CHECAGEM DO ROBÔ DE AUTOMAÇÃO ---
+                // Se existe uma data agendada E o momento atual é maior ou igual à segunda-feira meia-noite agendada
+                if (currentMenuData.targetRotationDate && Date.now() >= currentMenuData.targetRotationDate) {
+                    if (!isRotatingWeekLock) {
+                        isRotatingWeekLock = true; // Trava pra não rodar duas vezes no mesmo aparelho
+                        autoTurnWeek(currentMenuData).finally(() => { isRotatingWeekLock = false; });
+                    }
+                    return; // Interrompe a renderização visual pra evitar "flicks" até a rotação terminar
+                }
+
                 const toggleContainer = document.getElementById('week-toggle-container');
                 if (toggleContainer) {
                     if (currentMenuData.nextMenuImageBase64) {
@@ -653,8 +695,7 @@
                     guidanceSection.classList.remove('hidden');
                     document.getElementById('guidanceText').textContent = 'Por favor, insira o seu RGF para começar.';
                 } else {
-                    // --- NOVA LÓGICA DE AUTO-SWITCH PARA PRÓXIMA SEMANA ---
-                    // Só executa se houver menu na prox semana e ainda não testamos essa virada
+                    // Auto-Switch Lógica da Próxima Semana
                     if (!autoSwitchDone && currentMenuData.nextMenuImageBase64) {
                         try {
                             const q = query(collection(db, "pedidosDaSemana"), where("employeeRGF", "==", rgf));
@@ -665,18 +706,17 @@
                                 if (doc.data().isNextWeek === true) hasNextOrder = true;
                             });
 
-                            // Se NÃO houver pedido da próxima semana, forçamos o direcionamento
                             if (!hasNextOrder) {
                                 viewingNextWeek = true;
                                 autoSwitchDone = true;
-                                updateUserViewUI(); // Vai recarregar a UI direto na aba da Proxima Semana
-                                return; // Interrompe a execução atual, o updateUserViewUI chamará o form de novo
+                                updateUserViewUI(); 
+                                return; 
                             } else {
-                                autoSwitchDone = true; // Se ele já fez o pedido, marca a trava e segue na semana normal.
+                                autoSwitchDone = true; 
                             }
                         } catch (err) {
                             console.error("Erro no auto-switch:", err);
-                            autoSwitchDone = true; // Libera pra seguir normalmente
+                            autoSwitchDone = true; 
                         }
                     }
 
@@ -738,7 +778,6 @@
         function loadAdminData() {
             if (!auth.currentUser) return;
             
-            // Garante que não teremos listeners duplicados
             if (adminUnsubscribe) adminUnsubscribe();
 
             document.getElementById('status-section-title').textContent = adminViewingNextWeek ? "📊 Status de Pedidos (Próxima Semana)" : "📊 Status de Pedidos (Esta Semana)";
@@ -873,8 +912,8 @@
         function generateAndPrintReport() {
             const reportContainer = document.getElementById('print-report');
             if (allOrders.length === 0) { showToast("Não há pedidos para gerar o relatório.", "info"); return; }
-            const subTitle = adminViewingNextWeek ? "(Próxima Semana)" : "(Esta Semana)";
-            reportContainer.innerHTML = `<h1>Regional Quatinga <br><span style="font-size:12pt;font-weight:normal">${subTitle}</span></h1>`;
+            
+            reportContainer.innerHTML = `<h1>Regional Quatinga</h1>`;
             
             const printHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
             let allDaysHTML = '';
@@ -939,9 +978,18 @@
                 const compressedFile = await imageCompression(fileToUpload, options);
                 const base64String = await toBase64(compressedFile);
 
+                // --- CALCULA A DATA DA PRÓXIMA SEGUNDA FEIRA ---
+                const now = new Date();
+                let daysUntilMonday = (1 + 7 - now.getDay()) % 7;
+                if (daysUntilMonday === 0) daysUntilMonday = 7; // Se estivermos na segunda, agenda pra PRÓXIMA segunda
+                
+                const nextMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilMonday);
+                nextMonday.setHours(0, 0, 0, 0); // Exatamente às 00:00h da madrugada
+
                 await setDoc(menuDocRef, { 
                     nextMenuImageBase64: base64String,
-                    nextHolidays: selectedHolidays 
+                    nextHolidays: selectedHolidays,
+                    targetRotationDate: nextMonday.getTime() // Guarda o Agendamento no banco de dados!
                 }, { merge: true });
                 
                 showToast("Cardápio da Próxima Semana salvo e disponível!", "success");
@@ -972,14 +1020,13 @@
 
                     const batch = writeBatch(db);
 
-                    // Altera a visibilidade dos documentos baseada no campo "isNextWeek"
                     const ordersSnap = await getDocs(collection(db, "pedidosDaSemana"));
                     ordersSnap.forEach(d => {
                         const orderData = d.data();
                         if (orderData.isNextWeek === true) {
-                            batch.update(d.ref, { isNextWeek: false }); // Move para a semana atual
+                            batch.update(d.ref, { isNextWeek: false }); 
                         } else {
-                            batch.delete(d.ref); // Apaga os pedidos velhos
+                            batch.delete(d.ref); 
                         }
                     });
 
@@ -987,7 +1034,8 @@
                         menuImageBase64: data.nextMenuImageBase64,
                         holidays: data.nextHolidays || [],
                         nextMenuImageBase64: '',
-                        nextHolidays: []
+                        nextHolidays: [],
+                        targetRotationDate: null // Limpa o agendamento ao forçar manualmente
                     }, { merge: true });
 
                     await batch.commit();
@@ -1046,12 +1094,10 @@
         });
 
         async function showUserView() {
-            // Remove listeners soltos do painel de administração da memória
             if (adminUnsubscribe) {
                 adminUnsubscribe();
                 adminUnsubscribe = null;
             }
-            // Limpa dados de pedidos sigilosos da memória ao sair do painel ADM
             allOrders = [];
             const containerOrders = document.getElementById('ordersTableContainer');
             if (containerOrders) containerOrders.innerHTML = '<p class="text-gray-500">A carregar pedidos...</p>';
@@ -1091,12 +1137,10 @@
             isLoggingInAsAdmin = true;
 
             try {
-                // Aguarda o login anônimo terminar, caso esteja acontecendo em paralelo (Race Condition Lock)
                 if (anonymousLoginPromise) {
                     await anonymousLoginPromise;
                 }
                 
-                // Agora o Firebase substitui o login anônimo pela credencial do ADM automaticamente
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 
                 if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) { 
@@ -1130,7 +1174,6 @@
 
         async function handleAdminLogout() {
             try { 
-                // Assina a saída e transiciona suavemente sem forçar o recarregamento da página (SPA mode)
                 await signOut(auth); 
                 showToast("Saindo do painel...", 'info'); 
                 showUserView();
@@ -1161,7 +1204,7 @@
 
             const rgfInput = document.getElementById('employeeRGF');
             rgfInput.addEventListener('input', async () => { 
-                autoSwitchDone = false; // Permite a analise automática se o RGF for apagado e re-digitado
+                autoSwitchDone = false;
                 await findEmployeeByRGF(rgfInput.value.trim()); 
                 await validateForm(); 
             });
