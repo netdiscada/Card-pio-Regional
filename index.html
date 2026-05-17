@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cardápio Quatinga</title>
+    
+    <!-- PWA / Web App Tags (Modo Tela Cheia no Celular) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Card%C3%A1pio%20Quatinga%22%2C%22short_name%22%3A%22Card%C3%A1pio%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%232563eb%22%7D'>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,44 +84,59 @@
                     </div>
                 </div>
 
-                <div id="order-section" class="hidden">
-                    <div id="menu-image-container" class="mb-4">
-                        <div class="relative">
-                            <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto rounded-xl shadow-lg border-4 border-white cursor-pointer">
-                            <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                <div id="order-section" class="hidden mt-4 scroll-mt-20">
+                    <div class="flex flex-col md:flex-row gap-3 md:gap-6 items-stretch">
+                        
+                        <!-- Coluna 1: Imagem App-like (45vh no celular para não esconder os botões) -->
+                        <div id="menu-image-container" class="w-full md:w-1/2 h-[45vh] md:h-[70vh] relative bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-shrink-0">
+                            <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-full object-contain cursor-pointer p-1">
+                            <div class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full pointer-events-none shadow-sm backdrop-blur-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                            </div>
+                            <div class="absolute bottom-2 left-0 w-full text-center pointer-events-none">
+                                <span class="bg-black/60 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-md shadow-sm">🔍 Toque para ver em tela cheia</span>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Resumo do Pedido Existente -->
-                    <div id="existing-order-container" class="hidden bg-white rounded-xl shadow-sm p-6 sm:p-8 mb-6 border-2 border-green-100 fade-in">
-                        <div class="text-center mb-6">
-                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <!-- Coluna 2: Formulários (Flexível e Compacto) -->
+                        <div class="w-full md:w-1/2 flex flex-col">
+                            
+                            <!-- Resumo do Pedido Existente -->
+                            <div id="existing-order-container" class="hidden bg-white rounded-xl shadow-sm p-5 mb-4 border-2 border-green-100 fade-in">
+                                <div class="text-center mb-6">
+                                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800">Pedido Registado!</h3>
+                                    <p class="text-gray-600 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
+                                </div>
+                                <div id="existing-order-details" class="space-y-3">
+                                    <!-- Preenchido via JS -->
+                                </div>
                             </div>
-                            <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800">Pedido Registado!</h3>
-                            <p class="text-gray-600 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
-                        </div>
-                        <div id="existing-order-details" class="space-y-3">
-                            <!-- Preenchido via JS -->
-                        </div>
-                    </div>
 
-                    <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-                        <div id="order-wizard">
-                            <h3 id="wizard-day-title" class="text-2xl font-bold text-blue-600 mb-4 text-center"></h3>
-                            <div id="wizard-options" class="grid grid-cols-2 gap-3"></div>
-                            <div class="mt-4">
-                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Anotações? Ex: sem cebola, etc."></textarea>
+                            <!-- Wizard de Escolhas -->
+                            <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 mb-4 flex-1">
+                                <div id="order-wizard" class="h-full flex flex-col justify-center">
+                                    <h3 id="wizard-day-title" class="text-xl font-bold text-blue-600 mb-3 text-center"></h3>
+                                    <div id="wizard-options" class="grid grid-cols-2 gap-2 mb-3"></div>
+                                    <div>
+                                        <textarea id="wizard-notes" rows="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Anotações? Ex: sem cebola"></textarea>
+                                    </div>
+                                    <div id="wizard-progress" class="flex space-x-2 justify-center mt-auto pt-3"></div>
+                                </div>
                             </div>
-                            <div id="wizard-progress" class="flex space-x-2 justify-center mt-4"></div>
+
+                            <!-- Botão de submissão -->
+                            <div id="submitButtonContainer" class="hidden w-full mt-auto">
+                                <button id="openConfirmationModal" class="w-full bg-green-500 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
                 
                 <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
-                <div id="submitButtonContainer" class="hidden text-center mt-6"><button id="openConfirmationModal" class="w-full sm:w-auto bg-green-500 text-white font-bold text-lg px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg">Revisar e Finalizar Pedido</button></div>
             </div>
             <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Retornar ao Início</button></div>
         </div>
@@ -741,6 +764,11 @@
                     guidanceSection.classList.add('hidden');
                     orderSection.classList.remove('hidden');
                     await checkExistingOrder(rgf); 
+                    
+                    // Auto-Scroll mágico para emular a tela de um App e exibir Imagem + Botões sem rolar
+                    setTimeout(() => {
+                        document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
                 }
             } else {
                 orderSection.classList.add('hidden');
