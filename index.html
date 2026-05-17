@@ -11,30 +11,59 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2563eb">
     <link rel="manifest" id="pwa-manifest">
+
+    <!-- Prevenção de Piscar Branco (FOUC) no Modo Noturno -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     
+    <!-- Tailwind CSS CDN com configuração para Dark Mode -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         html { scroll-behavior: smooth; }
-        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Poppins', sans-serif; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .no-print { }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
-        .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
-        #image-zoom-modal .modal-content { width: auto; max-width: 95%; padding: 0.5rem; background: none; box-shadow: none; }
+        .modal-content { padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
+        
+        /* Ajustes específicos para Dark Mode nativo */
+        html.dark { background-color: #000000; color: #f4f4f5; }
+        .dark .modal-content { background-color: #09090b; border: 1px solid #27272a; color: #f4f4f5; }
+        html:not(.dark) .modal-content { background-color: white; color: #1f2937; }
+        
+        #image-zoom-modal .modal-content { width: auto; max-width: 95%; padding: 0.5rem; background: none !important; box-shadow: none; border: none; }
         #zoomed-image { max-width: 90vw; max-height: 85vh; border-radius: 0.75rem; }
-        input:read-only { background-color: #f3f4f6; cursor: not-allowed; }
+        
+        input:read-only { cursor: not-allowed; }
+        html:not(.dark) input:read-only { background-color: #f3f4f6; }
+        .dark input:read-only { background-color: #18181b !important; color: #a1a1aa; border-color: #27272a; }
+
         .wizard-btn { transition: all 0.2s ease-in-out; }
         .wizard-btn:hover { transform: scale(1.03); border-color: #3b82f6; }
-        .wizard-btn:active { transform: scale(0.98); background-color: #eff6ff; }
+        .wizard-btn:active { transform: scale(0.98); }
+        .dark .wizard-btn:active { background-color: #1e3a8a; }
+        html:not(.dark) .wizard-btn:active { background-color: #eff6ff; }
+
         #print-report { display: none; }
         @media print {
             @page { size: A4 portrait; margin: 10mm; }
-            html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
+            html, body { width: 100%; height: 100%; margin: 0; padding: 0; background-color: white !important; color: black !important; }
             .no-print { display: none !important; }
             body > *:not(#print-report) { display: none !important; }
             #print-report { display: block !important; }
@@ -54,54 +83,64 @@
         #app-toast.info { background-color: #3b82f6; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 dark:bg-black text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <div id="app-container" class="container mx-auto max-w-4xl p-2 sm:p-6 pb-20 mt-2">
+    <!-- Botões Flutuantes Superiores -->
+    <div class="absolute top-0 left-0 right-0 w-full z-50 p-2 flex justify-between no-print pointer-events-none">
+        <button id="darkModeToggle" class="pointer-events-auto text-xs bg-white/90 dark:bg-zinc-900/90 text-gray-600 dark:text-gray-300 font-bold py-1 px-3 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+            🌙 Modo Noturno
+        </button>
+        <button id="switchToAdmin" class="pointer-events-auto text-xs bg-white/90 dark:bg-zinc-900/90 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 font-bold py-1 px-3 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+            ⚙️ ADM
+        </button>
+    </div>
+
+    <div id="app-container" class="container mx-auto max-w-4xl p-2 sm:p-6 pb-20 mt-8 sm:mt-6">
         
         <!-- ================= VISÃO DO USUÁRIO ================= -->
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <!-- Título do Site que rola junto com a tela (Não é fixo) -->
+                <!-- Título do Site que rola junto com a tela -->
                 <div class="text-center mb-6 mt-4">
-                    <h1 class="font-brand text-4xl text-blue-600 drop-shadow-sm">Delícias Urbanas</h1>
-                    <p class="text-gray-500 text-sm mt-1 font-medium">O seu cardápio está servido!</p>
+                    <h1 class="font-brand text-4xl text-blue-600 dark:text-blue-500 drop-shadow-sm" style="font-family: 'Lobster Two', cursive;">Delícias Urbanas</h1>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1 font-medium">O seu cardápio está servido!</p>
                 </div>
 
                 <!-- Alternador de Semana para o Usuário -->
-                <div id="week-toggle-container" class="hidden mb-4 bg-white p-1 rounded-xl shadow-sm flex flex-col sm:flex-row gap-1 border border-gray-100 fade-in">
+                <div id="week-toggle-container" class="hidden mb-4 bg-white dark:bg-zinc-900 p-1 rounded-xl shadow-sm flex flex-col sm:flex-row gap-1 border border-gray-100 dark:border-zinc-800 fade-in">
                     <button id="btn-current-week" class="flex-1 px-2 py-2 bg-blue-600 text-white rounded-lg font-bold shadow transition-colors text-sm">🍲 Desta Semana</button>
-                    <button id="btn-next-week" class="flex-1 px-2 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-bold transition-colors border border-gray-200 text-sm">📅 Fazer Pedido (Próx.)</button>
+                    <button id="btn-next-week" class="flex-1 px-2 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg font-bold transition-colors border border-gray-200 dark:border-zinc-700 text-sm">📅 Fazer Pedido (Próx.)</button>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 border border-gray-100">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="block text-md font-semibold text-gray-800">👤 1. Identificação</h2>
-                        <!-- Botão ADM agora fica dentro da caixa de identificação, economizando espaço geral -->
-                        <button id="switchToAdmin" class="text-xs text-gray-400 hover:text-blue-600 font-bold py-1 px-2 rounded-md hover:bg-gray-100 transition-colors no-print">⚙️ ADM</button>
-                    </div>
+                <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-4 sm:p-6 mb-4 border border-gray-100 dark:border-zinc-800 transition-colors">
+                    <h2 class="block text-md font-semibold text-gray-800 dark:text-gray-100 mb-3">👤 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-3">
-                        <div><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg font-bold"></div>
-                        <div><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 font-semibold" readonly></div>
+                        <div>
+                            <input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg font-bold transition-colors">
+                        </div>
+                        <div>
+                            <input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900/50 text-gray-600 dark:text-gray-400 font-semibold rounded-lg transition-colors" readonly>
+                        </div>
                     </div>
                 </div>
 
                 <div id="order-section" class="hidden scroll-mt-2">
                     <!-- Imagem Gigante Novamente -->
-                    <div id="menu-image-container" class="mb-4 bg-white rounded-xl shadow-sm border border-gray-200 p-1 relative">
-                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto max-h-[75vh] object-contain cursor-pointer rounded-lg">
+                    <div id="menu-image-container" class="mb-4 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 p-1 relative transition-colors">
+                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto max-h-[75vh] object-contain cursor-pointer rounded-lg bg-white dark:bg-zinc-900">
                         <div class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full pointer-events-none shadow-sm backdrop-blur-md">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                         </div>
                     </div>
 
                     <!-- Resumo do Pedido Existente -->
-                    <div id="existing-order-container" class="hidden bg-white rounded-xl shadow-sm p-5 mb-4 border-2 border-green-100 fade-in">
+                    <div id="existing-order-container" class="hidden bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-5 mb-4 border-2 border-green-100 dark:border-green-900/50 fade-in transition-colors">
                         <div class="text-center mb-6">
-                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/40 mb-4">
+                                <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </div>
-                            <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800">Pedido Registado!</h3>
-                            <p class="text-gray-600 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
+                            <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800 dark:text-gray-100">Pedido Registado!</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
                         </div>
                         <div id="existing-order-details" class="space-y-3">
                             <!-- Preenchido via JS -->
@@ -109,12 +148,12 @@
                     </div>
 
                     <!-- Wizard de Escolhas -->
-                    <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 mb-4">
+                    <div id="order-wizard-container" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-zinc-800 mb-4 transition-colors">
                         <div id="order-wizard">
-                            <h3 id="wizard-day-title" class="text-xl font-bold text-blue-600 mb-3 text-center"></h3>
+                            <h3 id="wizard-day-title" class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-3 text-center"></h3>
                             <div id="wizard-options" class="grid grid-cols-2 gap-2 mb-3"></div>
                             <div>
-                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Anotações? Ex: sem cebola"></textarea>
+                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Anotações? Ex: sem cebola"></textarea>
                             </div>
                             <div id="wizard-progress" class="flex space-x-2 justify-center mt-4"></div>
                         </div>
@@ -122,68 +161,72 @@
 
                     <!-- Botão de submissão -->
                     <div id="submitButtonContainer" class="hidden text-center mt-2 mb-6">
-                        <button id="openConfirmationModal" class="w-full bg-green-500 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
+                        <button id="openConfirmationModal" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 dark:hover:bg-green-500 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
                     </div>
                 </div>
                 
-                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
+                <div id="guidanceSection" class="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-400 p-4 rounded-md mb-6 transition-colors"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
             </div>
-            <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Retornar ao Início</button></div>
+            <div id="success-message" class="hidden text-center p-10 bg-white dark:bg-zinc-900 rounded-lg shadow-lg border border-gray-100 dark:border-zinc-800 transition-colors">
+                <h2 class="text-3xl font-bold text-green-500 dark:text-green-400">Pedido Enviado com Sucesso!</h2>
+                <p id="success-text" class="mt-4 text-gray-600 dark:text-gray-400"></p>
+                <button onclick="location.reload()" class="mt-6 bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Retornar ao Início</button>
+            </div>
         </div>
 
         <!-- ================= VISÃO DO ADMINISTRADOR ================= -->
         <div id="admin-view" class="hidden no-print">
-            <header class="text-center border-b pb-6 mb-6 mt-8">
-                <h1 class="text-4xl font-bold text-gray-800">Painel do Administrador</h1>
-                <p class="text-lg text-gray-600 mt-1">Delícias Urbanas</p>
+            <header class="text-center border-b dark:border-zinc-800 pb-6 mb-6 mt-4">
+                <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">Painel do Administrador</h1>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mt-1">Delícias Urbanas</p>
                 <div class="mt-4">
-                    <button id="adminLogoutBtn" class="bg-red-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600">Sair do Painel</button>
+                    <button id="adminLogoutBtn" class="bg-red-500 dark:bg-red-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors">Sair do Painel</button>
                 </div>
             </header>
             <div class="mb-8">
-                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 hover:text-blue-600">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
+                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
             
-            <section id="menu-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-6">🖼️ Gerenciar Semanas e Cardápios</h2>
+            <section id="menu-management-section" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-6 mb-8 border border-gray-100 dark:border-zinc-800 transition-colors">
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">🖼️ Gerenciar Semanas e Cardápios</h2>
                 <div class="grid md:grid-cols-2 gap-6">
                     
                     <!-- Current Week -->
-                    <div class="border border-gray-200 rounded-xl p-5 bg-gray-50 flex flex-col">
-                        <h3 class="font-bold text-lg text-gray-800 mb-3 flex items-center gap-2"><span>📌</span> Cardápio Atual (Ativo)</h3>
+                    <div class="border border-gray-200 dark:border-zinc-800 rounded-xl p-5 bg-gray-50 dark:bg-zinc-950 flex flex-col transition-colors">
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2"><span>📌</span> Cardápio Atual (Ativo)</h3>
                         <div class="flex-1">
-                            <img id="admin-current-image" class="w-full h-40 object-cover rounded-lg mb-4 border shadow-sm hidden" />
-                            <p id="admin-current-status" class="text-sm text-gray-500 mb-4 italic">Nenhum cardápio ativo.</p>
+                            <img id="admin-current-image" class="w-full h-40 object-cover rounded-lg mb-4 border dark:border-zinc-700 shadow-sm hidden" />
+                            <p id="admin-current-status" class="text-sm text-gray-500 dark:text-gray-400 mb-4 italic">Nenhum cardápio ativo.</p>
                         </div>
-                        <button id="btn-turn-week" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-600 transition shadow-md flex justify-center items-center gap-2">
+                        <button id="btn-turn-week" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-600 dark:hover:bg-green-500 transition shadow-md flex justify-center items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
                             Forçar Atualização de Semana
                         </button>
-                        <p class="text-xs text-gray-500 mt-2 text-center">A virada de semana ocorrerá <b class="text-green-600">automaticamente</b> na próxima segunda-feira <span id="scheduled-date" class="font-bold text-blue-600"></span>. Você também pode forçar a virada agora clicando acima.</p>
-                        <div class="text-center mt-4 pt-4 border-t border-gray-200">
-                             <button id="btn-clear-current-orders" class="text-xs text-red-500 hover:text-red-700 underline font-semibold">⚠️ Apagar todos os pedidos da semana atual</button>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">A virada de semana ocorrerá <b class="text-green-600 dark:text-green-400">automaticamente</b> na próxima segunda-feira <span id="scheduled-date" class="font-bold text-blue-600 dark:text-blue-400"></span>. Você também pode forçar a virada agora clicando acima.</p>
+                        <div class="text-center mt-4 pt-4 border-t border-gray-200 dark:border-zinc-800">
+                             <button id="btn-clear-current-orders" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline font-semibold">⚠️ Apagar todos os pedidos da semana atual</button>
                         </div>
                     </div>
 
                     <!-- Next Week Setup -->
-                    <div class="border-2 border-blue-100 rounded-xl p-5 bg-blue-50/40 flex flex-col">
-                        <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center gap-2"><span>🚀</span> Preparar Próxima Semana</h3>
+                    <div class="border-2 border-blue-100 dark:border-blue-900/30 rounded-xl p-5 bg-blue-50/40 dark:bg-blue-900/10 flex flex-col transition-colors">
+                        <h3 class="font-bold text-lg text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2"><span>🚀</span> Preparar Próxima Semana</h3>
                         <div class="flex-1">
-                            <p class="text-xs text-gray-600 mb-4">Envie o cardápio (ex: na quinta-feira) para que já possam fazer os pedidos sem apagar a semana atual.</p>
-                            <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-4"/>
-                            <img id="imagePreview" class="w-full h-32 object-cover rounded-lg border hidden mb-4 shadow-sm" />
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-4">Envie o cardápio (ex: na quinta-feira) para que já possam fazer os pedidos sem apagar a semana atual.</p>
+                            <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-200 hover:file:bg-blue-200 dark:hover:file:bg-blue-800 mb-4 transition-colors"/>
+                            <img id="imagePreview" class="w-full h-32 object-cover rounded-lg border dark:border-zinc-700 hidden mb-4 shadow-sm" />
                             
-                            <h4 class="font-semibold text-sm text-gray-700 mb-2">Feriados da Próxima Semana</h4>
-                            <div id="holiday-selector" class="flex flex-wrap gap-2 mb-4 bg-white p-2 rounded-lg border border-gray-200"></div>
+                            <h4 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">Feriados da Próxima Semana</h4>
+                            <div id="holiday-selector" class="flex flex-wrap gap-2 mb-4 bg-white dark:bg-zinc-800 p-2 rounded-lg border border-gray-200 dark:border-zinc-700 transition-colors"></div>
                         </div>
-                        <button id="uploadImageBtn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition shadow-md" disabled>
+                        <button id="uploadImageBtn" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-zinc-700 disabled:text-gray-500 disabled:cursor-not-allowed transition shadow-md" disabled>
                             Salvar Cardápio para a Próxima Semana
                         </button>
-                        <button id="deleteNextWeekBtn" class="mt-2 w-full bg-red-100 text-red-600 font-bold py-2 px-4 rounded-xl hover:bg-red-200 transition shadow-sm hidden">
+                        <button id="deleteNextWeekBtn" class="mt-2 w-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold py-2 px-4 rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition shadow-sm hidden">
                             🗑️ Cancelar / Apagar Próxima Semana
                         </button>
                         <div id="whatsapp-notification-container" class="mt-4 hidden">
-                            <button id="notifyWhatsAppBtn" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 text-sm">
+                            <button id="notifyWhatsAppBtn" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 flex items-center justify-center gap-2 text-sm transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                                 Avisar no WhatsApp
                             </button>
@@ -192,44 +235,46 @@
                 </div>
             </section>
             
-            <section id="order-status-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="status-section-title">📊 Status de Pedidos</h2>
+            <section id="order-status-section" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-6 mb-8 border border-gray-100 dark:border-zinc-800 transition-colors">
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4" id="status-section-title">📊 Status de Pedidos</h2>
                 <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <p class="text-gray-500">A carregar status dos pedidos...</p>
+                    <p class="text-gray-500 dark:text-gray-400">A carregar status dos pedidos...</p>
                 </div>
             </section>
 
-            <section id="employee-management-section" class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">👥 Gerenciamento de Funcionários</h2>
+            <section id="employee-management-section" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-6 mb-8 border border-gray-100 dark:border-zinc-800 transition-colors">
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">👥 Gerenciamento de Funcionários</h2>
                 <form id="add-employee-form" class="grid sm:grid-cols-3 gap-4 items-end mb-6">
                     <div>
-                        <label for="newEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label>
-                        <input type="text" id="newEmployeeRGF" placeholder="RGF do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                        <label for="newEmployeeRGF" class="block text-sm font-medium text-gray-700 dark:text-gray-300">RGF</label>
+                        <input type="text" id="newEmployeeRGF" placeholder="RGF do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required>
                     </div>
                     <div>
-                        <label for="newEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                        <input type="text" id="newEmployeeName" placeholder="Nome do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                        <label for="newEmployeeName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
+                        <input type="text" id="newEmployeeName" placeholder="Nome do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Adicionar Funcionário</button>
+                    <button type="submit" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Adicionar Funcionário</button>
                 </form>
                 <div id="employee-list-container" class="overflow-x-auto">
-                    <p class="text-gray-500">A carregar lista de funcionários...</p>
+                    <p class="text-gray-500 dark:text-gray-400">A carregar lista de funcionários...</p>
                 </div>
             </section>
 
             <section id="orders-section">
-                <div class="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-b pb-4">
-                    <h2 class="text-2xl font-semibold text-gray-700">Pedidos Recebidos</h2>
-                    <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-                        <button id="admin-view-current" class="px-4 py-1.5 bg-white shadow-sm rounded-md text-sm font-bold text-blue-600 transition-colors">Esta Semana</button>
-                        <button id="admin-view-next" class="px-4 py-1.5 text-gray-600 hover:bg-gray-200 rounded-md text-sm font-semibold transition-colors">Próxima Semana</button>
+                <div class="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-b dark:border-zinc-800 pb-4 transition-colors">
+                    <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Pedidos Recebidos</h2>
+                    <div class="flex space-x-2 bg-gray-100 dark:bg-zinc-900 p-1 rounded-lg border border-gray-200 dark:border-zinc-800">
+                        <button id="admin-view-current" class="px-4 py-1.5 bg-white dark:bg-zinc-800 shadow-sm rounded-md text-sm font-bold text-blue-600 dark:text-blue-400 transition-colors">Esta Semana</button>
+                        <button id="admin-view-next" class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded-md text-sm font-semibold transition-colors">Próxima Semana</button>
                     </div>
                 </div>
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div class="w-full sm:w-auto"><input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border rounded-lg"></div>
-                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 shadow-lg">🖨️ Salvar Relatório como PDF</button>
+                    <div class="w-full sm:w-auto">
+                        <input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors">
+                    </div>
+                    <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg transition-colors">🖨️ Salvar Relatório como PDF</button>
                 </div>
-                <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500">A carregar pedidos...</p></div>
+                <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500 dark:text-gray-400">A carregar pedidos...</p></div>
             </section>
         </div>
     </div>
@@ -243,25 +288,25 @@
             <form id="edit-order-form">
                 <input type="hidden" id="edit-order-id">
                 <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nome do Funcionário</label>
-                    <input type="text" id="edit-order-employeeName" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 font-bold" readonly>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Nome do Funcionário</label>
+                    <input type="text" id="edit-order-employeeName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-100 dark:bg-zinc-800 font-bold transition-colors" readonly>
                 </div>
                 <div id="edit-menu-options" class="space-y-4 max-h-[50vh] overflow-y-auto p-1"></div>
                 <div class="mt-6 flex justify-end space-x-4">
-                    <button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Salvar Alterações</button>
+                    <button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Salvar Alterações</button>
                 </div>
             </form>
         </div>
     </div>
     
-    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar Alterações</button></div></form></div></div>
+    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700 dark:text-gray-300">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-100 dark:bg-zinc-800 transition-colors" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Salvar Alterações</button></div></form></div></div>
     
-    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600">Confirmar e Enviar</button></div></div></div>
+    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600 dark:text-gray-400">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 dark:bg-green-600 text-white font-bold rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition-colors">Confirmar e Enviar</button></div></div></div>
     
-    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Acesso Administrativo</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Entrar</button></div></form></div></div>
+    <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Acesso Administrativo</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Entrar</button></div></form></div></div>
     
-    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Confirmar</button></div></div></div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600 dark:text-gray-400" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Confirmar</button></div></div></div>
 
     <div id="print-report"></div>
     <div id="app-toast"></div>
@@ -328,7 +373,7 @@
                     short_name: "Cardápio",
                     start_url: window.location.href,
                     display: "standalone",
-                    background_color: "#f8fafc",
+                    background_color: "#000000", // Adaptado para fundo preto no load do app
                     theme_color: "#2563eb",
                     icons: [{
                         src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle' fill='white'%3E🍲%3C/text%3E%3C/svg%3E",
@@ -383,13 +428,13 @@
                 const snapshot = await getDocs(q);
 
                 if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum funcionário cadastrado.</p>';
+                    container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">Nenhum funcionário cadastrado.</p>';
                     return;
                 }
-                let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">RGF</th><th class="py-2 px-3 border-b text-left">Nome</th><th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+                let tableHTML = `<table class="min-w-full bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg overflow-hidden"><thead><tr class="bg-gray-50 dark:bg-zinc-800/80"><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">RGF</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Nome</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Ações</th></tr></thead><tbody>`;
                 snapshot.forEach(doc => {
                     const employee = doc.data();
-                    tableHTML += `<tr><td class="py-2 px-3 border-b font-mono">${doc.id}</td><td class="py-2 px-3 border-b font-semibold">${employee.nome}</td><td class="py-2 px-3 border-b space-x-2"><button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
+                    tableHTML += `<tr><td class="py-2 px-3 border-b dark:border-zinc-800 font-mono text-gray-800 dark:text-gray-200">${doc.id}</td><td class="py-2 px-3 border-b dark:border-zinc-800 font-semibold text-gray-800 dark:text-gray-200">${employee.nome}</td><td class="py-2 px-3 border-b dark:border-zinc-800 space-x-2"><button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-semibold transition-colors">Editar</button><button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-semibold transition-colors">Excluir</button></td></tr>`;
                 });
                 tableHTML += '</tbody></table>';
                 container.innerHTML = tableHTML;
@@ -467,11 +512,11 @@
                 if (choice) {
                     let displayChoice = choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : `🍽️ ${choice}`;
                     let notesHtml = notes ? `<span class="text-sm text-gray-500 italic block sm:inline mt-1 sm:mt-0 sm:ml-2">(${notes})</span>` : '';
-                    let styleClass = choice === 'FERIADO' ? 'bg-gray-50 text-gray-500 border-gray-200' : 'bg-green-50 text-green-800 border-green-200';
+                    let styleClass = choice === 'FERIADO' ? 'bg-gray-50 dark:bg-zinc-800/50 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-zinc-700' : 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800/50';
                     
                     detailsContainer.innerHTML += `
                         <div class="p-4 rounded-xl border ${styleClass} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 transition-all hover:shadow-md">
-                            <span class="font-bold text-gray-700 w-full sm:w-1/3">${day}</span>
+                            <span class="font-bold w-full sm:w-1/3">${day}</span>
                             <div class="w-full sm:w-2/3 text-left sm:text-right font-medium">${displayChoice} ${notesHtml}</div>
                         </div>
                     `;
@@ -545,12 +590,12 @@
             optionsContainer.innerHTML = '';
             mealOptions.forEach(opt => {
                 optionsContainer.innerHTML += `
-                    <button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 rounded-lg">
+                    <button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-500 dark:bg-zinc-800/50 rounded-lg">
                         <div class="flex items-center">
                             <span class="text-xl mr-2">${opt.emoji}</span>
                             <div>
-                                <p class="font-semibold text-gray-800 text-sm leading-tight">${opt.name}</p>
-                                <p class="text-xs text-gray-500">${opt.description}</p>
+                                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm leading-tight">${opt.name}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">${opt.description}</p>
                             </div>
                         </div>
                     </button>
@@ -567,8 +612,8 @@
             const progressContainer = document.getElementById('wizard-progress');
             progressContainer.innerHTML = '';
             for(let i=0; i < weekDays.length; i++) {
-                const dotClass = i < index ? 'bg-blue-600' : (i === index ? 'bg-blue-300' : 'bg-gray-300');
-                progressContainer.innerHTML += `<div class="w-2.5 h-2.5 rounded-full ${dotClass}"></div>`;
+                const dotClass = i < index ? 'bg-blue-600' : (i === index ? 'bg-blue-300' : 'bg-gray-300 dark:bg-zinc-700');
+                progressContainer.innerHTML += `<div class="w-2.5 h-2.5 rounded-full ${dotClass} transition-colors"></div>`;
             }
         }
         
@@ -593,9 +638,9 @@
                 const dayId = getDayId(day);
                 const isChecked = savedNextHolidays.includes(dayId) ? 'checked' : '';
                 container.innerHTML += `
-                    <label class="flex items-center space-x-2 cursor-pointer select-none bg-white p-2 rounded shadow-sm border border-gray-100 hover:bg-gray-50 transition">
+                    <label class="flex items-center space-x-2 cursor-pointer select-none bg-white dark:bg-zinc-800 p-2 rounded shadow-sm border border-gray-100 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition">
                         <input type="checkbox" value="${dayId}" class="holiday-checkbox w-5 h-5 text-blue-600 rounded focus:ring-blue-500" ${isChecked}>
-                        <span class="text-gray-700 font-medium">${day}</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium">${day}</span>
                     </label>
                 `;
             });
@@ -690,16 +735,26 @@
             if (btnCurrent && btnNext) {
                 if (viewingNextWeek) {
                     btnNext.classList.replace('bg-gray-100', 'bg-blue-600');
+                    btnNext.classList.replace('dark:bg-zinc-800', 'bg-blue-600');
                     btnNext.classList.replace('text-gray-700', 'text-white');
+                    btnNext.classList.replace('dark:text-gray-300', 'text-white');
+                    
                     btnCurrent.classList.replace('bg-blue-600', 'bg-gray-100');
                     btnCurrent.classList.replace('text-white', 'text-gray-700');
+                    btnCurrent.classList.add('dark:bg-zinc-800', 'dark:text-gray-300');
+                    
                     weeklyMenu.menuImageBase64 = currentMenuData.nextMenuImageBase64;
                     userActiveHolidays = currentMenuData.nextHolidays || [];
                 } else {
                     btnCurrent.classList.replace('bg-gray-100', 'bg-blue-600');
+                    btnCurrent.classList.replace('dark:bg-zinc-800', 'bg-blue-600');
                     btnCurrent.classList.replace('text-gray-700', 'text-white');
+                    btnCurrent.classList.replace('dark:text-gray-300', 'text-white');
+                    
                     btnNext.classList.replace('bg-blue-600', 'bg-gray-100');
                     btnNext.classList.replace('text-white', 'text-gray-700');
+                    btnNext.classList.add('dark:bg-zinc-800', 'dark:text-gray-300');
+                    
                     weeklyMenu.menuImageBase64 = currentMenuData.menuImageBase64;
                     userActiveHolidays = currentMenuData.holidays || [];
                 }
@@ -756,7 +811,7 @@
                     orderSection.classList.remove('hidden');
                     await checkExistingOrder(rgf); 
                     
-                    // Auto-Scroll suave para mostrar a imagem no topo
+                    // Auto-Scroll suave para mostrar a imagem e botões focados
                     setTimeout(() => {
                         document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 150);
@@ -782,7 +837,7 @@
                 tempOrderData[dayId] = item.choice;
                 if(item.notes) tempOrderData[`${dayId}_notes`] = item.notes;
                 const displayChoice = item.choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : item.choice;
-                const styleClass = item.choice === 'FERIADO' ? 'text-gray-400 italic' : 'text-gray-800';
+                const styleClass = item.choice === 'FERIADO' ? 'text-gray-400 italic' : 'text-gray-800 dark:text-gray-200';
                 summaryContainer.innerHTML += `<p class="${styleClass}"><span class="font-bold">${item.day}:</span> ${displayChoice} ${item.notes ? `<span class="text-sm text-gray-500 italic">(${item.notes})</span>` : ''}</p>`;
             });
             document.getElementById('confirmation-modal').classList.remove('hidden');
@@ -850,12 +905,12 @@
 
                 let html = `
                     <div>
-                        <h3 class="font-semibold text-lg text-green-600 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
+                        <h3 class="font-semibold text-lg text-green-600 dark:text-green-400 mb-2">✅ Já Pediram (${haveOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-md border border-green-100 dark:border-green-800/30">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-lg text-red-600 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 rounded-md">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
+                        <h3 class="font-semibold text-lg text-red-600 dark:text-red-400 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3>
+                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md border border-red-100 dark:border-red-800/30">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul>
                     </div>
                 `;
                 container.innerHTML = html;
@@ -869,27 +924,27 @@
 
             if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado nesta seleção.</p>'; return; }
             
-            let tableHTML = `<table class="min-w-full bg-white border"><thead><tr class="bg-gray-50"><th class="py-2 px-3 border-b text-left">Funcionário</th><th class="py-2 px-3 border-b text-left">RGF</th>`;
-            weekDays.forEach(item => tableHTML += `<th class="py-2 px-3 border-b text-left">${item.substring(0,3)}</th>`);
-            tableHTML += `<th class="py-2 px-3 border-b text-left">Ações</th></tr></thead><tbody>`;
+            let tableHTML = `<table class="min-w-full bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg overflow-hidden"><thead><tr class="bg-gray-50 dark:bg-zinc-800/80"><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Funcionário</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">RGF</th>`;
+            weekDays.forEach(item => tableHTML += `<th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">${item.substring(0,3)}</th>`);
+            tableHTML += `<th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Ações</th></tr></thead><tbody>`;
 
             filteredOrders.forEach(doc => {
                 const order = doc.data();
-                tableHTML += `<tr><td class="py-2 px-3 border-b font-bold">${order.employeeName}</td><td class="py-2 px-3 border-b">${order.employeeRGF || 'N/A'}</td>`;
+                tableHTML += `<tr><td class="py-2 px-3 border-b dark:border-zinc-800 font-bold text-gray-800 dark:text-gray-200">${order.employeeName}</td><td class="py-2 px-3 border-b dark:border-zinc-800 text-gray-600 dark:text-gray-400">${order.employeeRGF || 'N/A'}</td>`;
                 weekDays.forEach(day => {
                     const dayId = getDayId(day);
                     let choice = order[dayId] || 'N/A';
                     const notes = order[`${dayId}_notes`];
                     
                     if (choice === 'FERIADO') {
-                        tableHTML += `<td class="py-2 px-3 border-b bg-gray-100 text-gray-400 text-xs text-center">FERIADO</td>`;
+                        tableHTML += `<td class="py-2 px-3 border-b dark:border-zinc-800 bg-gray-100 dark:bg-zinc-800/50 text-gray-400 dark:text-gray-500 text-xs text-center">FERIADO</td>`;
                     } else {
                         let cellContent = choice;
                         if (notes) cellContent += ` <span title="${notes}" class="cursor-help text-blue-500 font-bold">*</span>`;
-                        tableHTML += `<td class="py-2 px-3 border-b">${cellContent}</td>`;
+                        tableHTML += `<td class="py-2 px-3 border-b dark:border-zinc-800 text-gray-700 dark:text-gray-300">${cellContent}</td>`;
                     }
                 });
-                tableHTML += `<td class="py-2 px-3 border-b space-x-2 whitespace-nowrap"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 hover:text-red-800 text-sm font-semibold">Excluir</button></td></tr>`;
+                tableHTML += `<td class="py-2 px-3 border-b dark:border-zinc-800 space-x-2 whitespace-nowrap"><button data-id="${doc.id}" class="edit-order-btn text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-semibold transition-colors">Editar</button><button data-id="${doc.id}" data-name="${order.employeeName}" class="delete-order-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-semibold transition-colors">Excluir</button></td></tr>`;
             });
             tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
@@ -914,9 +969,9 @@
                 const currentChoice = order[dayId] || '';
                 const currentNotes = order[`${dayId}_notes`] || '';
 
-                let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm bg-white"><option value="">(Nenhuma opção selecionada)</option>${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}</select>`;
+                let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg mb-2 text-sm bg-white dark:bg-zinc-800 dark:text-white"><option value="">(Nenhuma opção selecionada)</option>${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}</select>`;
 
-                optionsContainer.innerHTML += `<div class="p-3 border rounded-lg bg-gray-50 border-gray-200"><label class="block font-semibold text-gray-700 mb-2">${day}</label>${selectHTML}<input type="text" id="edit-notes-${dayId}" value="${currentNotes}" placeholder="Anotações (ex: sem cebola)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"></div>`;
+                optionsContainer.innerHTML += `<div class="p-3 border rounded-lg bg-gray-50 dark:bg-zinc-800/50 border-gray-200 dark:border-zinc-700"><label class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">${day}</label>${selectHTML}<input type="text" id="edit-notes-${dayId}" value="${currentNotes}" placeholder="Anotações (ex: sem cebola)" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 dark:text-white"></div>`;
             });
             document.getElementById('edit-order-modal').classList.remove('hidden');
         }
@@ -1079,6 +1134,24 @@
             window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
         }
 
+        // Lógica de Troca do Tema Noturno
+        const darkModeToggleBtn = document.getElementById('darkModeToggle');
+        darkModeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+                darkModeToggleBtn.innerHTML = '☀️ Modo Claro';
+            } else {
+                localStorage.setItem('theme', 'light');
+                darkModeToggleBtn.innerHTML = '🌙 Modo Noturno';
+            }
+        });
+        
+        // Ajusta o texto inicial do botão baseado no carregamento do <head>
+        if (document.documentElement.classList.contains('dark')) {
+            darkModeToggleBtn.innerHTML = '☀️ Modo Claro';
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (user.uid === APP_CONFIG.ADMIN_UID) { showAdminView(); } 
@@ -1164,14 +1237,20 @@
 
             document.getElementById('admin-view-current').addEventListener('click', (e) => {
                 adminViewingNextWeek = false;
-                e.target.classList.add('bg-white', 'shadow-sm', 'text-blue-600'); e.target.classList.remove('text-gray-600', 'hover:bg-gray-200');
-                const nextBtn = document.getElementById('admin-view-next'); nextBtn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600'); nextBtn.classList.add('text-gray-600', 'hover:bg-gray-200');
+                e.target.classList.add('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
+                e.target.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
+                const nextBtn = document.getElementById('admin-view-next'); 
+                nextBtn.classList.remove('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
+                nextBtn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
                 loadAdminData();
             });
             document.getElementById('admin-view-next').addEventListener('click', (e) => {
                 adminViewingNextWeek = true;
-                e.target.classList.add('bg-white', 'shadow-sm', 'text-blue-600'); e.target.classList.remove('text-gray-600', 'hover:bg-gray-200');
-                const curBtn = document.getElementById('admin-view-current'); curBtn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600'); curBtn.classList.add('text-gray-600', 'hover:bg-gray-200');
+                e.target.classList.add('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
+                e.target.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
+                const curBtn = document.getElementById('admin-view-current'); 
+                curBtn.classList.remove('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
+                curBtn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
                 loadAdminData();
             });
 
