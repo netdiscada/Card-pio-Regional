@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2563eb">
-    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Card%C3%A1pio%20Quatinga%22%2C%22short_name%22%3A%22Card%C3%A1pio%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%232563eb%22%7D'>
+    <link rel="manifest" id="pwa-manifest">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,77 +57,77 @@
 </head>
 <body class="bg-slate-50">
 
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-20 shadow-sm no-print">
-        <div class="container mx-auto max-w-4xl p-2 flex justify-between items-center">
-            <h1 class="font-brand text-2xl text-blue-600">Delícias Urbanas</h1>
-            <button id="switchToAdmin" class="text-xs text-gray-500 hover:text-blue-600 font-semibold py-1 px-2 rounded-md hover:bg-gray-100">Painel ADM</button>
-        </div>
-    </header>
+    <!-- Botão ADM Flutuante e Pequeno (Não ocupa espaço no topo) -->
+    <div class="absolute top-0 right-0 z-50 p-2 no-print">
+        <button id="switchToAdmin" class="text-xs bg-white/90 backdrop-blur-md text-gray-600 font-bold py-1 px-3 rounded-lg shadow-sm border border-gray-200">⚙️ ADM</button>
+    </div>
 
-    <div id="app-container" class="container mx-auto max-w-4xl p-4 sm:p-6 pb-20">
+    <div id="app-container" class="container mx-auto max-w-4xl p-2 sm:p-6 pb-20 mt-6 sm:mt-2">
         
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <p class="text-center mt-2 mb-4 text-md text-gray-500">O seu cardápio está servido!</p>
-
                 <!-- Alternador de Semana para o Usuário -->
-                <div id="week-toggle-container" class="hidden mb-6 bg-white p-2 rounded-xl shadow-sm flex flex-col sm:flex-row gap-2 border border-gray-100 fade-in">
-                    <button id="btn-current-week" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold shadow transition-colors">🍲 Cardápio Desta Semana</button>
-                    <button id="btn-next-week" class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-bold transition-colors border border-gray-200">📅 Fazer Pedido (Próx. Semana)</button>
+                <div id="week-toggle-container" class="hidden mb-4 bg-white p-1 rounded-xl shadow-sm flex flex-col sm:flex-row gap-1 border border-gray-100 fade-in">
+                    <button id="btn-current-week" class="flex-1 px-2 py-2 bg-blue-600 text-white rounded-lg font-bold shadow transition-colors text-sm">🍲 Desta Semana</button>
+                    <button id="btn-next-week" class="flex-1 px-2 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-bold transition-colors border border-gray-200 text-sm">📅 Fazer Pedido (Próx.)</button>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="block text-lg font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div><label for="employeeRGF" class="block text-sm font-medium text-gray-700">Seu RGF</label><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
-                        <div><label for="employeeName" class="block text-sm font-medium text-gray-700">Nome Completo</label><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg" readonly></div>
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 border border-gray-100">
+                    <h2 class="block text-md font-semibold text-gray-800 mb-2">👤 1. Identificação</h2>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <div><input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg font-bold"></div>
+                        <div><input type="text" id="employeeName" placeholder="Preenchido automaticamente" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 font-semibold" readonly></div>
                     </div>
                 </div>
 
-                <div id="order-section" class="hidden mt-4 scroll-mt-20">
-                    <div class="flex flex-col md:flex-row gap-3 md:gap-6 items-stretch">
-                        
-                        <!-- Coluna 1: Imagem App-like (45vh no celular para não esconder os botões) -->
-                        <div id="menu-image-container" class="w-full md:w-1/2 h-[45vh] md:h-[70vh] relative bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-shrink-0">
-                            <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-full object-contain cursor-pointer p-1">
-                            <div class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full pointer-events-none shadow-sm backdrop-blur-md">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-                            </div>
-                            <div class="absolute bottom-2 left-0 w-full text-center pointer-events-none">
-                                <span class="bg-black/60 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-md shadow-sm">🔍 Toque para ver em tela cheia</span>
-                            </div>
+                <div id="order-section" class="hidden scroll-mt-2">
+                    <!-- Imagem Gigante Novamente -->
+                    <div id="menu-image-container" class="mb-4 bg-white rounded-xl shadow-sm border border-gray-200 p-1 relative">
+                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto max-h-[75vh] object-contain cursor-pointer rounded-lg">
+                        <div class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full pointer-events-none shadow-sm backdrop-blur-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                         </div>
+                    </div>
 
-                        <!-- Coluna 2: Formulários (Flexível e Compacto) -->
-                        <div class="w-full md:w-1/2 flex flex-col">
-                            
-                            <!-- Resumo do Pedido Existente -->
-                            <div id="existing-order-container" class="hidden bg-white rounded-xl shadow-sm p-5 mb-4 border-2 border-green-100 fade-in">
-                                <div class="text-center mb-6">
-                                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    </div>
-                                    <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800">Pedido Registado!</h3>
-                                    <p class="text-gray-600 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
-                                </div>
-                                <div id="existing-order-details" class="space-y-3">
-                                    <!-- Preenchido via JS -->
-                                </div>
+                    <!-- Resumo do Pedido Existente -->
+                    <div id="existing-order-container" class="hidden bg-white rounded-xl shadow-sm p-5 mb-4 border-2 border-green-100 fade-in">
+                        <div class="text-center mb-6">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </div>
+                            <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800">Pedido Registado!</h3>
+                            <p class="text-gray-600 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
+                        </div>
+                        <div id="existing-order-details" class="space-y-3">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
 
-                            <!-- Wizard de Escolhas -->
-                            <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 mb-4 flex-1">
-                                <div id="order-wizard" class="h-full flex flex-col justify-center">
-                                    <h3 id="wizard-day-title" class="text-xl font-bold text-blue-600 mb-3 text-center"></h3>
-                                    <div id="wizard-options" class="grid grid-cols-2 gap-2 mb-3"></div>
-                                    <div>
-                                        <textarea id="wizard-notes" rows="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Anotações? Ex: sem cebola"></textarea>
-                                    </div>
-                                    <div id="wizard-progress" class="flex space-x-2 justify-center mt-auto pt-3"></div>
-                                </div>
+                    <!-- Wizard de Escolhas -->
+                    <div id="order-wizard-container" class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 mb-4">
+                        <div id="order-wizard">
+                            <h3 id="wizard-day-title" class="text-xl font-bold text-blue-600 mb-3 text-center"></h3>
+                            <div id="wizard-options" class="grid grid-cols-2 gap-2 mb-3"></div>
+                            <div>
+                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Anotações? Ex: sem cebola"></textarea>
                             </div>
+                            <div id="wizard-progress" class="flex space-x-2 justify-center mt-4"></div>
+                        </div>
+                    </div>
 
-                            <!-- Botão de submissão -->
+                    <!-- Botão de submissão -->
+                    <div id="submitButtonContainer" class="hidden text-center mt-2 mb-6">
+                        <button id="openConfirmationModal" class="w-full bg-green-500 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
+                    </div>
+                </div>
+                
+                <div id="guidanceSection" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
+            </div>
+            <div id="success-message" class="hidden text-center p-10 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold text-green-500">Pedido Enviado com Sucesso!</h2><p id="success-text" class="mt-4 text-gray-600"></p><button onclick="location.reload()" class="mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Retornar ao Início</button></div>
+        </div>
+
+        <div id="admin-view" class="hidden no-print">
+            <header class="text-center border-b pb-6 mb-6 mt-8">
                             <div id="submitButtonContainer" class="hidden w-full mt-auto">
                                 <button id="openConfirmationModal" class="w-full bg-green-500 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
                             </div>
@@ -329,6 +329,34 @@
         let fileToUpload = null;
         
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
+
+        // --- SISTEMA DE INSTALAÇÃO DE APP (PWA) ---
+        function setupPWA() {
+            try {
+                const manifest = {
+                    name: "Cardápio Quatinga",
+                    short_name: "Cardápio",
+                    start_url: window.location.href,
+                    display: "standalone",
+                    background_color: "#f8fafc",
+                    theme_color: "#2563eb",
+                    icons: [{
+                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle' fill='white'%3E🍲%3C/text%3E%3C/svg%3E",
+                        sizes: "192x192",
+                        type: "image/svg+xml"
+                    }]
+                };
+                const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
+                document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+                const swCode = `self.addEventListener('fetch', function(e) {});`;
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+                }
+            } catch (e) { console.log("PWA setup falhou, mas não afeta o site."); }
+        }
+        setupPWA();
 
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.getElementById('app-toast');
@@ -765,7 +793,7 @@
                     orderSection.classList.remove('hidden');
                     await checkExistingOrder(rgf); 
                     
-                    // Auto-Scroll mágico para emular a tela de um App e exibir Imagem + Botões sem rolar
+                    // Auto-Scroll mágico para pular o nome e exibir a imagem inteira
                     setTimeout(() => {
                         document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 150);
