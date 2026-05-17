@@ -145,7 +145,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
                             Forçar Atualização de Semana
                         </button>
-                        <p class="text-xs text-gray-500 mt-2 text-center">A virada de semana ocorrerá <b class="text-green-600">automaticamente</b> na próxima segunda-feira. Você também pode forçar a virada agora clicando acima.</p>
+                        <p class="text-xs text-gray-500 mt-2 text-center">A virada de semana ocorrerá <b class="text-green-600">automaticamente</b> na próxima segunda-feira <span id="scheduled-date" class="font-bold text-blue-600"></span>. Você também pode forçar a virada agora clicando acima.</p>
                         <div class="text-center mt-4 pt-4 border-t border-gray-200">
                              <button id="btn-clear-current-orders" class="text-xs text-red-500 hover:text-red-700 underline font-semibold">⚠️ Apagar todos os pedidos da semana atual</button>
                         </div>
@@ -629,6 +629,8 @@
 
                 const currentImg = document.getElementById('admin-current-image');
                 const currentStatus = document.getElementById('admin-current-status');
+                const scheduledDateSpan = document.getElementById('scheduled-date');
+
                 if (currentImg && currentStatus) {
                     if (currentMenuData.menuImageBase64) {
                         currentImg.src = currentMenuData.menuImageBase64;
@@ -637,6 +639,15 @@
                     } else {
                         currentImg.classList.add('hidden');
                         currentStatus.textContent = "Nenhum cardápio ativo no momento.";
+                    }
+                }
+
+                if (scheduledDateSpan) {
+                    if (currentMenuData.targetRotationDate) {
+                        const d = new Date(currentMenuData.targetRotationDate);
+                        scheduledDateSpan.textContent = `(Dia ${d.toLocaleDateString('pt-BR')})`;
+                    } else {
+                        scheduledDateSpan.textContent = '';
                     }
                 }
 
