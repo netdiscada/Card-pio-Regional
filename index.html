@@ -82,10 +82,10 @@
             .report-day-section { margin-bottom: 12px; page-break-inside: avoid; }
             .report-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
             #print-report th, #print-report td { border: 1px solid #999; padding: 5px; text-align: left; }
-            #print-report th { background-color: #e2e8f0; font-weight: 600; }
+            #print-report th { background-color: white; font-weight: 600; }
             #print-report .rgf-col { width: 15%; }
             #print-report .nome-col { width: 60%; }
-            #print-report .pedido-col { width: 25%; background-color: #dbeafe; font-weight: bold; }
+            #print-report .pedido-col { width: 25%; background-color: white; font-weight: bold; }
         }
         #app-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 24px; border-radius: 8px; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; pointer-events: none; transform: translateX(-50%) translateY(20px); }
         #app-toast.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
@@ -568,9 +568,20 @@
             if (!rgf || !auth.currentUser) { nameInput.value = ''; nameInput.placeholder = 'Preenchido automaticamente'; return false; }
             try {
                 const docSnap = await getDoc(doc(db, "funcionarios", rgf));
-                if (docSnap.exists()) { nameInput.value = docSnap.data().nome; return true; } 
-                else { nameInput.value = ''; nameInput.placeholder = 'RGF não encontrado'; return false; }
-            } catch (error) { nameInput.value = ''; nameInput.placeholder = 'Erro'; return false; }
+                if (docSnap.exists()) { 
+                    nameInput.value = docSnap.data().nome; 
+                    nameInput.placeholder = 'Preenchido automaticamente'; // CORREÇÃO: Limpa a mensagem fantasma de erro
+                    return true; 
+                } else { 
+                    nameInput.value = ''; 
+                    nameInput.placeholder = 'RGF não encontrado'; 
+                    return false; 
+                }
+            } catch (error) { 
+                nameInput.value = ''; 
+                nameInput.placeholder = 'Erro'; 
+                return false; 
+            }
         }
 
         function displayExistingOrder(orderData) {
@@ -636,23 +647,29 @@
                 existingContainer.classList.add('hidden');
                 publicReportBtnContainer.classList.add('hidden');
                 
-                if (currentDayIndex >= weekDays.length) {
-                    wizardContainer.classList.add('hidden');
-                    submitBtnContainer.classList.remove('hidden');
-                } else {
-                    wizardContainer.classList.remove('hidden');
-                    submitBtnContainer.classList.add('hidden');
-                }
+                // CORREÇÃO: Garante que o questionário e os botões recomeçam do zero ao introduzir um novo RGF
+                currentDayIndex = 0;
+                userChoices = [];
+                renderWizardStep(0);
+                
+                wizardContainer.classList.remove('hidden');
+                submitBtnContainer.classList.add('hidden');
+                
             } catch (error) { console.error(error); }
         }
         
         function renderWizardStep(index) {
             const wizardContainer = document.getElementById('order-wizard-container');
+            const submitBtnContainer = document.getElementById('submitButtonContainer');
+            
             if (index >= weekDays.length) {
                 wizardContainer.classList.add('hidden'); 
-                document.getElementById('submitButtonContainer').classList.remove('hidden');
+                submitBtnContainer.classList.remove('hidden');
                 return;
             }
+
+            wizardContainer.classList.remove('hidden');
+            submitBtnContainer.classList.add('hidden');
 
             const day = weekDays[index];
             const dayId = getDayId(day);
@@ -875,7 +892,8 @@
             const orderSection = document.getElementById('order-section');
             const publicReportBtnContainer = document.getElementById('publicReportButtonContainer');
             
-            const isValidUser = name && rgf && nameInput.placeholder !== 'RGF não encontrado';
+            // CORREÇÃO: Apenas verifica se existe um nome e um RGF válidos, sem depender do texto do placeholder
+            const isValidUser = name && rgf;
 
             if (isValidUser && !autoSwitchDone && currentMenuData.nextMenuImageBase64) {
                 try {
@@ -1083,14 +1101,14 @@
                 // Formatação exata igual ao PDF (Fundo branco, texto preto, sem cores, largura forçada para permitir zoom)
                 let html = `
                     <div style="background-color: white; color: black; padding: 20px; min-width: 700px; font-family: 'Poppins', sans-serif;">
-                        <h1 style="font-size: 18pt; text-align: center; margin-bottom: 20px; font-weight: bold;">Regional Quatinga</h1>
+                        <h1 style="font-size: 18pt; text-align: center; margin-bottom: 15px; font-weight: 600;">Regional Quatinga</h1>
                 `;
 
                 weekDays.forEach(day => {
                     const dayId = getDayId(day);
                     if (holidays.includes(dayId)) return;
 
-                    let tableHTML = `<div style="margin-bottom: 15px; page-break-inside: avoid;"><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr><th style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold; width: 15%;">RGF</th><th style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold; width: 60%;">NOME</th><th style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold; width: 25%;">${day}</th></tr></thead><tbody>`;
+                    let tableHTML = `<div style="margin-bottom: 12px; page-break-inside: avoid;"><table style="width: 100%; border-collapse: collapse; font-size: 9pt;"><thead><tr><th style="border: 1px solid #999; padding: 5px; text-align: left; background-color: white; font-weight: 600; width: 15%;">RGF</th><th style="border: 1px solid #999; padding: 5px; text-align: left; background-color: white; font-weight: 600; width: 60%;">NOME</th><th style="border: 1px solid #999; padding: 5px; text-align: left; background-color: white; font-weight: bold; width: 25%;">${day}</th></tr></thead><tbody>`;
 
                     const dailyOrders = orders.filter(orderDoc => { const data = orderDoc.data(); return data[dayId] && data[dayId] !== 'FERIADO'; });
 
@@ -1103,7 +1121,7 @@
                         if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
                         if (notes) choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
 
-                        tableHTML += `<tr><td style="border: 1px solid #000; padding: 6px; text-align: left; font-family: monospace;">${order.employeeRGF || 'N/A'}</td><td style="border: 1px solid #000; padding: 6px; text-align: left;">${order.employeeName}</td><td style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold;">${choiceHTML}</td></tr>`;
+                        tableHTML += `<tr><td style="border: 1px solid #999; padding: 5px; text-align: left; font-weight: 400;">${order.employeeRGF || 'N/A'}</td><td style="border: 1px solid #999; padding: 5px; text-align: left; font-weight: 400;">${order.employeeName}</td><td style="border: 1px solid #999; padding: 5px; text-align: left; font-weight: 400;">${choiceHTML}</td></tr>`;
                     });
                     tableHTML += '</tbody></table></div>';
                     html += tableHTML;
