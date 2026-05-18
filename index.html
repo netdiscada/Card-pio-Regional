@@ -14,25 +14,31 @@
 
     <!-- Prevenção de Piscar Branco (FOUC) no Modo Noturno -->
     <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
         }
     </script>
     
-    <!-- Tailwind CSS CDN com configuração para Dark Mode -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
 
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bibliotecas Externas: Compressão de Imagem e Cropper.js -->
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <style>
         html { scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; }
@@ -59,6 +65,11 @@
         .wizard-btn:active { transform: scale(0.98); }
         .dark .wizard-btn:active { background-color: #1e3a8a; }
         html:not(.dark) .wizard-btn:active { background-color: #eff6ff; }
+
+        /* Estilos do Cropper para modal */
+        #cropper-container { max-height: 50vh; width: 100%; display: flex; justify-content: center; align-items: center; background-color: #f3f4f6; }
+        .dark #cropper-container { background-color: #18181b; }
+        #cropper-image { display: block; max-width: 100%; max-height: 100%; }
 
         #print-report { display: none; }
         @media print {
@@ -125,10 +136,17 @@
                 </div>
 
                 <div id="order-section" class="hidden scroll-mt-2">
-                    <!-- Imagem Gigante Novamente -->
-                    <div id="menu-image-container" class="mb-4 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 p-1 relative transition-colors">
-                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto max-h-[75vh] object-contain cursor-pointer rounded-lg bg-white dark:bg-zinc-900">
-                        <div class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full pointer-events-none shadow-sm backdrop-blur-md">
+                    <!-- Imagem Gigante com Spinner -->
+                    <div id="menu-image-container" class="mb-4 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 p-1 relative transition-colors min-h-[200px] flex items-center justify-center overflow-hidden">
+                        
+                        <!-- Ícone de Carregamento (Spinner) -->
+                        <div id="menu-image-loading" class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-zinc-900 z-0 rounded-lg">
+                            <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
+                        </div>
+
+                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto max-h-[75vh] object-contain cursor-pointer rounded-lg bg-white dark:bg-zinc-900 relative z-10 opacity-0 transition-opacity duration-300">
+                        
+                        <div class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full pointer-events-none shadow-sm backdrop-blur-md z-20">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                         </div>
                     </div>
@@ -142,7 +160,7 @@
                             <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800 dark:text-gray-100">Pedido Registado!</h3>
                             <p class="text-gray-600 dark:text-gray-400 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
                         </div>
-                        <div id="existing-order-details" class="space-y-3">
+                        <div id="existing-order-details" class="space-y-3 mb-4">
                             <!-- Preenchido via JS -->
                         </div>
                     </div>
@@ -163,6 +181,14 @@
                     <div id="submitButtonContainer" class="hidden text-center mt-2 mb-6">
                         <button id="openConfirmationModal" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 dark:hover:bg-green-500 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
                     </div>
+                </div>
+
+                <!-- Botão de Relatório Público -->
+                <div id="publicReportButtonContainer" class="hidden mt-8 pt-6 border-t border-gray-200 dark:border-zinc-800 text-center fade-in">
+                    <button id="btn-view-public-report" class="text-blue-600 dark:text-blue-400 font-bold hover:text-blue-800 dark:hover:text-blue-300 hover:underline flex items-center justify-center gap-2 mx-auto transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Visualizar Relatório da Semana
+                    </button>
                 </div>
                 
                 <div id="guidanceSection" class="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-400 p-4 rounded-md mb-6 transition-colors"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
@@ -282,6 +308,39 @@
     <!-- Modals -->
     <div id="image-zoom-modal" class="modal-overlay hidden no-print cursor-zoom-out"><div class="modal-content"><img id="zoomed-image" src=""></div></div>
     
+    <!-- Modal do Relatório Público (Acesso para os funcionários) -->
+    <div id="public-report-modal" class="modal-overlay hidden no-print">
+        <div class="modal-content w-full max-w-4xl h-[90vh] flex flex-col p-4 sm:p-6 !max-h-[95vh]">
+            <div class="flex justify-between items-center mb-4 shrink-0">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Relatório da Semana</h2>
+                <button type="button" class="cancel-modal-btn text-gray-500 hover:text-red-500 text-3xl font-bold leading-none">&times;</button>
+            </div>
+            <!-- Área de conteúdo scrollável onde a tabela HTML será gerada -->
+            <div class="flex-1 overflow-auto bg-gray-50 dark:bg-zinc-950 rounded-lg border border-gray-200 dark:border-zinc-700 p-2 sm:p-4 text-sm sm:text-base transition-colors" id="public-report-content">
+                <!-- Tabela inserida via JS -->
+            </div>
+            <div class="mt-4 text-center shrink-0">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Use os dedos para ampliar a tabela se necessário 🔍</p>
+                <button type="button" class="cancel-modal-btn mt-3 px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors w-full sm:w-auto">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Recorte de Imagem (Cropper.js) -->
+    <div id="cropper-modal" class="modal-overlay hidden no-print">
+        <div class="modal-content w-full max-w-2xl h-[80vh] flex flex-col p-4 sm:p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white shrink-0">Recortar Imagem do Cardápio</h2>
+            <div id="cropper-container" class="flex-1 min-h-0 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700">
+                <img id="cropper-image" src="" alt="Cortar">
+            </div>
+            <p class="text-xs text-center text-gray-500 dark:text-gray-400 mt-2 shrink-0">Arraste as bordas para focar apenas na área útil do cardápio.</p>
+            <div class="mt-4 flex justify-end space-x-3 shrink-0">
+                <button type="button" id="cancel-crop-btn" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button>
+                <button type="button" id="confirm-crop-btn" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">✂️ Confirmar Recorte</button>
+            </div>
+        </div>
+    </div>
+    
     <div id="edit-order-modal" class="modal-overlay hidden no-print">
         <div class="modal-content w-full max-w-lg">
             <h2 class="text-2xl font-bold mb-4">Editar Pedido</h2>
@@ -302,7 +361,7 @@
     
     <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700 dark:text-gray-300">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-100 dark:bg-zinc-800 transition-colors" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Salvar Alterações</button></div></form></div></div>
     
-    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600 dark:text-gray-400">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-6 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 dark:bg-green-600 text-white font-bold rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition-colors">Confirmar e Enviar</button></div></div></div>
+    <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600 dark:text-gray-400">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" id="btn-edit-wizard" class="px-6 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 dark:bg-green-600 text-white font-bold rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition-colors">Confirmar e Enviar</button></div></div></div>
     
     <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Acesso Administrativo</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Entrar</button></div></form></div></div>
     
@@ -361,7 +420,10 @@
         let tempOrderData = {};
         let userChoices = [];
         let currentDayIndex = 0;
-        let fileToUpload = null;
+        
+        // Variaveis do Cropper
+        let cropperInstance = null;
+        let finalImageBase64 = null;
         
         function getDayId(dayName) { return dayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z]/g, "").toLowerCase(); }
 
@@ -373,7 +435,7 @@
                     short_name: "Cardápio",
                     start_url: window.location.href,
                     display: "standalone",
-                    background_color: "#000000", // Adaptado para fundo preto no load do app
+                    background_color: "#000000", 
                     theme_color: "#2563eb",
                     icons: [{
                         src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle' fill='white'%3E🍲%3C/text%3E%3C/svg%3E",
@@ -419,6 +481,19 @@
                 modal.classList.add('hidden');
             });
         }
+
+        // --- SISTEMA ROBUSTO DE CARREGAMENTO DE IMAGEM ---
+        function handleImageLoad() {
+            const img = document.getElementById('menu-image');
+            const loading = document.getElementById('menu-image-loading');
+            if (img && img.src && img.src !== window.location.href) {
+                img.classList.remove('opacity-0');
+                if (loading) loading.classList.add('hidden');
+            }
+        }
+
+        // Esconde o spinner assim que a imagem for carregada nativamente
+        document.getElementById('menu-image').addEventListener('load', handleImageLoad);
 
         async function loadAndRenderEmployees() {
             if (!auth.currentUser) return;
@@ -533,6 +608,7 @@
                 const wizardContainer = document.getElementById('order-wizard-container');
                 const existingContainer = document.getElementById('existing-order-container');
                 const submitBtnContainer = document.getElementById('submitButtonContainer');
+                const publicReportBtnContainer = document.getElementById('publicReportButtonContainer');
                 
                 let latestOrder = null;
                 let latestTime = 0;
@@ -553,10 +629,13 @@
                     wizardContainer.classList.add('hidden');
                     submitBtnContainer.classList.add('hidden');
                     existingContainer.classList.remove('hidden');
+                    publicReportBtnContainer.classList.remove('hidden'); 
                     return;
                 }
                 
                 existingContainer.classList.add('hidden');
+                publicReportBtnContainer.classList.add('hidden');
+                
                 if (currentDayIndex >= weekDays.length) {
                     wizardContainer.classList.add('hidden');
                     submitBtnContainer.classList.remove('hidden');
@@ -761,14 +840,26 @@
             }
 
             const menuImage = document.getElementById('menu-image');
+            const menuLoading = document.getElementById('menu-image-loading');
+            
             if (menuImage) {
                 if (weeklyMenu.menuImageBase64) {
-                    menuImage.src = weeklyMenu.menuImageBase64;
+                    menuImage.classList.add('opacity-0'); 
+                    menuLoading.classList.remove('hidden');
+                    
+                    // Se o src for o mesmo, o load event não dispara nativamente. Forçamos a exibição:
+                    if (menuImage.src === weeklyMenu.menuImageBase64) {
+                        setTimeout(handleImageLoad, 50);
+                    } else {
+                        menuImage.src = weeklyMenu.menuImageBase64;
+                    }
+                    
                     currentDayIndex = 0;
                     userChoices = [];
                     renderWizardStep(0);
                 } else {
                     menuImage.src = '';
+                    menuLoading.classList.add('hidden');
                 }
             }
             validateForm();
@@ -782,6 +873,7 @@
             const rgf = rgfInput?.value.trim();
             const guidanceSection = document.getElementById('guidanceSection');
             const orderSection = document.getElementById('order-section');
+            const publicReportBtnContainer = document.getElementById('publicReportButtonContainer');
             
             const isValidUser = name && rgf && nameInput.placeholder !== 'RGF não encontrado';
 
@@ -804,6 +896,7 @@
             if (weeklyMenu.menuImageBase64) {
                 if (!isValidUser) {
                     orderSection.classList.add('hidden');
+                    publicReportBtnContainer.classList.add('hidden');
                     guidanceSection.classList.remove('hidden');
                     document.getElementById('guidanceText').textContent = 'Por favor, insira o seu RGF para começar.';
                 } else {
@@ -811,13 +904,16 @@
                     orderSection.classList.remove('hidden');
                     await checkExistingOrder(rgf); 
                     
-                    // Auto-Scroll suave para mostrar a imagem e botões focados
-                    setTimeout(() => {
-                        document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 150);
+                    // Auto-Scroll suave APENAS se o utilizador estiver ativamente a escrever no RGF (evita bugs no reload)
+                    if (document.activeElement === rgfInput) {
+                        setTimeout(() => {
+                            document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 150);
+                    }
                 }
             } else {
                 orderSection.classList.add('hidden');
+                publicReportBtnContainer.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
                 document.getElementById('guidanceText').textContent = 'Nenhum cardápio disponível para a seleção atual.';
             }
@@ -950,6 +1046,77 @@
             container.innerHTML = tableHTML;
         }
 
+        // --- SISTEMA DE RELATÓRIO PÚBLICO (SOMENTE LEITURA PARA FUNCIONÁRIOS) ---
+        async function openPublicReportModal() {
+            if (!auth.currentUser) return;
+            const container = document.getElementById('public-report-content');
+            container.innerHTML = '<p class="text-center text-gray-500 py-10">A carregar os dados da semana...</p>';
+            document.getElementById('public-report-modal').classList.remove('hidden');
+
+            try {
+                // Busca de forma independente todos os pedidos da semana ativa
+                const q = query(collection(db, "pedidosDaSemana"), where("isNextWeek", "==", viewingNextWeek));
+                const snapshot = await getDocs(q);
+
+                const latestOrdersMap = new Map();
+                snapshot.forEach(doc => {
+                    const orderData = doc.data();
+                    if (orderData.employeeRGF) {
+                        const timestamp = orderData.timestamp ? orderData.timestamp.toMillis() : 0;
+                        if (!latestOrdersMap.has(orderData.employeeRGF) || timestamp > latestOrdersMap.get(orderData.employeeRGF).timestamp) {
+                            latestOrdersMap.set(orderData.employeeRGF, { doc: doc, timestamp: timestamp });
+                        }
+                    }
+                });
+
+                const orders = Array.from(latestOrdersMap.values())
+                    .map(item => item.doc)
+                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-10">Ainda não existem pedidos registados para esta semana.</p>';
+                    return;
+                }
+
+                const holidays = viewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
+                
+                // Formatação exata igual ao PDF (Fundo branco, texto preto, sem cores, largura forçada para permitir zoom)
+                let html = `
+                    <div style="background-color: white; color: black; padding: 20px; min-width: 700px; font-family: 'Poppins', sans-serif;">
+                        <h1 style="font-size: 18pt; text-align: center; margin-bottom: 20px; font-weight: bold;">Regional Quatinga</h1>
+                `;
+
+                weekDays.forEach(day => {
+                    const dayId = getDayId(day);
+                    if (holidays.includes(dayId)) return;
+
+                    let tableHTML = `<div style="margin-bottom: 15px; page-break-inside: avoid;"><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr><th style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold; width: 15%;">RGF</th><th style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold; width: 60%;">NOME</th><th style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold; width: 25%;">${day}</th></tr></thead><tbody>`;
+
+                    const dailyOrders = orders.filter(orderDoc => { const data = orderDoc.data(); return data[dayId] && data[dayId] !== 'FERIADO'; });
+
+                    dailyOrders.forEach(orderDoc => {
+                        const order = orderDoc.data();
+                        let choice = (order[dayId] || '').toUpperCase();
+                        const notes = order[`${dayId}_notes`];
+                        let choiceHTML = choice;
+                        if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
+                        if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
+                        if (notes) choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
+
+                        tableHTML += `<tr><td style="border: 1px solid #000; padding: 6px; text-align: left; font-family: monospace;">${order.employeeRGF || 'N/A'}</td><td style="border: 1px solid #000; padding: 6px; text-align: left;">${order.employeeName}</td><td style="border: 1px solid #000; padding: 6px; text-align: left; font-weight: bold;">${choiceHTML}</td></tr>`;
+                    });
+                    tableHTML += '</tbody></table></div>';
+                    html += tableHTML;
+                });
+                
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error("Erro ao carregar relatório:", error);
+                container.innerHTML = '<p class="text-center text-red-500 py-10">Ocorreu um erro ao carregar o relatório.</p>';
+            }
+        }
+
         function openEditOrderModal(orderId) {
             const orderDoc = allOrders.find(doc => doc.id === orderId);
             if (!orderDoc) return;
@@ -1022,39 +1189,127 @@
             window.print();
         }
 
-        function handleImageUpload(event) {
+        // --- SISTEMA DE RECORTE DE IMAGEM (CROPPER.JS) ---
+        document.getElementById('imageUpload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (!file) return;
-            fileToUpload = file;
+            
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById('imagePreview').src = e.target.result;
-                document.getElementById('imagePreview').classList.remove('hidden');
-                document.getElementById('uploadImageBtn').disabled = false;
+                const cropperImage = document.getElementById('cropper-image');
+                cropperImage.src = e.target.result;
+                document.getElementById('cropper-modal').classList.remove('hidden');
+                
+                if (cropperInstance) cropperInstance.destroy();
+                
+                cropperInstance = new Cropper(cropperImage, {
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.95,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
             };
             reader.readAsDataURL(file);
-        }
-
-        const toBase64 = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
         });
 
-        async function uploadNextWeekMenu() {
-            if (!auth.currentUser) return;
-            if (!fileToUpload) { showToast("Nenhuma imagem selecionada.", "error"); return; }
+        // Quando cancela o recorte, reseta o input
+        document.getElementById('cancel-crop-btn').addEventListener('click', () => {
+            document.getElementById('cropper-modal').classList.add('hidden');
+            document.getElementById('imageUpload').value = ''; 
+            finalImageBase64 = null;
+            if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+        });
+
+        // QUANDO CONFIRMA O RECORTE
+        document.getElementById('confirm-crop-btn').addEventListener('click', async () => {
+            if (!cropperInstance) return;
             
-            const selectedHolidays = Array.from(document.querySelectorAll('.holiday-checkbox:checked')).map(cb => cb.value);
-            const uploadBtn = document.getElementById('uploadImageBtn');
-            uploadBtn.disabled = true; uploadBtn.textContent = "A enviar...";
-
+            const btn = document.getElementById('confirm-crop-btn');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "⏳ Processando...";
+            
             try {
-                const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024 };
-                const compressedFile = await imageCompression(fileToUpload, options);
-                const base64String = await toBase64(compressedFile);
+                const canvas = cropperInstance.getCroppedCanvas({
+                    maxWidth: 1200,
+                    maxHeight: 1200,
+                    fillColor: '#fff', 
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
 
+                if (!canvas) throw new Error("Falha ao gerar o canvas.");
+                
+                // Extrai a imagem em alta velocidade
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        showToast("Erro no recorte.", "error");
+                        btn.disabled = false; btn.textContent = originalText;
+                        return;
+                    }
+                    
+                    try {
+                        // Compressão RIGOROSA na hora do corte para garantir a passagem no Firebase (< 0.5MB)
+                        const options = { maxSizeMB: 0.45, maxWidthOrHeight: 1200, useWebWorker: true };
+                        const compressFn = window.imageCompression || imageCompression;
+                        const compressedBlob = await compressFn(blob, options);
+                        
+                        const reader = new FileReader();
+                        reader.readAsDataURL(compressedBlob);
+                        reader.onloadend = () => {
+                            finalImageBase64 = reader.result;
+                            
+                            document.getElementById('imagePreview').src = finalImageBase64;
+                            document.getElementById('imagePreview').classList.remove('hidden');
+                            document.getElementById('uploadImageBtn').disabled = false;
+                            
+                            document.getElementById('cropper-modal').classList.add('hidden');
+                            cropperInstance.destroy();
+                            cropperInstance = null;
+                            
+                            btn.disabled = false;
+                            btn.textContent = originalText;
+                            showToast("Imagem processada e pronta!", "success");
+                        };
+                    } catch (compErr) {
+                        console.error(compErr);
+                        showToast("Falha na compressão.", "error");
+                        btn.disabled = false; btn.textContent = originalText;
+                    }
+                }, 'image/jpeg', 0.85);
+                
+            } catch (err) {
+                console.error("Erro no Cropper:", err);
+                showToast("Erro ao processar imagem.", "error");
+                btn.disabled = false; btn.textContent = originalText;
+            }
+        });
+
+        // ENVIAR O CARDÁPIO (BOTÃO PRINCIPAL)
+        document.getElementById('uploadImageBtn').addEventListener('click', async () => {
+            const uploadBtn = document.getElementById('uploadImageBtn');
+            
+            try {
+                if (!auth.currentUser) {
+                    showToast("Sessão expirada. Recarregue a página.", "error");
+                    return;
+                }
+                if (!finalImageBase64) { 
+                    showToast("Você precisa selecionar e recortar uma imagem primeiro.", "error"); 
+                    return; 
+                }
+                
+                uploadBtn.disabled = true; 
+                uploadBtn.innerHTML = "⏳ Salvando no banco de dados...";
+
+                const selectedHolidays = Array.from(document.querySelectorAll('.holiday-checkbox:checked')).map(cb => cb.value);
+                
                 const now = new Date();
                 let daysUntilMonday = (1 + 7 - now.getDay()) % 7;
                 if (daysUntilMonday === 0) daysUntilMonday = 7; 
@@ -1063,7 +1318,7 @@
                 nextMonday.setHours(0, 0, 0, 0); 
 
                 await setDoc(menuDocRef, { 
-                    nextMenuImageBase64: base64String,
+                    nextMenuImageBase64: finalImageBase64,
                     nextHolidays: selectedHolidays,
                     targetRotationDate: nextMonday.getTime() 
                 }, { merge: true });
@@ -1071,11 +1326,22 @@
                 showToast("Cardápio da Próxima Semana salvo e disponível!", "success");
                 document.getElementById('whatsapp-notification-container').classList.remove('hidden');
                 document.getElementById('imageUpload').value = '';
-                document.getElementById('imagePreview').classList.add('hidden');
-                fileToUpload = null;
-            } catch (error) { showToast("Falha ao guardar. Tente novamente.", "error"); } 
-            finally { uploadBtn.disabled = true; uploadBtn.textContent = "Salvar Cardápio para a Próxima Semana"; }
-        }
+                
+                finalImageBase64 = null; // Limpa variável para o próximo upload, mas mantém a tela pra visualização.
+                uploadBtn.innerHTML = "✅ Salvo com sucesso!";
+                
+            } catch (error) { 
+                console.error("Erro CRÍTICO no salvamento:", error);
+                uploadBtn.disabled = false; 
+                uploadBtn.textContent = "Tentar Salvar Novamente"; 
+                
+                if (error.code === 'resource-exhausted' || (error.message && error.message.includes('large'))) {
+                    showToast("Erro: A imagem ainda está muito pesada para o banco de dados.", "error");
+                } else {
+                    showToast("Falha na conexão. Tente novamente.", "error"); 
+                }
+            } 
+        });
 
         async function turnWeek() {
             showCustomConfirm("Tem certeza? O cardápio e os pedidos da 'Próxima Semana' substituirão integralmente a 'Semana Atual'.", async () => {
@@ -1136,26 +1402,36 @@
 
         // Lógica de Troca do Tema Noturno
         const darkModeToggleBtn = document.getElementById('darkModeToggle');
+        function updateDarkModeButton() {
+            if (document.documentElement.classList.contains('dark')) {
+                darkModeToggleBtn.innerHTML = '☀️ Modo Claro';
+            } else {
+                darkModeToggleBtn.innerHTML = '🌙 Modo Noturno';
+            }
+        }
+        updateDarkModeButton();
+
         darkModeToggleBtn.addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
             if (document.documentElement.classList.contains('dark')) {
                 localStorage.setItem('theme', 'dark');
-                darkModeToggleBtn.innerHTML = '☀️ Modo Claro';
             } else {
                 localStorage.setItem('theme', 'light');
-                darkModeToggleBtn.innerHTML = '🌙 Modo Noturno';
             }
+            updateDarkModeButton();
         });
-        
-        // Ajusta o texto inicial do botão baseado no carregamento do <head>
-        if (document.documentElement.classList.contains('dark')) {
-            darkModeToggleBtn.innerHTML = '☀️ Modo Claro';
-        }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                if (user.uid === APP_CONFIG.ADMIN_UID) { showAdminView(); } 
-                else { showUserView(); }
+                if (user.uid === APP_CONFIG.ADMIN_UID) {
+                    if (localStorage.getItem('currentAppView') === 'admin') {
+                        showAdminView();
+                    } else {
+                        showUserView();
+                    }
+                } else {
+                    showUserView(); 
+                }
             } else {
                 if (!isLoggingInAsAdmin) {
                     try {
@@ -1173,9 +1449,10 @@
             const containerOrders = document.getElementById('ordersTableContainer');
             if (containerOrders) containerOrders.innerHTML = '<p class="text-gray-500">A carregar pedidos...</p>';
 
-            document.getElementById('user-view').classList.remove('hidden');
+            // Garante que o painel ADM é totalmente escondido
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
+            document.getElementById('user-view').classList.remove('hidden');
             
             const rgfInput = document.getElementById('employeeRGF');
             if (!rgfInput.value && localStorage.getItem('employeeRGF')) { rgfInput.value = localStorage.getItem('employeeRGF'); }
@@ -1188,6 +1465,8 @@
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
+            
+            localStorage.setItem('currentAppView', 'admin');
             
             loadAndDisplayMenu(); 
             loadAdminData();
@@ -1215,6 +1494,7 @@
                      document.getElementById('admin-login-modal').classList.add('hidden');
                      document.getElementById('adminEmail').value = '';
                      document.getElementById('adminPassword').value = '';
+                     localStorage.setItem('currentAppView', 'admin');
                      showAdminView();
                 }
             } catch (error) { 
@@ -1227,7 +1507,12 @@
         }
 
         async function handleAdminLogout() {
-            try { await signOut(auth); showToast("Saindo do painel...", 'info'); showUserView(); } 
+            try { 
+                await signOut(auth); 
+                localStorage.setItem('currentAppView', 'user');
+                showToast("Saindo do painel...", 'info'); 
+                showUserView(); 
+            } 
             catch (error) { showToast("Erro ao fazer logout.", 'error'); }
         }
 
@@ -1264,7 +1549,9 @@
                 clearTimeout(rgfDebounceTimeout);
                 rgfDebounceTimeout = setTimeout(async () => {
                     autoSwitchDone = false;
-                    await findEmployeeByRGF(rgfInput.value.trim()); 
+                    const val = rgfInput.value.trim();
+                    localStorage.setItem('employeeRGF', val);
+                    await findEmployeeByRGF(val); 
                     await validateForm(); 
                 }, 400); 
             });
@@ -1274,14 +1561,38 @@
             document.getElementById('openConfirmationModal').addEventListener('click', openConfirmationModal);
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
             
+            // Botão "Editar" dentro do formulário de revisão (Wizard)
+            document.getElementById('btn-edit-wizard').addEventListener('click', () => {
+                document.getElementById('confirmation-modal').classList.add('hidden');
+                currentDayIndex = 0;
+                userChoices = [];
+                document.getElementById('submitButtonContainer').classList.add('hidden');
+                document.getElementById('order-wizard-container').classList.remove('hidden');
+                renderWizardStep(0);
+            });
+
+            // Botão para relatorio publico do usuario
+            document.getElementById('btn-view-public-report').addEventListener('click', openPublicReportModal);
+
             document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
                 btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
             });
 
-            document.getElementById('switchToAdmin').addEventListener('click', () => document.getElementById('admin-login-modal').classList.remove('hidden'));
+            document.getElementById('switchToAdmin').addEventListener('click', () => {
+                if (auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID) {
+                    localStorage.setItem('currentAppView', 'admin');
+                    showAdminView();
+                } else {
+                    document.getElementById('admin-login-modal').classList.remove('hidden');
+                }
+            });
+            
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
             document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
-            document.getElementById('switchToUserFromAdmin').addEventListener('click', showUserView);
+            document.getElementById('switchToUserFromAdmin').addEventListener('click', () => {
+                localStorage.setItem('currentAppView', 'user');
+                showUserView();
+            });
             
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
@@ -1324,9 +1635,6 @@
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
             document.getElementById('generateReportBtn').addEventListener('click', generateAndPrintReport);
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
-            
-            document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
-            document.getElementById('uploadImageBtn').addEventListener('click', uploadNextWeekMenu);
             
             document.getElementById('deleteNextWeekBtn')?.addEventListener('click', async () => {
                 showCustomConfirm("Tem a certeza? Isso vai apagar o cardápio da próxima semana e todos os pedidos já feitos antecipadamente.", async () => {
