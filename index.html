@@ -420,9 +420,14 @@
                 document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
 
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('./sw.js')
-                        .then(() => console.log('Service Worker Registrado e Offline Habilitado!'))
-                        .catch(err => console.log('Aguardando criação do sw.js no servidor...', err));
+                    // Previne o erro no ambiente de teste/preview. O SW só será instalado em HTTP/HTTPS (GitHub)
+                    if (window.location.protocol === 'https:' || window.location.protocol === 'http:') {
+                        navigator.serviceWorker.register('./sw.js')
+                            .then(() => console.log('Service Worker Registrado e Offline Habilitado!'))
+                            .catch(err => console.log('Aguardando criação do sw.js no servidor...', err));
+                    } else {
+                        console.log('Ambiente de teste isolado detectado. O cache offline será ativado assim que for para o GitHub.');
+                    }
                 }
             } catch (e) { console.log("PWA setup falhou"); }
         }
