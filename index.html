@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card谩pio Quatinga</title>
+    <title>Cardápio Quatinga</title>
     
-    <!-- PWA / Web App Tags (Modo Tela Cheia no Celular) -->
+    <!-- PWA / Web App Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2563eb">
     <link rel="manifest" id="pwa-manifest">
 
-    <!-- Preven莽茫o de Piscar Branco (FOUC) no Modo Noturno -->
+    <!-- Prevenção de Piscar Branco -->
     <script>
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
@@ -34,11 +34,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas Externas: Compress茫o de Imagem, Cropper.js e HTML2PDF -->
+    <!-- Bibliotecas Externas -->
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <!-- Nova Biblioteca para gerar o PDF em segundo plano -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -46,11 +45,9 @@
         body { font-family: 'Poppins', sans-serif; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .no-print { }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
         .modal-content { padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); max-height: 90vh; overflow-y: auto; width: 90%; max-width: 500px; }
         
-        /* Ajustes espec铆ficos para Dark Mode nativo */
         html.dark { background-color: #000000; color: #f4f4f5; }
         .dark .modal-content { background-color: #09090b; border: 1px solid #27272a; color: #f4f4f5; }
         html:not(.dark) .modal-content { background-color: white; color: #1f2937; }
@@ -68,16 +65,25 @@
         .dark .wizard-btn:active { background-color: #1e3a8a; }
         html:not(.dark) .wizard-btn:active { background-color: #eff6ff; }
 
-        /* Estilos do Cropper para modal */
         #cropper-container { max-height: 50vh; width: 100%; display: flex; justify-content: center; align-items: center; background-color: #f3f4f6; }
         .dark #cropper-container { background-color: #18181b; }
         #cropper-image { display: block; max-width: 100%; max-height: 100%; }
 
-        /* Novo estilo para a 谩rea que ser谩 gerada em PDF e n茫o mais via window.print */
-        #print-report { display: none; background-color: white; color: black; padding: 20px; width: 210mm; /* Largura A4 aprox */ }
-        #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; color: black;}
+        /* CORREÇÃO DO PDF EM BRANCO: Oculto visualmente, mas fisicamente renderizado */
+        #print-report { 
+            position: absolute; 
+            left: -9999px; 
+            top: 0; 
+            display: block; 
+            width: 210mm; /* Largura A4 aprox */ 
+            background-color: white !important; 
+            color: black !important; 
+            padding: 20px; 
+            z-index: -10;
+        }
+        #print-report h1 { font-size: 18pt; text-align: center; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-weight: 600; color: black !important;}
         .report-day-section { margin-bottom: 15px; page-break-inside: avoid; }
-        .report-table { width: 100%; border-collapse: collapse; font-size: 10pt; color: black; }
+        .report-table { width: 100%; border-collapse: collapse; font-size: 10pt; color: black !important; }
         #print-report th, #print-report td { border: 1px solid #666; padding: 6px; text-align: left; }
         #print-report th { background-color: #f3f4f6; font-weight: bold; }
         #print-report .rgf-col { width: 15%; }
@@ -89,39 +95,41 @@
         #app-toast.success { background-color: #22c55e; }
         #app-toast.error { background-color: #ef4444; }
         #app-toast.info { background-color: #3b82f6; }
+        
+        @media print {
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-black text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <!-- Bot玫es Flutuantes Superiores -->
+    <!-- Botões Flutuantes Superiores -->
     <div class="absolute top-0 left-0 right-0 w-full z-50 p-2 flex justify-between no-print pointer-events-none">
         <button id="darkModeToggle" class="pointer-events-auto text-xs bg-white/90 dark:bg-zinc-900/90 text-gray-600 dark:text-gray-300 font-bold py-1 px-3 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-            馃寵 Modo Noturno
+            🌙 Modo Noturno
         </button>
         <button id="switchToAdmin" class="pointer-events-auto text-xs bg-white/90 dark:bg-zinc-900/90 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 font-bold py-1 px-3 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-            鈿欙笍 ADM
+            ⚙️ ADM
         </button>
     </div>
 
     <div id="app-container" class="container mx-auto max-w-4xl p-2 sm:p-6 pb-20 mt-8 sm:mt-6">
         
-        <!-- ================= VIS脙O DO USU脕RIO ================= -->
+        <!-- ================= VISÃO DO USUÁRIO ================= -->
         <div id="user-view" class="no-print">
             <div id="form-container">
-                <!-- T铆tulo do Site que rola junto com a tela -->
                 <div class="text-center mb-6 mt-4">
-                    <h1 class="font-brand text-4xl text-blue-600 dark:text-blue-500 drop-shadow-sm" style="font-family: 'Lobster Two', cursive;">Del铆cias Urbanas</h1>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1 font-medium">O seu card谩pio est谩 servido!</p>
+                    <h1 class="font-brand text-4xl text-blue-600 dark:text-blue-500 drop-shadow-sm" style="font-family: 'Lobster Two', cursive;">Delícias Urbanas</h1>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1 font-medium">O seu cardápio está servido!</p>
                 </div>
 
-                <!-- Alternador de Semana para o Usu谩rio -->
                 <div id="week-toggle-container" class="hidden mb-4 bg-white dark:bg-zinc-900 p-1 rounded-xl shadow-sm flex flex-col sm:flex-row gap-1 border border-gray-100 dark:border-zinc-800 fade-in">
-                    <button id="btn-current-week" class="flex-1 px-2 py-2 bg-blue-600 text-white rounded-lg font-bold shadow transition-colors text-sm">馃嵅 Desta Semana</button>
-                    <button id="btn-next-week" class="flex-1 px-2 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg font-bold transition-colors border border-gray-200 dark:border-zinc-700 text-sm">馃搮 Fazer Pedido (Pr贸x.)</button>
+                    <button id="btn-current-week" class="flex-1 px-2 py-2 bg-blue-600 text-white rounded-lg font-bold shadow transition-colors text-sm">🍲 Desta Semana</button>
+                    <button id="btn-next-week" class="flex-1 px-2 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg font-bold transition-colors border border-gray-200 dark:border-zinc-700 text-sm">📅 Fazer Pedido (Próx.)</button>
                 </div>
 
                 <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-4 sm:p-6 mb-4 border border-gray-100 dark:border-zinc-800 transition-colors">
-                    <h2 class="block text-md font-semibold text-gray-800 dark:text-gray-100 mb-3">馃懁 1. Identifica莽茫o</h2>
+                    <h2 class="block text-md font-semibold text-gray-800 dark:text-gray-100 mb-3">👤 1. Identificação</h2>
                     <div class="grid sm:grid-cols-2 gap-3">
                         <div>
                             <input type="text" id="employeeRGF" placeholder="Digite o seu RGF" class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg font-bold transition-colors">
@@ -133,124 +141,108 @@
                 </div>
 
                 <div id="order-section" class="hidden scroll-mt-2">
-                    <!-- Imagem Gigante com Spinner -->
                     <div id="menu-image-container" class="mb-4 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 p-1 relative transition-colors min-h-[200px] flex items-center justify-center overflow-hidden">
-                        
-                        <!-- 脥cone de Carregamento (Spinner) -->
                         <div id="menu-image-loading" class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-zinc-900 z-0 rounded-lg">
                             <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
                         </div>
-
-                        <img id="menu-image" src="" alt="Card谩pio da Semana" class="w-full h-auto max-h-[75vh] object-contain cursor-pointer rounded-lg bg-white dark:bg-zinc-900 relative z-10 opacity-0 transition-opacity duration-300">
-                        
+                        <img id="menu-image" src="" alt="Cardápio da Semana" class="w-full h-auto max-h-[75vh] object-contain cursor-pointer rounded-lg bg-white dark:bg-zinc-900 relative z-10 opacity-0 transition-opacity duration-300">
                         <div class="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full pointer-events-none shadow-sm backdrop-blur-md z-20">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                         </div>
                     </div>
 
-                    <!-- Resumo do Pedido Existente -->
                     <div id="existing-order-container" class="hidden bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-5 mb-4 border-2 border-green-100 dark:border-green-900/50 fade-in transition-colors">
                         <div class="text-center mb-6">
                             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/40 mb-4">
                                 <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </div>
                             <h3 id="existing-order-title" class="text-2xl font-bold text-gray-800 dark:text-gray-100">Pedido Registado!</h3>
-                            <p class="text-gray-600 dark:text-gray-400 mt-2">Voc锚 j谩 realizou este pedido. Consulte abaixo as suas escolhas:</p>
+                            <p class="text-gray-600 dark:text-gray-400 mt-2">Você já realizou este pedido. Consulte abaixo as suas escolhas:</p>
                         </div>
-                        <div id="existing-order-details" class="space-y-3 mb-4">
-                            <!-- Preenchido via JS -->
-                        </div>
+                        <div id="existing-order-details" class="space-y-3 mb-4"></div>
                     </div>
 
-                    <!-- Wizard de Escolhas -->
                     <div id="order-wizard-container" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-zinc-800 mb-4 transition-colors">
                         <div id="order-wizard">
                             <h3 id="wizard-day-title" class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-3 text-center"></h3>
                             <div id="wizard-options" class="grid grid-cols-2 gap-2 mb-3"></div>
                             <div>
-                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Anota莽玫es? Ex: sem cebola"></textarea>
+                                <textarea id="wizard-notes" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Anotações? Ex: sem cebola"></textarea>
                             </div>
                             <div id="wizard-progress" class="flex space-x-2 justify-center mt-4"></div>
                         </div>
                     </div>
 
-                    <!-- Bot茫o de submiss茫o -->
                     <div id="submitButtonContainer" class="hidden text-center mt-2 mb-6">
-                        <button id="openConfirmationModal" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 dark:hover:bg-green-500 shadow-md transition-transform transform active:scale-95">鉁� Revisar e Finalizar Pedido</button>
+                        <button id="openConfirmationModal" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold text-lg px-6 py-4 rounded-xl hover:bg-green-600 dark:hover:bg-green-500 shadow-md transition-transform transform active:scale-95">✅ Revisar e Finalizar Pedido</button>
                     </div>
                 </div>
 
-                <!-- Bot茫o de Relat贸rio P煤blico -->
                 <div id="publicReportButtonContainer" class="hidden mt-8 pt-6 border-t border-gray-200 dark:border-zinc-800 text-center fade-in">
                     <button id="btn-view-public-report" class="text-blue-600 dark:text-blue-400 font-bold hover:text-blue-800 dark:hover:text-blue-300 hover:underline flex items-center justify-center gap-2 mx-auto transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        Visualizar Relat贸rio da Semana
+                        Visualizar Relatório da Semana
                     </button>
                 </div>
                 
-                <div id="guidanceSection" class="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-400 p-4 rounded-md mb-6 transition-colors"><p id="guidanceText" class="font-semibold">Aguardando card谩pio...</p></div>
+                <div id="guidanceSection" class="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-400 p-4 rounded-md mb-6 transition-colors"><p id="guidanceText" class="font-semibold">Aguardando cardápio...</p></div>
             </div>
             <div id="success-message" class="hidden text-center p-10 bg-white dark:bg-zinc-900 rounded-lg shadow-lg border border-gray-100 dark:border-zinc-800 transition-colors">
                 <h2 class="text-3xl font-bold text-green-500 dark:text-green-400">Pedido Enviado com Sucesso!</h2>
                 <p id="success-text" class="mt-4 text-gray-600 dark:text-gray-400"></p>
-                <button onclick="location.reload()" class="mt-6 bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Retornar ao In铆cio</button>
+                <button onclick="location.reload()" class="mt-6 bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Retornar ao Início</button>
             </div>
         </div>
 
-        <!-- ================= VIS脙O DO ADMINISTRADOR ================= -->
+        <!-- ================= VISÃO DO ADMINISTRADOR ================= -->
         <div id="admin-view" class="hidden no-print">
             <header class="text-center border-b dark:border-zinc-800 pb-6 mb-6 mt-4">
                 <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">Painel do Administrador</h1>
-                <p class="text-lg text-gray-600 dark:text-gray-400 mt-1">Del铆cias Urbanas</p>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mt-1">Delícias Urbanas</p>
                 <div class="mt-4">
                     <button id="adminLogoutBtn" class="bg-red-500 dark:bg-red-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors">Sair do Painel</button>
                 </div>
             </header>
             <div class="mb-8">
-                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">猬咃笍 Voltar para o Card谩pio (Vis茫o Usu谩rio)</button>
+                <button id="switchToUserFromAdmin" class="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">⬅️ Voltar para o Cardápio (Visão Usuário)</button>
             </div>
             
             <section id="menu-management-section" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-6 mb-8 border border-gray-100 dark:border-zinc-800 transition-colors">
-                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">馃柤锔� Gerenciar Semanas e Card谩pios</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">🖼️ Gerenciar Semanas e Cardápios</h2>
                 <div class="grid md:grid-cols-2 gap-6">
-                    
-                    <!-- Current Week -->
                     <div class="border border-gray-200 dark:border-zinc-800 rounded-xl p-5 bg-gray-50 dark:bg-zinc-950 flex flex-col transition-colors">
-                        <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2"><span>馃搶</span> Card谩pio Atual (Ativo)</h3>
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2"><span>📌</span> Cardápio Atual (Ativo)</h3>
                         <div class="flex-1">
                             <img id="admin-current-image" class="w-full h-40 object-cover rounded-lg mb-4 border dark:border-zinc-700 shadow-sm hidden" />
-                            <p id="admin-current-status" class="text-sm text-gray-500 dark:text-gray-400 mb-4 italic">Nenhum card谩pio ativo.</p>
+                            <p id="admin-current-status" class="text-sm text-gray-500 dark:text-gray-400 mb-4 italic">Nenhum cardápio ativo.</p>
                         </div>
                         <button id="btn-turn-week" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-600 dark:hover:bg-green-500 transition shadow-md flex justify-center items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                            For莽ar Atualiza莽茫o de Semana
+                            Forçar Atualização de Semana
                         </button>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">A virada de semana ocorrer谩 <b class="text-green-600 dark:text-green-400">automaticamente</b> na pr贸xima segunda-feira <span id="scheduled-date" class="font-bold text-blue-600 dark:text-blue-400"></span>. Voc锚 tamb茅m pode for莽ar a virada agora clicando acima.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">A virada de semana ocorrerá <b class="text-green-600 dark:text-green-400">automaticamente</b> na próxima segunda-feira <span id="scheduled-date" class="font-bold text-blue-600 dark:text-blue-400"></span>.</p>
                         <div class="text-center mt-4 pt-4 border-t border-gray-200 dark:border-zinc-800">
-                             <button id="btn-clear-current-orders" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline font-semibold">鈿狅笍 Apagar todos os pedidos da semana atual</button>
+                             <button id="btn-clear-current-orders" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 underline font-semibold">⚠️ Apagar todos os pedidos da semana atual</button>
                         </div>
                     </div>
 
-                    <!-- Next Week Setup -->
                     <div class="border-2 border-blue-100 dark:border-blue-900/30 rounded-xl p-5 bg-blue-50/40 dark:bg-blue-900/10 flex flex-col transition-colors">
-                        <h3 class="font-bold text-lg text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2"><span>馃殌</span> Preparar Pr贸xima Semana</h3>
+                        <h3 class="font-bold text-lg text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2"><span>🚀</span> Preparar Próxima Semana</h3>
                         <div class="flex-1">
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-4">Envie o card谩pio (ex: na quinta-feira) para que j谩 possam fazer os pedidos sem apagar a semana atual.</p>
                             <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-slate-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-200 hover:file:bg-blue-200 dark:hover:file:bg-blue-800 mb-4 transition-colors"/>
                             <img id="imagePreview" class="w-full h-32 object-cover rounded-lg border dark:border-zinc-700 hidden mb-4 shadow-sm" />
                             
-                            <h4 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">Feriados da Pr贸xima Semana</h4>
+                            <h4 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">Feriados da Próxima Semana</h4>
                             <div id="holiday-selector" class="flex flex-wrap gap-2 mb-4 bg-white dark:bg-zinc-800 p-2 rounded-lg border border-gray-200 dark:border-zinc-700 transition-colors"></div>
                         </div>
                         <button id="uploadImageBtn" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-zinc-700 disabled:text-gray-500 disabled:cursor-not-allowed transition shadow-md" disabled>
-                            Salvar Card谩pio para a Pr贸xima Semana
+                            Salvar Cardápio para a Próxima Semana
                         </button>
                         <button id="deleteNextWeekBtn" class="mt-2 w-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold py-2 px-4 rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition shadow-sm hidden">
-                            馃棏锔� Cancelar / Apagar Pr贸xima Semana
+                            🗑️ Cancelar / Apagar Próxima Semana
                         </button>
                         <div id="whatsapp-notification-container" class="mt-4 hidden">
                             <button id="notifyWhatsAppBtn" class="w-full bg-green-500 dark:bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 flex items-center justify-center gap-2 text-sm transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.731 6.086l.287.492-1.24 4.515 4.639-1.219.452.273zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.296-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                                 Avisar no WhatsApp
                             </button>
                         </div>
@@ -259,27 +251,27 @@
             </section>
             
             <section id="order-status-section" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-6 mb-8 border border-gray-100 dark:border-zinc-800 transition-colors">
-                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4" id="status-section-title">馃搳 Status de Pedidos</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4" id="status-section-title">📊 Status de Pedidos</h2>
                 <div id="order-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <p class="text-gray-500 dark:text-gray-400">A carregar status dos pedidos...</p>
                 </div>
             </section>
 
             <section id="employee-management-section" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-6 mb-8 border border-gray-100 dark:border-zinc-800 transition-colors">
-                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">馃懃 Gerenciamento de Funcion谩rios</h2>
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">👥 Gerenciamento de Funcionários</h2>
                 <form id="add-employee-form" class="grid sm:grid-cols-3 gap-4 items-end mb-6">
                     <div>
                         <label for="newEmployeeRGF" class="block text-sm font-medium text-gray-700 dark:text-gray-300">RGF</label>
-                        <input type="text" id="newEmployeeRGF" placeholder="RGF do funcion谩rio" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required>
+                        <input type="text" id="newEmployeeRGF" placeholder="RGF do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required>
                     </div>
                     <div>
                         <label for="newEmployeeName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
-                        <input type="text" id="newEmployeeName" placeholder="Nome do funcion谩rio" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required>
+                        <input type="text" id="newEmployeeName" placeholder="Nome do funcionário" class="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Adicionar Funcion谩rio</button>
+                    <button type="submit" class="w-full bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Adicionar Funcionário</button>
                 </form>
                 <div id="employee-list-container" class="overflow-x-auto">
-                    <p class="text-gray-500 dark:text-gray-400">A carregar lista de funcion谩rios...</p>
+                    <p class="text-gray-500 dark:text-gray-400">A carregar lista de funcionários...</p>
                 </div>
             </section>
 
@@ -288,16 +280,16 @@
                     <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">Pedidos Recebidos</h2>
                     <div class="flex space-x-2 bg-gray-100 dark:bg-zinc-900 p-1 rounded-lg border border-gray-200 dark:border-zinc-800">
                         <button id="admin-view-current" class="px-4 py-1.5 bg-white dark:bg-zinc-800 shadow-sm rounded-md text-sm font-bold text-blue-600 dark:text-blue-400 transition-colors">Esta Semana</button>
-                        <button id="admin-view-next" class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded-md text-sm font-semibold transition-colors">Pr贸xima Semana</button>
+                        <button id="admin-view-next" class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded-md text-sm font-semibold transition-colors">Próxima Semana</button>
                     </div>
                 </div>
                 <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="w-full sm:w-auto">
-                        <input type="text" id="searchInput" placeholder="馃攷 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors">
+                        <input type="text" id="searchInput" placeholder="🔎 Buscar por nome..." class="w-full sm:w-64 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors">
                     </div>
-                    <!-- Bot茫o alterado visualmente para a nova fun莽茫o -->
+                    <!-- Botão de gerar PDF e compartilhar -->
                     <button id="generateReportBtn" class="w-full sm:w-auto bg-blue-600 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg transition-colors">
-                        馃摛 Gerar e Compartilhar PDF
+                        📤 Gerar e Compartilhar PDF
                     </button>
                 </div>
                 <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-gray-500 dark:text-gray-400">A carregar pedidos...</p></div>
@@ -308,66 +300,43 @@
     <!-- Modals -->
     <div id="image-zoom-modal" class="modal-overlay hidden no-print cursor-zoom-out"><div class="modal-content"><img id="zoomed-image" src=""></div></div>
     
-    <!-- Modal do Relat贸rio P煤blico (Acesso para os funcion谩rios) -->
     <div id="public-report-modal" class="modal-overlay hidden no-print">
         <div class="modal-content w-full max-w-4xl h-[90vh] flex flex-col p-4 sm:p-6 !max-h-[95vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Relat贸rio da Semana</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Relatório da Semana</h2>
                 <button type="button" class="cancel-modal-btn text-gray-500 hover:text-red-500 text-3xl font-bold leading-none">&times;</button>
             </div>
-            <!-- 脕rea de conte煤do scroll谩vel onde a tabela HTML ser谩 gerada -->
-            <div class="flex-1 overflow-auto bg-gray-50 dark:bg-zinc-950 rounded-lg border border-gray-200 dark:border-zinc-700 p-2 sm:p-4 text-sm sm:text-base transition-colors" id="public-report-content">
-                <!-- Tabela inserida via JS -->
-            </div>
+            <div class="flex-1 overflow-auto bg-gray-50 dark:bg-zinc-950 rounded-lg border border-gray-200 dark:border-zinc-700 p-2 sm:p-4 text-sm sm:text-base transition-colors" id="public-report-content"></div>
             <div class="mt-4 text-center shrink-0">
-                <p class="text-xs text-gray-500 dark:text-gray-400">Use os dedos para ampliar a tabela se necess谩rio 馃攳</p>
                 <button type="button" class="cancel-modal-btn mt-3 px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors w-full sm:w-auto">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Recorte de Imagem (Cropper.js) -->
     <div id="cropper-modal" class="modal-overlay hidden no-print">
         <div class="modal-content w-full max-w-2xl h-[80vh] flex flex-col p-4 sm:p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white shrink-0">Recortar Imagem do Card谩pio</h2>
+            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white shrink-0">Recortar Imagem</h2>
             <div id="cropper-container" class="flex-1 min-h-0 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-700">
                 <img id="cropper-image" src="" alt="Cortar">
             </div>
-            <p class="text-xs text-center text-gray-500 dark:text-gray-400 mt-2 shrink-0">Arraste as bordas para focar apenas na 谩rea 煤til do card谩pio.</p>
             <div class="mt-4 flex justify-end space-x-3 shrink-0">
                 <button type="button" id="cancel-crop-btn" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button>
-                <button type="button" id="confirm-crop-btn" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">鉁傦笍 Confirmar Recorte</button>
+                <button type="button" id="confirm-crop-btn" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">✂️ Confirmar Recorte</button>
             </div>
         </div>
     </div>
     
-    <div id="edit-order-modal" class="modal-overlay hidden no-print">
-        <div class="modal-content w-full max-w-lg">
-            <h2 class="text-2xl font-bold mb-4">Editar Pedido</h2>
-            <form id="edit-order-form">
-                <input type="hidden" id="edit-order-id">
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Nome do Funcion谩rio</label>
-                    <input type="text" id="edit-order-employeeName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-100 dark:bg-zinc-800 font-bold transition-colors" readonly>
-                </div>
-                <div id="edit-menu-options" class="space-y-4 max-h-[50vh] overflow-y-auto p-1"></div>
-                <div class="mt-6 flex justify-end space-x-4">
-                    <button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Salvar Altera莽玫es</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <div id="edit-order-modal" class="modal-overlay hidden no-print"><div class="modal-content w-full max-w-lg"><h2 class="text-2xl font-bold mb-4">Editar Pedido</h2><form id="edit-order-form"><input type="hidden" id="edit-order-id"><div class="mb-4"><label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Nome</label><input type="text" id="edit-order-employeeName" class="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-100 dark:bg-zinc-800 font-bold transition-colors" readonly></div><div id="edit-menu-options" class="space-y-4 max-h-[50vh] overflow-y-auto p-1"></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Salvar Alterações</button></div></form></div></div>
     
-    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcion谩rio</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700 dark:text-gray-300">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-100 dark:bg-zinc-800 transition-colors" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Salvar Altera莽玫es</button></div></form></div></div>
+    <div id="edit-employee-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Editar Funcionário</h2><form id="edit-employee-form"><div class="mb-4"><label for="editEmployeeRGF" class="block text-sm font-medium text-gray-700 dark:text-gray-300">RGF</label><input type="text" id="editEmployeeRGF" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-100 dark:bg-zinc-800 transition-colors" readonly></div><div class="mb-4"><label for="editEmployeeName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label><input type="text" id="editEmployeeName" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Salvar Alterações</button></div></form></div></div>
     
     <div id="confirmation-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-2xl font-bold mb-4">Confirme o seu Pedido</h2><p class="mb-6 text-gray-600 dark:text-gray-400">Por favor, revise as suas escolhas antes de enviar.</p><div id="confirmation-summary" class="space-y-2 mb-8"></div><div class="flex justify-end space-x-4"><button type="button" id="btn-edit-wizard" class="px-6 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Editar</button><button id="submitOrder" class="px-6 py-2 bg-green-500 dark:bg-green-600 text-white font-bold rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition-colors">Confirmar e Enviar</button></div></div></div>
     
     <div id="admin-login-modal" class="modal-overlay hidden no-print"><div class="modal-content"><h2 class="text-2xl font-bold mb-4">Acesso Administrativo</h2><form id="admin-login-form"><div class="mb-4"><label for="adminEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" id="adminEmail" placeholder="seu-email@exemplo.com" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mb-4"><label for="adminPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label><input type="password" id="adminPassword" placeholder="Sua senha" class="mt-1 w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white rounded-lg transition-colors" required></div><div class="mt-6 flex justify-end space-x-4"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Entrar</button></div></form></div></div>
     
-    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar A莽茫o</h2><p class="mb-6 text-gray-600 dark:text-gray-400" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Confirmar</button></div></div></div>
+    <div id="custom-confirm-modal" class="modal-overlay hidden no-print"><div class="modal-content fade-in"><h2 class="text-xl font-bold mb-4" id="custom-confirm-title">Confirmar Ação</h2><p class="mb-6 text-gray-600 dark:text-gray-400" id="custom-confirm-message">Tem a certeza que deseja prosseguir?</p><div class="flex justify-end space-x-4"><button id="custom-confirm-cancel-btn" class="px-6 py-2 bg-gray-300 dark:bg-zinc-800 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-zinc-700 transition-colors">Cancelar</button><button id="custom-confirm-ok-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">Confirmar</button></div></div></div>
 
-    <!-- Div que ser谩 convertida em PDF -->
+    <!-- Div que será convertida em PDF. Mantida fora do fluxo da tela -->
     <div id="print-report"></div>
     
     <div id="app-toast"></div>
@@ -377,17 +346,33 @@
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
-        const firebaseConfig = {
-            apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
-            authDomain: "cardapio-8ddea.firebaseapp.com",
-            projectId: "cardapio-8ddea",
-            storageBucket: "cardapio-8ddea.appspot.com",
-            messagingSenderId: "1019677985212",
-            appId: "1:1019677985212:web:57c7820a62585a867dc3b9"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        function showToast(message, type = 'info', duration = 4000) {
+            const toast = document.getElementById('app-toast');
+            if(!toast) return;
+            toast.textContent = message;
+            toast.className = 'show';
+            toast.classList.add(type);
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
+        }
+
+        // Tenta inicializar o app com tratamento para problemas no APK (ex: dominios bloqueados)
+        let app, db, auth;
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyDa24jUk24wjlMsJUC4uXwnbmxM4vCtocI",
+                authDomain: "cardapio-8ddea.firebaseapp.com",
+                projectId: "cardapio-8ddea",
+                storageBucket: "cardapio-8ddea.appspot.com",
+                messagingSenderId: "1019677985212",
+                appId: "1:1019677985212:web:57c7820a62585a867dc3b9"
+            };
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } catch (error) {
+            console.error("Erro ao inicializar Firebase: ", error);
+            showToast("Erro crítico de conexão: O app não conseguiu acessar o banco de dados. (Verifique o Firebase)", 'error', 10000);
+        }
 
         const APP_CONFIG = {
             ADMIN_UID: 'LqAXao4FuOQAvzS3uQAd9et6OnK2',
@@ -396,33 +381,29 @@
         const menuDocRef = doc(db, "cardapio", "semanal");
         const funcionariosCollectionRef = collection(db, "funcionarios");
         
-        const weekDays = ['Segunda-feira', 'Ter莽a-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+        const weekDays = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
         const mealOptions = [
-            { name: "Prato Principal", emoji: "馃嵔锔�", description: "A op莽茫o do dia, conforme a imagem" },
-            { name: "Op莽茫o", emoji: "馃嵅", description: "A segunda op莽茫o do dia, se houver" },
-            { name: "Omelete", emoji: "馃嵆", description: "Op莽茫o fixa" },
-            { name: "Fil茅 de frango", emoji: "馃崡", description: "Op莽茫o fixa" }
+            { name: "Prato Principal", emoji: "🍽️", description: "A opção do dia, conforme a imagem" },
+            { name: "Opção", emoji: "🍲", description: "A segunda opção do dia, se houver" },
+            { name: "Omelete", emoji: "🍳", description: "Opção fixa" },
+            { name: "Filé de frango", emoji: "🍗", description: "Opção fixa" }
         ];
 
         let currentMenuData = { menuImageBase64: '', holidays: [], nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null };
         let weeklyMenu = {};
         let userActiveHolidays = [];
-        
         let viewingNextWeek = false; 
         let adminViewingNextWeek = false; 
         let autoSwitchDone = false; 
-        
         let menuUnsubscribe = null;
         let adminUnsubscribe = null;
         let anonymousLoginPromise = null;
         let isLoggingInAsAdmin = false;
         let isRotatingWeekLock = false; 
-
         let allOrders = [];
         let tempOrderData = {};
         let userChoices = [];
         let currentDayIndex = 0;
-        
         let cropperInstance = null;
         let finalImageBase64 = null;
         
@@ -431,14 +412,14 @@
         function setupPWA() {
             try {
                 const manifest = {
-                    name: "Card谩pio Quatinga",
-                    short_name: "Card谩pio",
+                    name: "Cardápio Quatinga",
+                    short_name: "Cardápio",
                     start_url: window.location.href,
                     display: "standalone",
                     background_color: "#000000", 
                     theme_color: "#2563eb",
                     icons: [{
-                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle' fill='white'%3E馃嵅%3C/text%3E%3C/svg%3E",
+                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232563eb' rx='20'/%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle' fill='white'%3E🍲%3C/text%3E%3C/svg%3E",
                         sizes: "192x192",
                         type: "image/svg+xml",
                         purpose: "any maskable"
@@ -455,31 +436,16 @@
             } catch (e) { console.log("PWA setup falhou"); }
         }
         setupPWA();
-
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.getElementById('app-toast');
-            if(!toast) return;
-            toast.textContent = message;
-            toast.className = 'show';
-            toast.classList.add(type);
-            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, duration);
-        }
         
         function showCustomConfirm(message, onConfirm) {
             const modal = document.getElementById('custom-confirm-modal');
             const messageEl = document.getElementById('custom-confirm-message');
             const okBtn = document.getElementById('custom-confirm-ok-btn');
-            
             messageEl.textContent = message;
             modal.classList.remove('hidden');
-
             const newOkBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
-            
-            newOkBtn.addEventListener('click', () => {
-                onConfirm();
-                modal.classList.add('hidden');
-            });
+            newOkBtn.addEventListener('click', () => { onConfirm(); modal.classList.add('hidden'); });
         }
 
         function handleImageLoad() {
@@ -490,7 +456,6 @@
                 if (loading) loading.classList.add('hidden');
             }
         }
-
         document.getElementById('menu-image').addEventListener('load', handleImageLoad);
 
         async function loadAndRenderEmployees() {
@@ -501,10 +466,10 @@
                 const snapshot = await getDocs(q);
 
                 if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">Nenhum funcion谩rio cadastrado.</p>';
+                    container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">Nenhum funcionário cadastrado.</p>';
                     return;
                 }
-                let tableHTML = `<table class="min-w-full bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg overflow-hidden"><thead><tr class="bg-gray-50 dark:bg-zinc-800/80"><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">RGF</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Nome</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">A莽玫es</th></tr></thead><tbody>`;
+                let tableHTML = `<table class="min-w-full bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg overflow-hidden"><thead><tr class="bg-gray-50 dark:bg-zinc-800/80"><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">RGF</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Nome</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Ações</th></tr></thead><tbody>`;
                 snapshot.forEach(doc => {
                     const employee = doc.data();
                     tableHTML += `<tr><td class="py-2 px-3 border-b dark:border-zinc-800 font-mono text-gray-800 dark:text-gray-200">${doc.id}</td><td class="py-2 px-3 border-b dark:border-zinc-800 font-semibold text-gray-800 dark:text-gray-200">${employee.nome}</td><td class="py-2 px-3 border-b dark:border-zinc-800 space-x-2"><button data-id="${doc.id}" data-name="${employee.nome}" class="edit-employee-btn text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-semibold transition-colors">Editar</button><button data-id="${doc.id}" data-name="${employee.nome}" class="delete-employee-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-semibold transition-colors">Excluir</button></td></tr>`;
@@ -513,7 +478,7 @@
                 container.innerHTML = tableHTML;
             } catch (error) {
                 console.error("Erro:", error);
-                container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcion谩rios.</p>`;
+                container.innerHTML = `<p class="text-center text-red-500 font-semibold">Falha ao carregar funcionários.</p>`;
             }
         }
 
@@ -527,7 +492,7 @@
             if (!rgf || !nome) { showToast("Preencha o RGF e o Nome.", 'error'); return; }
             try {
                 await setDoc(doc(db, "funcionarios", rgf), { nome });
-                showToast("Funcion谩rio adicionado!", 'success');
+                showToast("Funcionário adicionado!", 'success');
                 rgfInput.value = ''; nameInput.value = '';
                 loadAndRenderEmployees(); 
             } catch (error) { showToast("Erro ao adicionar.", 'error'); }
@@ -536,7 +501,7 @@
         function handleDeleteEmployee(rgf, name) {
             showCustomConfirm(`Tem a certeza que deseja excluir ${name}?`, async () => {
                 if (!auth.currentUser) return;
-                try { await deleteDoc(doc(db, "funcionarios", rgf)); showToast("Exclu铆do.", 'success'); loadAndRenderEmployees(); } 
+                try { await deleteDoc(doc(db, "funcionarios", rgf)); showToast("Excluído.", 'success'); loadAndRenderEmployees(); } 
                 catch (error) { showToast("Falha ao excluir.", 'error'); }
             });
         }
@@ -572,7 +537,7 @@
                     return true; 
                 } else { 
                     nameInput.value = ''; 
-                    nameInput.placeholder = 'RGF n茫o encontrado'; 
+                    nameInput.placeholder = 'RGF não encontrado'; 
                     return false; 
                 }
             } catch (error) { 
@@ -585,25 +550,16 @@
         function displayExistingOrder(orderData) {
             const detailsContainer = document.getElementById('existing-order-details');
             detailsContainer.innerHTML = '';
-            
-            document.getElementById('existing-order-title').textContent = viewingNextWeek ? "Pedido da Pr贸xima Semana Registado!" : "Pedido Registado!";
-            
+            document.getElementById('existing-order-title').textContent = viewingNextWeek ? "Pedido da Próxima Semana Registado!" : "Pedido Registado!";
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 const choice = orderData[dayId];
                 const notes = orderData[`${dayId}_notes`];
-                
                 if (choice) {
-                    let displayChoice = choice === 'FERIADO' ? '馃彇锔� FERIADO (Sem Pedido)' : `馃嵔锔� ${choice}`;
+                    let displayChoice = choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : `🍽️ ${choice}`;
                     let notesHtml = notes ? `<span class="text-sm text-gray-500 italic block sm:inline mt-1 sm:mt-0 sm:ml-2">(${notes})</span>` : '';
                     let styleClass = choice === 'FERIADO' ? 'bg-gray-50 dark:bg-zinc-800/50 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-zinc-700' : 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800/50';
-                    
-                    detailsContainer.innerHTML += `
-                        <div class="p-4 rounded-xl border ${styleClass} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 transition-all hover:shadow-md">
-                            <span class="font-bold w-full sm:w-1/3">${day}</span>
-                            <div class="w-full sm:w-2/3 text-left sm:text-right font-medium">${displayChoice} ${notesHtml}</div>
-                        </div>
-                    `;
+                    detailsContainer.innerHTML += `<div class="p-4 rounded-xl border ${styleClass} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 transition-all hover:shadow-md"><span class="font-bold w-full sm:w-1/3">${day}</span><div class="w-full sm:w-2/3 text-left sm:text-right font-medium">${displayChoice} ${notesHtml}</div></div>`;
                 }
             });
         }
@@ -613,7 +569,6 @@
             try {
                 const q = query(collection(db, "pedidosDaSemana"), where("employeeRGF", "==", rgf));
                 const snapshot = await getDocs(q);
-                
                 const wizardContainer = document.getElementById('order-wizard-container');
                 const existingContainer = document.getElementById('existing-order-container');
                 const submitBtnContainer = document.getElementById('submitButtonContainer');
@@ -621,7 +576,6 @@
                 
                 let latestOrder = null;
                 let latestTime = 0;
-
                 if (!snapshot.empty) {
                     snapshot.forEach(doc => {
                         const data = doc.data();
@@ -632,7 +586,6 @@
                         }
                     });
                 }
-                
                 if (latestOrder) {
                     displayExistingOrder(latestOrder);
                     wizardContainer.classList.add('hidden');
@@ -641,60 +594,40 @@
                     publicReportBtnContainer.classList.remove('hidden'); 
                     return;
                 }
-                
                 existingContainer.classList.add('hidden');
                 publicReportBtnContainer.classList.add('hidden');
-                
                 currentDayIndex = 0;
                 userChoices = [];
                 renderWizardStep(0);
-                
                 wizardContainer.classList.remove('hidden');
                 submitBtnContainer.classList.add('hidden');
-                
             } catch (error) { console.error(error); }
         }
         
         function renderWizardStep(index) {
             const wizardContainer = document.getElementById('order-wizard-container');
             const submitBtnContainer = document.getElementById('submitButtonContainer');
-            
             if (index >= weekDays.length) {
                 wizardContainer.classList.add('hidden'); 
                 submitBtnContainer.classList.remove('hidden');
                 return;
             }
-
             wizardContainer.classList.remove('hidden');
             submitBtnContainer.classList.add('hidden');
-
             const day = weekDays[index];
             const dayId = getDayId(day);
-
             if (userActiveHolidays.includes(dayId)) {
                 userChoices[index] = { day: day, choice: "FERIADO", notes: "" };
                 currentDayIndex = index + 1; 
                 renderWizardStep(currentDayIndex);
                 return;
             }
-
             document.getElementById('wizard-day-title').textContent = day;
             const optionsContainer = document.getElementById('wizard-options');
             optionsContainer.innerHTML = '';
             mealOptions.forEach(opt => {
-                optionsContainer.innerHTML += `
-                    <button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-500 dark:bg-zinc-800/50 rounded-lg">
-                        <div class="flex items-center">
-                            <span class="text-xl mr-2">${opt.emoji}</span>
-                            <div>
-                                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm leading-tight">${opt.name}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">${opt.description}</p>
-                            </div>
-                        </div>
-                    </button>
-                `;
+                optionsContainer.innerHTML += `<button data-value="${opt.name}" class="wizard-btn text-left p-2 border-2 border-gray-200 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-500 dark:bg-zinc-800/50 rounded-lg"><div class="flex items-center"><span class="text-xl mr-2">${opt.emoji}</span><div><p class="font-semibold text-gray-800 dark:text-gray-200 text-sm leading-tight">${opt.name}</p><p class="text-xs text-gray-500 dark:text-gray-400">${opt.description}</p></div></div></button>`;
             });
-
             document.getElementById('wizard-notes').value = '';
             updateWizardProgress(index);
             wizardContainer.classList.add('fade-in');
@@ -730,12 +663,7 @@
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 const isChecked = savedNextHolidays.includes(dayId) ? 'checked' : '';
-                container.innerHTML += `
-                    <label class="flex items-center space-x-2 cursor-pointer select-none bg-white dark:bg-zinc-800 p-2 rounded shadow-sm border border-gray-100 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition">
-                        <input type="checkbox" value="${dayId}" class="holiday-checkbox w-5 h-5 text-blue-600 rounded focus:ring-blue-500" ${isChecked}>
-                        <span class="text-gray-700 dark:text-gray-300 font-medium">${day}</span>
-                    </label>
-                `;
+                container.innerHTML += `<label class="flex items-center space-x-2 cursor-pointer select-none bg-white dark:bg-zinc-800 p-2 rounded shadow-sm border border-gray-100 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition"><input type="checkbox" value="${dayId}" class="holiday-checkbox w-5 h-5 text-blue-600 rounded focus:ring-blue-500" ${isChecked}><span class="text-gray-700 dark:text-gray-300 font-medium">${day}</span></label>`;
             });
         }
 
@@ -745,24 +673,13 @@
                 const ordersSnap = await getDocs(collection(db, "pedidosDaSemana"));
                 ordersSnap.forEach(d => {
                     const orderData = d.data();
-                    if (orderData.isNextWeek === true) {
-                        batch.update(d.ref, { isNextWeek: false }); 
-                    } else {
-                        batch.delete(d.ref); 
-                    }
+                    if (orderData.isNextWeek === true) batch.update(d.ref, { isNextWeek: false }); 
+                    else batch.delete(d.ref); 
                 });
-
-                batch.set(menuDocRef, {
-                    menuImageBase64: menuData.nextMenuImageBase64,
-                    holidays: menuData.nextHolidays || [],
-                    nextMenuImageBase64: '',
-                    nextHolidays: [],
-                    targetRotationDate: null
-                }, { merge: true });
-
+                batch.set(menuDocRef, { menuImageBase64: menuData.nextMenuImageBase64, holidays: menuData.nextHolidays || [], nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null }, { merge: true });
                 await batch.commit();
                 showToast("A semana virou automaticamente!", "success");
-            } catch (error) { console.warn("Automa莽茫o em pausa.", error); }
+            } catch (error) { console.warn("Automação em pausa.", error); }
         }
 
         function loadAndDisplayMenu() {
@@ -800,10 +717,10 @@
                     if (currentMenuData.menuImageBase64) {
                         currentImg.src = currentMenuData.menuImageBase64;
                         currentImg.classList.remove('hidden');
-                        currentStatus.textContent = "Card谩pio atual est谩 ativo.";
+                        currentStatus.textContent = "Cardápio atual está ativo.";
                     } else {
                         currentImg.classList.add('hidden');
-                        currentStatus.textContent = "Nenhum card谩pio ativo no momento.";
+                        currentStatus.textContent = "Nenhum cardápio ativo no momento.";
                     }
                 }
 
@@ -811,14 +728,12 @@
                     if (currentMenuData.targetRotationDate) {
                         const d = new Date(currentMenuData.targetRotationDate);
                         scheduledDateSpan.textContent = `(Dia ${d.toLocaleDateString('pt-BR')})`;
-                    } else {
-                        scheduledDateSpan.textContent = '';
-                    }
+                    } else { scheduledDateSpan.textContent = ''; }
                 }
 
                 renderHolidayCheckboxes();
                 updateUserViewUI();
-            }, (error) => { showToast("Erro ao carregar o card谩pio.", 'error'); });
+            }, (error) => { showToast("Erro ao carregar o cardápio.", 'error'); });
         }
 
         function updateUserViewUI() {
@@ -911,23 +826,21 @@
                     orderSection.classList.add('hidden');
                     publicReportBtnContainer.classList.add('hidden');
                     guidanceSection.classList.remove('hidden');
-                    document.getElementById('guidanceText').textContent = 'Por favor, insira o seu RGF para come莽ar.';
+                    document.getElementById('guidanceText').textContent = 'Por favor, insira o seu RGF para começar.';
                 } else {
                     guidanceSection.classList.add('hidden');
                     orderSection.classList.remove('hidden');
                     await checkExistingOrder(rgf); 
                     
                     if (document.activeElement === rgfInput) {
-                        setTimeout(() => {
-                            document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 150);
+                        setTimeout(() => { document.getElementById('order-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
                     }
                 }
             } else {
                 orderSection.classList.add('hidden');
                 publicReportBtnContainer.classList.add('hidden');
                 guidanceSection.classList.remove('hidden');
-                document.getElementById('guidanceText').textContent = 'Nenhum card谩pio dispon铆vel para a sele莽茫o atual.';
+                document.getElementById('guidanceText').textContent = 'Nenhum cardápio disponível para a seleção atual.';
             }
         }
 
@@ -944,7 +857,7 @@
                 const dayId = getDayId(item.day);
                 tempOrderData[dayId] = item.choice;
                 if(item.notes) tempOrderData[`${dayId}_notes`] = item.notes;
-                const displayChoice = item.choice === 'FERIADO' ? '馃彇锔� FERIADO (Sem Pedido)' : item.choice;
+                const displayChoice = item.choice === 'FERIADO' ? '🏖️ FERIADO (Sem Pedido)' : item.choice;
                 const styleClass = item.choice === 'FERIADO' ? 'text-gray-400 italic' : 'text-gray-800 dark:text-gray-200';
                 summaryContainer.innerHTML += `<p class="${styleClass}"><span class="font-bold">${item.day}:</span> ${displayChoice} ${item.notes ? `<span class="text-sm text-gray-500 italic">(${item.notes})</span>` : ''}</p>`;
             });
@@ -971,7 +884,7 @@
             if (!auth.currentUser) return;
             if (adminUnsubscribe) adminUnsubscribe();
 
-            document.getElementById('status-section-title').textContent = adminViewingNextWeek ? "馃搳 Status de Pedidos (Pr贸xima Semana)" : "馃搳 Status de Pedidos (Esta Semana)";
+            document.getElementById('status-section-title').textContent = adminViewingNextWeek ? "📊 Status de Pedidos (Próxima Semana)" : "📊 Status de Pedidos (Esta Semana)";
 
             adminUnsubscribe = onSnapshot(collection(db, "pedidosDaSemana"), (snapshot) => {
                 const latestCurrentOrdersMap = new Map();
@@ -1011,16 +924,7 @@
                 const haveOrdered = allEmployees.filter(emp => orderedRGFs.has(emp.id));
                 const haveNotOrdered = allEmployees.filter(emp => !orderedRGFs.has(emp.id));
 
-                let html = `
-                    <div>
-                        <h3 class="font-semibold text-lg text-green-600 dark:text-green-400 mb-2">鉁� J谩 Pediram (${haveOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-md border border-green-100 dark:border-green-800/30">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ningu茅m fez pedido ainda.</li>'}</ul>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-lg text-red-600 dark:text-red-400 mb-2">鉂� Ainda N茫o Pediram (${haveNotOrdered.length})</h3>
-                        <ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md border border-red-100 dark:border-red-800/30">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcion谩rios fizeram pedido!</li>'}</ul>
-                    </div>
-                `;
+                let html = `<div><h3 class="font-semibold text-lg text-green-600 dark:text-green-400 mb-2">✅ Já Pediram (${haveOrdered.length})</h3><ul class="space-y-1 text-sm">${haveOrdered.map(e => `<li class="p-2 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-md border border-green-100 dark:border-green-800/30">${e.nome}</li>`).join('') || '<li class="text-gray-500">Ninguém fez pedido ainda.</li>'}</ul></div><div><h3 class="font-semibold text-lg text-red-600 dark:text-red-400 mb-2">❌ Ainda Não Pediram (${haveNotOrdered.length})</h3><ul class="space-y-1 text-sm">${haveNotOrdered.map(e => `<li class="p-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md border border-red-100 dark:border-red-800/30">${e.nome}</li>`).join('') || '<li class="text-gray-500">Todos os funcionários fizeram pedido!</li>'}</ul></div>`;
                 container.innerHTML = html;
             } catch (error) { container.innerHTML = '<p class="text-red-500">Falha ao carregar status.</p>'; }
         }
@@ -1030,11 +934,11 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredOrders = orders.filter(doc => doc.data().employeeName.toLowerCase().includes(searchTerm));
 
-            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado nesta sele莽茫o.</p>'; return; }
+            if (filteredOrders.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum pedido encontrado nesta seleção.</p>'; return; }
             
-            let tableHTML = `<table class="min-w-full bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg overflow-hidden"><thead><tr class="bg-gray-50 dark:bg-zinc-800/80"><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Funcion谩rio</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">RGF</th>`;
+            let tableHTML = `<table class="min-w-full bg-white dark:bg-zinc-900 border dark:border-zinc-800 rounded-lg overflow-hidden"><thead><tr class="bg-gray-50 dark:bg-zinc-800/80"><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Funcionário</th><th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">RGF</th>`;
             weekDays.forEach(item => tableHTML += `<th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">${item.substring(0,3)}</th>`);
-            tableHTML += `<th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">A莽玫es</th></tr></thead><tbody>`;
+            tableHTML += `<th class="py-2 px-3 border-b dark:border-zinc-700 text-left text-gray-700 dark:text-gray-300">Ações</th></tr></thead><tbody>`;
 
             filteredOrders.forEach(doc => {
                 const order = doc.data();
@@ -1063,11 +967,9 @@
             const container = document.getElementById('public-report-content');
             container.innerHTML = '<p class="text-center text-gray-500 py-10">A carregar os dados da semana...</p>';
             document.getElementById('public-report-modal').classList.remove('hidden');
-
             try {
                 const q = query(collection(db, "pedidosDaSemana"), where("isNextWeek", "==", viewingNextWeek));
                 const snapshot = await getDocs(q);
-
                 const latestOrdersMap = new Map();
                 snapshot.forEach(doc => {
                     const orderData = doc.data();
@@ -1078,76 +980,52 @@
                         }
                     }
                 });
-
-                const orders = Array.from(latestOrdersMap.values())
-                    .map(item => item.doc)
-                    .sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
-
+                const orders = Array.from(latestOrdersMap.values()).map(item => item.doc).sort((a, b) => a.data().employeeName.localeCompare(b.data().employeeName));
                 if (orders.length === 0) {
-                    container.innerHTML = '<p class="text-center text-gray-500 py-10">Ainda n茫o existem pedidos registados para esta semana.</p>';
+                    container.innerHTML = '<p class="text-center text-gray-500 py-10">Ainda não existem pedidos registados para esta semana.</p>';
                     return;
                 }
-
                 const holidays = viewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
-                
-                let html = `
-                    <div style="background-color: white; color: black; padding: 20px; min-width: 700px; font-family: 'Poppins', sans-serif;">
-                        <h1 style="font-size: 18pt; text-align: center; margin-bottom: 15px; font-weight: 600;">Regional Quatinga</h1>
-                `;
-
+                let html = `<div style="background-color: white; color: black; padding: 20px; min-width: 700px; font-family: 'Poppins', sans-serif;"><h1 style="font-size: 18pt; text-align: center; margin-bottom: 15px; font-weight: 600;">Cardápio Quatinga</h1>`;
                 weekDays.forEach(day => {
                     const dayId = getDayId(day);
                     if (holidays.includes(dayId)) return;
-
                     let tableHTML = `<div style="margin-bottom: 12px; page-break-inside: avoid;"><table style="width: 100%; border-collapse: collapse; font-size: 9pt;"><thead><tr><th style="border: 1px solid #999; padding: 5px; text-align: left; background-color: white; font-weight: 600; width: 15%;">RGF</th><th style="border: 1px solid #999; padding: 5px; text-align: left; background-color: white; font-weight: 600; width: 60%;">NOME</th><th style="border: 1px solid #999; padding: 5px; text-align: left; background-color: white; font-weight: bold; width: 25%;">${day}</th></tr></thead><tbody>`;
-
                     const dailyOrders = orders.filter(orderDoc => { const data = orderDoc.data(); return data[dayId] && data[dayId] !== 'FERIADO'; });
-
                     dailyOrders.forEach(orderDoc => {
                         const order = orderDoc.data();
                         let choice = (order[dayId] || '').toUpperCase();
                         const notes = order[`${dayId}_notes`];
                         let choiceHTML = choice;
                         if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
-                        if (choice === 'OP脟脙O') choiceHTML = 'OP脟脙O';
+                        if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
                         if (notes) choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
-
                         tableHTML += `<tr><td style="border: 1px solid #999; padding: 5px; text-align: left; font-weight: 400;">${order.employeeRGF || 'N/A'}</td><td style="border: 1px solid #999; padding: 5px; text-align: left; font-weight: 400;">${order.employeeName}</td><td style="border: 1px solid #999; padding: 5px; text-align: left; font-weight: 400;">${choiceHTML}</td></tr>`;
                     });
                     tableHTML += '</tbody></table></div>';
                     html += tableHTML;
                 });
-                
                 html += '</div>';
                 container.innerHTML = html;
-            } catch (error) {
-                console.error("Erro ao carregar relat贸rio:", error);
-                container.innerHTML = '<p class="text-center text-red-500 py-10">Ocorreu um erro ao carregar o relat贸rio.</p>';
-            }
+            } catch (error) { container.innerHTML = '<p class="text-center text-red-500 py-10">Ocorreu um erro ao carregar o relatório.</p>'; }
         }
 
         function openEditOrderModal(orderId) {
             const orderDoc = allOrders.find(doc => doc.id === orderId);
             if (!orderDoc) return;
             const order = orderDoc.data();
-
             document.getElementById('edit-order-id').value = orderId;
             document.getElementById('edit-order-employeeName').value = order.employeeName;
-
             const optionsContainer = document.getElementById('edit-menu-options');
             optionsContainer.innerHTML = '';
             const editHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
-
             weekDays.forEach(day => {
                 const dayId = getDayId(day);
                 if (editHolidays.includes(dayId)) return; 
-
                 const currentChoice = order[dayId] || '';
                 const currentNotes = order[`${dayId}_notes`] || '';
-
-                let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg mb-2 text-sm bg-white dark:bg-zinc-800 dark:text-white"><option value="">(Nenhuma op莽茫o selecionada)</option>${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}</select>`;
-
-                optionsContainer.innerHTML += `<div class="p-3 border rounded-lg bg-gray-50 dark:bg-zinc-800/50 border-gray-200 dark:border-zinc-700"><label class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">${day}</label>${selectHTML}<input type="text" id="edit-notes-${dayId}" value="${currentNotes}" placeholder="Anota莽玫es (ex: sem cebola)" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 dark:text-white"></div>`;
+                let selectHTML = `<select id="edit-choice-${dayId}" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg mb-2 text-sm bg-white dark:bg-zinc-800 dark:text-white"><option value="">(Nenhuma opção selecionada)</option>${mealOptions.map(opt => `<option value="${opt.name}" ${currentChoice === opt.name ? 'selected' : ''}>${opt.name}</option>`).join('')}</select>`;
+                optionsContainer.innerHTML += `<div class="p-3 border rounded-lg bg-gray-50 dark:bg-zinc-800/50 border-gray-200 dark:border-zinc-700"><label class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">${day}</label>${selectHTML}<input type="text" id="edit-notes-${dayId}" value="${currentNotes}" placeholder="Anotações (ex: sem cebola)" class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 dark:text-white"></div>`;
             });
             document.getElementById('edit-order-modal').classList.remove('hidden');
         }
@@ -1157,13 +1035,13 @@
                 if (!auth.currentUser) return;
                 try {
                     await deleteDoc(doc(collection(db, "pedidosDaSemana"), orderId));
-                    showToast("Pedido exclu铆do!", 'success');
+                    showToast("Pedido excluído!", 'success');
                 } catch (error) { showToast("Erro ao excluir.", 'error'); }
             });
         }
 
         // ==========================================
-        // NOVA FUN脟脙O: GERAR PDF E COMPARTILHAR
+        // CORREÇÃO DO PDF: NOME, TÍTULO E GERAÇÃO
         // ==========================================
         async function generateAndShareReport() {
             const btn = document.getElementById('generateReportBtn');
@@ -1171,15 +1049,15 @@
             const reportContainer = document.getElementById('print-report');
             
             if (allOrders.length === 0) { 
-                showToast("Sem pedidos para gerar relat贸rio.", "info"); 
+                showToast("Sem pedidos para gerar relatório.", "info"); 
                 return; 
             }
             
             btn.disabled = true;
-            btn.innerHTML = "鈴� Processando PDF...";
+            btn.innerHTML = "⏳ Processando PDF...";
 
-            // Monta o HTML do relat贸rio
-            reportContainer.innerHTML = `<h1>Regional Quatinga</h1>`;
+            // CORREÇÃO 1: Nome do Título para "Cardápio Quatinga"
+            reportContainer.innerHTML = `<h1>Cardápio Quatinga</h1>`;
             const printHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
             let allDaysHTML = '';
             
@@ -1199,7 +1077,7 @@
                     const notes = order[`${dayId}_notes`];
                     let choiceHTML = choice;
                     if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
-                    if (choice === 'OP脟脙O') choiceHTML = 'OP脟脙O';
+                    if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
                     if (notes) choiceHTML += ` <span style="font-style: italic; font-weight: normal;">(${notes})</span>`;
                     tableHTML += `<tr><td>${order.employeeRGF || 'N/A'}</td><td>${order.employeeName}</td><td>${choiceHTML}</td></tr>`;
                 });
@@ -1208,43 +1086,37 @@
             });
             reportContainer.innerHTML += allDaysHTML;
 
-            // Torna vis铆vel temporariamente para a biblioteca ler
-            reportContainer.style.display = 'block';
-
-            // Configura莽玫es do html2pdf
+            // Configurações do html2pdf
             const pdfOptions = {
                 margin:       10,
-                filename:     'Relatorio_Quatinga.pdf',
+                filename:     'Cardápio_Quatinga.pdf', // CORREÇÃO 2: Nome do Arquivo
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
+                html2canvas:  { scale: 2, useCORS: true }, // useCORS garante boa formatação de imagens
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             try {
-                // Gera o arquivo Blob do PDF
+                // A div reportContainer foi estilizada no topo com position absolute, e left -9999px.
+                // Isso resolve o problema dela ficar invisível para a biblioteca (que não enxerga elementos display: none)
                 const pdfBlob = await html2pdf().set(pdfOptions).from(reportContainer).output('blob');
                 
-                const file = new File([pdfBlob], 'Relatorio_Quatinga.pdf', { type: 'application/pdf' });
+                const file = new File([pdfBlob], 'Cardápio_Quatinga.pdf', { type: 'application/pdf' });
 
-                // Tenta usar a API nativa de compartilhamento (Share API)
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
-                        title: 'Relat贸rio da Semana',
-                        text: 'Segue em anexo o relat贸rio de pedidos.',
+                        title: 'Cardápio Quatinga',
+                        text: 'Segue em anexo o relatório de pedidos da semana.',
                         files: [file]
                     });
                     showToast("Compartilhamento aberto com sucesso!", "success");
                 } else {
-                    // Se estiver no PC ou um navegador/app sem suporte a share de arquivos, faz o download autom谩tico
-                    showToast("Abrindo para download (compartilhamento direto n茫o suportado).", "info");
+                    showToast("Baixando (compartilhamento direto não suportado neste aparelho).", "info");
                     html2pdf().set(pdfOptions).from(reportContainer).save();
                 }
             } catch (error) {
-                console.error("Erro na gera莽茫o do PDF:", error);
+                console.error("Erro na geração do PDF:", error);
                 showToast("Erro ao criar o PDF.", "error");
             } finally {
-                // Esconde a div novamente e reseta o bot茫o
-                reportContainer.style.display = 'none';
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             }
@@ -1253,26 +1125,15 @@
         document.getElementById('imageUpload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const cropperImage = document.getElementById('cropper-image');
                 cropperImage.src = e.target.result;
                 document.getElementById('cropper-modal').classList.remove('hidden');
-                
                 if (cropperInstance) cropperInstance.destroy();
-                
                 cropperInstance = new Cropper(cropperImage, {
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.95,
-                    restore: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
+                    viewMode: 1, dragMode: 'move', autoCropArea: 0.95, restore: false, guides: true,
+                    center: true, highlight: false, cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false,
                 });
             };
             reader.readAsDataURL(file);
@@ -1287,159 +1148,83 @@
 
         document.getElementById('confirm-crop-btn').addEventListener('click', async () => {
             if (!cropperInstance) return;
-            
             const btn = document.getElementById('confirm-crop-btn');
             const originalText = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = "鈴� Processando...";
+            btn.disabled = true; btn.textContent = "⏳ Processando...";
             
             try {
-                const canvas = cropperInstance.getCroppedCanvas({
-                    maxWidth: 1200,
-                    maxHeight: 1200,
-                    fillColor: '#fff', 
-                    imageSmoothingEnabled: true,
-                    imageSmoothingQuality: 'high',
-                });
-
+                const canvas = cropperInstance.getCroppedCanvas({ maxWidth: 1200, maxHeight: 1200, fillColor: '#fff', imageSmoothingEnabled: true, imageSmoothingQuality: 'high', });
                 if (!canvas) throw new Error("Falha ao gerar o canvas.");
                 
                 canvas.toBlob(async (blob) => {
-                    if (!blob) {
-                        showToast("Erro no recorte.", "error");
-                        btn.disabled = false; btn.textContent = originalText;
-                        return;
-                    }
-                    
+                    if (!blob) { showToast("Erro no recorte.", "error"); btn.disabled = false; btn.textContent = originalText; return; }
                     try {
                         const options = { maxSizeMB: 0.45, maxWidthOrHeight: 1200, useWebWorker: true };
                         const compressFn = window.imageCompression || imageCompression;
                         const compressedBlob = await compressFn(blob, options);
-                        
                         const reader = new FileReader();
                         reader.readAsDataURL(compressedBlob);
                         reader.onloadend = () => {
                             finalImageBase64 = reader.result;
-                            
                             document.getElementById('imagePreview').src = finalImageBase64;
                             document.getElementById('imagePreview').classList.remove('hidden');
                             document.getElementById('uploadImageBtn').disabled = false;
-                            
                             document.getElementById('cropper-modal').classList.add('hidden');
-                            cropperInstance.destroy();
-                            cropperInstance = null;
-                            
-                            btn.disabled = false;
-                            btn.textContent = originalText;
-                            showToast("Imagem processada e pronta!", "success");
+                            cropperInstance.destroy(); cropperInstance = null;
+                            btn.disabled = false; btn.textContent = originalText; showToast("Imagem processada e pronta!", "success");
                         };
-                    } catch (compErr) {
-                        console.error(compErr);
-                        showToast("Falha na compress茫o.", "error");
-                        btn.disabled = false; btn.textContent = originalText;
-                    }
+                    } catch (compErr) { showToast("Falha na compressão.", "error"); btn.disabled = false; btn.textContent = originalText; }
                 }, 'image/jpeg', 0.85);
-                
-            } catch (err) {
-                console.error("Erro no Cropper:", err);
-                showToast("Erro ao processar imagem.", "error");
-                btn.disabled = false; btn.textContent = originalText;
-            }
+            } catch (err) { showToast("Erro ao processar imagem.", "error"); btn.disabled = false; btn.textContent = originalText; }
         });
 
         document.getElementById('uploadImageBtn').addEventListener('click', async () => {
             const uploadBtn = document.getElementById('uploadImageBtn');
-            
             try {
-                if (!auth.currentUser) {
-                    showToast("Sess茫o expirada. Recarregue a p谩gina.", "error");
-                    return;
-                }
-                if (!finalImageBase64) { 
-                    showToast("Voc锚 precisa selecionar e recortar uma imagem primeiro.", "error"); 
-                    return; 
-                }
-                
-                uploadBtn.disabled = true; 
-                uploadBtn.innerHTML = "鈴� Salvando no banco de dados...";
-
+                if (!auth.currentUser) { showToast("Sessão expirada. Recarregue a página.", "error"); return; }
+                if (!finalImageBase64) { showToast("Você precisa selecionar e recortar uma imagem primeiro.", "error"); return; }
+                uploadBtn.disabled = true; uploadBtn.innerHTML = "⏳ Salvando no banco de dados...";
                 const selectedHolidays = Array.from(document.querySelectorAll('.holiday-checkbox:checked')).map(cb => cb.value);
-                
                 const now = new Date();
                 let daysUntilMonday = (1 + 7 - now.getDay()) % 7;
                 if (daysUntilMonday === 0) daysUntilMonday = 7; 
-                
                 const nextMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilMonday);
                 nextMonday.setHours(0, 0, 0, 0); 
-
-                await setDoc(menuDocRef, { 
-                    nextMenuImageBase64: finalImageBase64,
-                    nextHolidays: selectedHolidays,
-                    targetRotationDate: nextMonday.getTime() 
-                }, { merge: true });
-                
-                showToast("Card谩pio da Pr贸xima Semana salvo e dispon铆vel!", "success");
+                await setDoc(menuDocRef, { nextMenuImageBase64: finalImageBase64, nextHolidays: selectedHolidays, targetRotationDate: nextMonday.getTime() }, { merge: true });
+                showToast("Cardápio da Próxima Semana salvo e disponível!", "success");
                 document.getElementById('whatsapp-notification-container').classList.remove('hidden');
                 document.getElementById('imageUpload').value = '';
-                
-                finalImageBase64 = null; 
-                uploadBtn.innerHTML = "鉁� Salvo com sucesso!";
-                
+                finalImageBase64 = null; uploadBtn.innerHTML = "✅ Salvo com sucesso!";
             } catch (error) { 
-                console.error("Erro CR脥TICO no salvamento:", error);
-                uploadBtn.disabled = false; 
-                uploadBtn.textContent = "Tentar Salvar Novamente"; 
-                
-                if (error.code === 'resource-exhausted' || (error.message && error.message.includes('large'))) {
-                    showToast("Erro: A imagem ainda est谩 muito pesada para o banco de dados.", "error");
-                } else {
-                    showToast("Falha na conex茫o. Tente novamente.", "error"); 
-                }
+                uploadBtn.disabled = false; uploadBtn.textContent = "Tentar Salvar Novamente"; 
+                if (error.code === 'resource-exhausted' || (error.message && error.message.includes('large'))) { showToast("Erro: A imagem ainda está muito pesada para o banco de dados.", "error"); } 
+                else { showToast("Falha na conexão. Tente novamente.", "error"); }
             } 
         });
 
         async function turnWeek() {
-            showCustomConfirm("Tem certeza? O card谩pio e os pedidos da 'Pr贸xima Semana' substituir茫o integralmente a 'Semana Atual'.", async () => {
+            showCustomConfirm("Tem certeza? O cardápio e os pedidos da 'Próxima Semana' substituirão integralmente a 'Semana Atual'.", async () => {
                 if (!auth.currentUser) return;
                 const btn = document.getElementById('btn-turn-week');
-                btn.disabled = true; btn.innerHTML = '鈴� Atualizando...';
-
+                btn.disabled = true; btn.innerHTML = '⏳ Atualizando...';
                 try {
                     const docSnap = await getDoc(menuDocRef);
                     const data = docSnap.exists() ? docSnap.data() : {};
-
-                    if (!data.nextMenuImageBase64) {
-                        showToast("N茫o h谩 card谩pio da pr贸xima semana para iniciar.", "error");
-                        btn.disabled = false; btn.innerHTML = '馃攧 For莽ar Atualiza莽茫o de Semana';
-                        return;
-                    }
-
+                    if (!data.nextMenuImageBase64) { showToast("Não há cardápio da próxima semana para iniciar.", "error"); btn.disabled = false; btn.innerHTML = '🔄 Forçar Atualização de Semana'; return; }
                     const batch = writeBatch(db);
                     const ordersSnap = await getDocs(collection(db, "pedidosDaSemana"));
-                    ordersSnap.forEach(d => {
-                        if (d.data().isNextWeek === true) batch.update(d.ref, { isNextWeek: false }); 
-                        else batch.delete(d.ref); 
-                    });
-
-                    batch.set(menuDocRef, {
-                        menuImageBase64: data.nextMenuImageBase64,
-                        holidays: data.nextHolidays || [],
-                        nextMenuImageBase64: '',
-                        nextHolidays: [],
-                        targetRotationDate: null 
-                    }, { merge: true });
-
+                    ordersSnap.forEach(d => { if (d.data().isNextWeek === true) batch.update(d.ref, { isNextWeek: false }); else batch.delete(d.ref); });
+                    batch.set(menuDocRef, { menuImageBase64: data.nextMenuImageBase64, holidays: data.nextHolidays || [], nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null }, { merge: true });
                     await batch.commit();
                     showToast("Nova semana iniciada com sucesso!", "success");
-                    adminViewingNextWeek = false; 
-                    loadAdminData();
+                    adminViewingNextWeek = false; loadAdminData();
                 } catch (error) { showToast("Falha ao iniciar a semana.", "error"); } 
-                finally { btn.disabled = false; btn.innerHTML = '馃攧 For莽ar Atualiza莽茫o de Semana'; }
+                finally { btn.disabled = false; btn.innerHTML = '🔄 Forçar Atualização de Semana'; }
             });
         }
 
         async function clearCurrentOrders() {
-            showCustomConfirm("鈿狅笍 Aten莽茫o: Isso vai APAGAR TODOS os pedidos cadastrados na Semana Atual. Deseja continuar?", async () => {
+            showCustomConfirm("⚠️ Atenção: Isso vai APAGAR TODOS os pedidos cadastrados na Semana Atual. Deseja continuar?", async () => {
                 if (!auth.currentUser) return;
                 const snap = await getDocs(collection(db, "pedidosDaSemana"));
                 const batch = writeBatch(db);
@@ -1450,67 +1235,58 @@
         }
 
         function handleWhatsAppNotification() {
-            const message = `O card谩pio da pr贸xima semana j谩 est谩 dispon铆vel! 鉁� Fa莽a o seu pedido com anteced锚ncia: ${window.location.href}`;
+            const message = `O cardápio da próxima semana já está disponível! ✨ Faça o seu pedido com antecedência: ${window.location.href}`;
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
         }
 
         const darkModeToggleBtn = document.getElementById('darkModeToggle');
         function updateDarkModeButton() {
-            if (document.documentElement.classList.contains('dark')) {
-                darkModeToggleBtn.innerHTML = '鈽�锔� Modo Claro';
-            } else {
-                darkModeToggleBtn.innerHTML = '馃寵 Modo Noturno';
-            }
+            if (document.documentElement.classList.contains('dark')) { darkModeToggleBtn.innerHTML = '☀️ Modo Claro'; } 
+            else { darkModeToggleBtn.innerHTML = '🌙 Modo Noturno'; }
         }
         updateDarkModeButton();
 
         darkModeToggleBtn.addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
-            if (document.documentElement.classList.contains('dark')) {
-                localStorage.setItem('theme', 'dark');
-            } else {
-                localStorage.setItem('theme', 'light');
-            }
+            if (document.documentElement.classList.contains('dark')) { localStorage.setItem('theme', 'dark'); } 
+            else { localStorage.setItem('theme', 'light'); }
             updateDarkModeButton();
         });
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                if (user.uid === APP_CONFIG.ADMIN_UID) {
-                    if (localStorage.getItem('currentAppView') === 'admin') {
-                        showAdminView();
-                    } else {
-                        showUserView();
-                    }
+        if(auth) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    if (user.uid === APP_CONFIG.ADMIN_UID) {
+                        if (localStorage.getItem('currentAppView') === 'admin') showAdminView();
+                        else showUserView();
+                    } else { showUserView(); }
                 } else {
-                    showUserView(); 
+                    if (!isLoggingInAsAdmin) {
+                        try { anonymousLoginPromise = signInAnonymously(auth); await anonymousLoginPromise; } 
+                        catch (error) { 
+                            console.error("Erro no login anônimo:", error); 
+                            if (error.code === 'auth/unauthorized-domain') {
+                                showToast("Erro: O seu APK precisa ser autorizado no Firebase (Veja a documentação de domínios).", "error", 10000);
+                            }
+                        } 
+                        finally { anonymousLoginPromise = null; }
+                    }
                 }
-            } else {
-                if (!isLoggingInAsAdmin) {
-                    try {
-                        anonymousLoginPromise = signInAnonymously(auth);
-                        await anonymousLoginPromise;
-                    } catch (error) { console.error("Erro no login an贸nimo:", error); } 
-                    finally { anonymousLoginPromise = null; }
-                }
-            }
-        });
+            });
+        }
 
         async function showUserView() {
             if (adminUnsubscribe) { adminUnsubscribe(); adminUnsubscribe = null; }
             allOrders = [];
             const containerOrders = document.getElementById('ordersTableContainer');
             if (containerOrders) containerOrders.innerHTML = '<p class="text-gray-500">A carregar pedidos...</p>';
-
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
             document.getElementById('user-view').classList.remove('hidden');
-            
             const rgfInput = document.getElementById('employeeRGF');
             if (!rgfInput.value && localStorage.getItem('employeeRGF')) { rgfInput.value = localStorage.getItem('employeeRGF'); }
             if (rgfInput.value) { await findEmployeeByRGF(rgfInput.value); }
-
             loadAndDisplayMenu(); 
         }
 
@@ -1518,12 +1294,8 @@
             document.getElementById('user-view').classList.add('hidden');
             document.getElementById('admin-view').classList.remove('hidden');
             document.getElementById('admin-login-modal').classList.add('hidden');
-            
             localStorage.setItem('currentAppView', 'admin');
-            
-            loadAndDisplayMenu(); 
-            loadAdminData();
-            loadAndRenderEmployees();
+            loadAndDisplayMenu(); loadAdminData(); loadAndRenderEmployees();
         }
 
         async function handleAdminLogin(e) {
@@ -1532,27 +1304,20 @@
             const password = document.getElementById('adminPassword').value;
             const btn = e.target.querySelector('button[type="submit"]');
             btn.disabled = true; btn.textContent = 'Entrando...';
-
             isLoggingInAsAdmin = true;
-
             try {
                 if (anonymousLoginPromise) await anonymousLoginPromise;
-                
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                
                 if (userCredential.user.uid !== APP_CONFIG.ADMIN_UID) { 
-                    await signOut(auth); 
-                    showToast("Acesso Negado.", 'error'); 
+                    await signOut(auth); showToast("Acesso Negado.", 'error'); 
                 } else {
                      document.getElementById('admin-login-modal').classList.add('hidden');
-                     document.getElementById('adminEmail').value = '';
-                     document.getElementById('adminPassword').value = '';
-                     localStorage.setItem('currentAppView', 'admin');
-                     showAdminView();
+                     document.getElementById('adminEmail').value = ''; document.getElementById('adminPassword').value = '';
+                     localStorage.setItem('currentAppView', 'admin'); showAdminView();
                 }
             } catch (error) { 
                 let msg = "Email ou senha incorretos.";
-                if (error.code === 'auth/unauthorized-domain') msg = `Bloqueado! Adicione o dom铆nio "${window.location.hostname}" no Firebase.`;
+                if (error.code === 'auth/unauthorized-domain') msg = `Bloqueado! Adicione este domínio no Firebase (Authentication -> Settings -> Authorized Domains).`;
                 else if (error.code === 'auth/invalid-credential') msg = "E-mail ou senha incorretos.";
                 showToast(msg, 'error', 6000); 
             } 
@@ -1560,35 +1325,22 @@
         }
 
         async function handleAdminLogout() {
-            try { 
-                await signOut(auth); 
-                localStorage.setItem('currentAppView', 'user');
-                showToast("Saindo do painel...", 'info'); 
-                showUserView(); 
-            } 
+            try { await signOut(auth); localStorage.setItem('currentAppView', 'user'); showToast("Saindo do painel...", 'info'); showUserView(); } 
             catch (error) { showToast("Erro ao fazer logout.", 'error'); }
         }
 
         function main() {
             document.getElementById('btn-current-week').addEventListener('click', () => { viewingNextWeek = false; updateUserViewUI(); });
             document.getElementById('btn-next-week').addEventListener('click', () => { viewingNextWeek = true; updateUserViewUI(); });
-
+            
             document.getElementById('admin-view-current').addEventListener('click', (e) => {
-                adminViewingNextWeek = false;
-                e.target.classList.add('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
-                e.target.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
-                const nextBtn = document.getElementById('admin-view-next'); 
-                nextBtn.classList.remove('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
-                nextBtn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
+                adminViewingNextWeek = false; e.target.classList.add('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); e.target.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
+                const nextBtn = document.getElementById('admin-view-next'); nextBtn.classList.remove('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); nextBtn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
                 loadAdminData();
             });
             document.getElementById('admin-view-next').addEventListener('click', (e) => {
-                adminViewingNextWeek = true;
-                e.target.classList.add('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
-                e.target.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
-                const curBtn = document.getElementById('admin-view-current'); 
-                curBtn.classList.remove('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); 
-                curBtn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
+                adminViewingNextWeek = true; e.target.classList.add('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); e.target.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
+                const curBtn = document.getElementById('admin-view-current'); curBtn.classList.remove('bg-white', 'dark:bg-zinc-800', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400'); curBtn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-zinc-800');
                 loadAdminData();
             });
 
@@ -1597,15 +1349,11 @@
 
             const rgfInput = document.getElementById('employeeRGF');
             let rgfDebounceTimeout;
-            
             rgfInput.addEventListener('input', () => { 
                 clearTimeout(rgfDebounceTimeout);
                 rgfDebounceTimeout = setTimeout(async () => {
-                    autoSwitchDone = false;
-                    const val = rgfInput.value.trim();
-                    localStorage.setItem('employeeRGF', val);
-                    await findEmployeeByRGF(val); 
-                    await validateForm(); 
+                    autoSwitchDone = false; const val = rgfInput.value.trim(); localStorage.setItem('employeeRGF', val);
+                    await findEmployeeByRGF(val); await validateForm(); 
                 }, 400); 
             });
             rgfInput.addEventListener('blur', () => localStorage.setItem('employeeRGF', rgfInput.value));
@@ -1615,106 +1363,65 @@
             document.getElementById('submitOrder').addEventListener('click', submitOrder);
             
             document.getElementById('btn-edit-wizard').addEventListener('click', () => {
-                document.getElementById('confirmation-modal').classList.add('hidden');
-                currentDayIndex = 0;
-                userChoices = [];
-                document.getElementById('submitButtonContainer').classList.add('hidden');
-                document.getElementById('order-wizard-container').classList.remove('hidden');
-                renderWizardStep(0);
+                document.getElementById('confirmation-modal').classList.add('hidden'); currentDayIndex = 0; userChoices = [];
+                document.getElementById('submitButtonContainer').classList.add('hidden'); document.getElementById('order-wizard-container').classList.remove('hidden'); renderWizardStep(0);
             });
 
             document.getElementById('btn-view-public-report').addEventListener('click', openPublicReportModal);
-
-            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => {
-                btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden'));
-            });
-
+            document.querySelectorAll('.cancel-modal-btn, #custom-confirm-cancel-btn').forEach(btn => { btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.add('hidden')); });
             document.getElementById('switchToAdmin').addEventListener('click', () => {
-                if (auth.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID) {
-                    localStorage.setItem('currentAppView', 'admin');
-                    showAdminView();
-                } else {
-                    document.getElementById('admin-login-modal').classList.remove('hidden');
-                }
+                if (auth?.currentUser && auth.currentUser.uid === APP_CONFIG.ADMIN_UID) { localStorage.setItem('currentAppView', 'admin'); showAdminView(); } 
+                else { document.getElementById('admin-login-modal').classList.remove('hidden'); }
             });
             
             document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
             document.getElementById('adminLogoutBtn').addEventListener('click', handleAdminLogout);
-            document.getElementById('switchToUserFromAdmin').addEventListener('click', () => {
-                localStorage.setItem('currentAppView', 'user');
-                showUserView();
-            });
-            
+            document.getElementById('switchToUserFromAdmin').addEventListener('click', () => { localStorage.setItem('currentAppView', 'user'); showUserView(); });
             document.getElementById('add-employee-form').addEventListener('submit', handleAddEmployee);
             document.getElementById('employee-list-container').addEventListener('click', (e) => {
                 if (e.target.closest('.edit-employee-btn')) openEmployeeEditModal(e.target.closest('.edit-employee-btn').dataset.id, e.target.closest('.edit-employee-btn').dataset.name);
                 if (e.target.closest('.delete-employee-btn')) handleDeleteEmployee(e.target.closest('.delete-employee-btn').dataset.id, e.target.closest('.delete-employee-btn').dataset.name);
             });
-
             document.getElementById('edit-employee-form').addEventListener('submit', handleSaveEmployeeChanges);
-            
             document.getElementById('ordersTableContainer').addEventListener('click', (e) => {
                 if (e.target.closest('.edit-order-btn')) openEditOrderModal(e.target.closest('.edit-order-btn').dataset.id);
                 if (e.target.closest('.delete-order-btn')) handleDeleteOrder(e.target.closest('.delete-order-btn').dataset.id, e.target.closest('.delete-order-btn').dataset.name);
             });
 
             document.getElementById('edit-order-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!auth.currentUser) return;
-                const orderId = document.getElementById('edit-order-id').value;
-                const submitBtn = e.target.querySelector('button[type="submit"]');
-                const updateData = {};
-                const editHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
-
+                e.preventDefault(); if (!auth.currentUser) return;
+                const orderId = document.getElementById('edit-order-id').value; const submitBtn = e.target.querySelector('button[type="submit"]');
+                const updateData = {}; const editHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
                 weekDays.forEach(day => {
-                    const dayId = getDayId(day);
-                    if (editHolidays.includes(dayId)) return; 
-                    const selectEl = document.getElementById(`edit-choice-${dayId}`);
-                    const notesEl = document.getElementById(`edit-notes-${dayId}`);
+                    const dayId = getDayId(day); if (editHolidays.includes(dayId)) return; 
+                    const selectEl = document.getElementById(`edit-choice-${dayId}`); const notesEl = document.getElementById(`edit-notes-${dayId}`);
                     if (selectEl) { updateData[dayId] = selectEl.value; updateData[`${dayId}_notes`] = notesEl.value.trim(); }
                 });
-
                 submitBtn.disabled = true; submitBtn.textContent = 'Salvando...';
-                try {
-                    await updateDoc(doc(collection(db, "pedidosDaSemana"), orderId), updateData);
-                    showToast("Pedido atualizado com sucesso!", 'success');
-                    document.getElementById('edit-order-modal').classList.add('hidden');
-                } catch (error) { showToast("Erro ao salvar.", 'error'); } 
-                finally { submitBtn.disabled = false; submitBtn.textContent = 'Salvar Altera莽玫es'; }
+                try { await updateDoc(doc(collection(db, "pedidosDaSemana"), orderId), updateData); showToast("Pedido atualizado com sucesso!", 'success'); document.getElementById('edit-order-modal').classList.add('hidden'); } 
+                catch (error) { showToast("Erro ao salvar.", 'error'); } finally { submitBtn.disabled = false; submitBtn.textContent = 'Salvar Alterações'; }
             });
             
             document.getElementById('searchInput').addEventListener('input', () => renderOrdersTable(allOrders));
             
-            // ===== EVENTO ALTERADO AQUI =====
-            // Em vez de chamar a antiga impress茫o, agora chamamos a fun莽茫o que gera o PDF e aciona o WhatsApp/Gaveta Android
             document.getElementById('generateReportBtn').addEventListener('click', generateAndShareReport);
-            // ================================
-
             document.getElementById('notifyWhatsAppBtn').addEventListener('click', handleWhatsAppNotification);
-            
             document.getElementById('deleteNextWeekBtn')?.addEventListener('click', async () => {
-                showCustomConfirm("Tem a certeza? Isso vai apagar o card谩pio da pr贸xima semana e todos os pedidos j谩 feitos antecipadamente.", async () => {
+                showCustomConfirm("Tem a certeza? Isso vai apagar o cardápio da próxima semana e todos os pedidos já feitos antecipadamente.", async () => {
                     if (!auth.currentUser) return;
-                    const btn = document.getElementById('deleteNextWeekBtn');
-                    btn.disabled = true; btn.textContent = "A apagar...";
+                    const btn = document.getElementById('deleteNextWeekBtn'); btn.disabled = true; btn.textContent = "A apagar...";
                     try {
                         await updateDoc(menuDocRef, { nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null });
-                        const snap = await getDocs(collection(db, "pedidosDaSemana"));
-                        const batch = writeBatch(db);
+                        const snap = await getDocs(collection(db, "pedidosDaSemana")); const batch = writeBatch(db);
                         snap.forEach(d => { if (d.data().isNextWeek === true) batch.delete(d.ref); });
-                        await batch.commit();
-                        showToast("Pr贸xima semana apagada.", "success");
-                    } catch (error) { showToast("Erro ao apagar.", "error"); } 
-                    finally { btn.disabled = false; btn.textContent = "馃棏锔� Cancelar / Apagar Pr贸xima Semana"; }
+                        await batch.commit(); showToast("Próxima semana apagada.", "success");
+                    } catch (error) { showToast("Erro ao apagar.", "error"); } finally { btn.disabled = false; btn.textContent = "🗑️ Cancelar / Apagar Próxima Semana"; }
                 });
             });
 
             const zoomModal = document.getElementById('image-zoom-modal');
             const menuImage = document.getElementById('menu-image');
-            menuImage.addEventListener('click', () => {
-                document.getElementById('zoomed-image').src = menuImage.src;
-                zoomModal.classList.remove('hidden');
-            });
+            menuImage.addEventListener('click', () => { document.getElementById('zoomed-image').src = menuImage.src; zoomModal.classList.remove('hidden'); });
             zoomModal.addEventListener('click', () => zoomModal.classList.add('hidden'));
         }
 
@@ -1722,4 +1429,5 @@
     </script>
 </body>
 </html>
+
 
