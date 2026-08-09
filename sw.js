@@ -1,47 +1,54 @@
-const CACHE_NAME = 'cardapio-cache-v2';
+const CACHE_NAME = 'cardapio-cache-v1';
 
-// Instala o motor offline
-self.addEventListener('install', event => {
-    self.skipWaiting();
+// Arquivos que devem ser guardados imediatamente na primeira vez que abre
+const STATIC_ASSETS = [
+  './',
+  './index.html',
+  './manifest.json'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    })
+  );
+  self.skipWaiting();
 });
 
-// Limpa versões antigas do site quando houver atualizações
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cache => {
-                    if (cache !== CACHE_NAME) return caches.delete(cache);
-                })
-            );
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
         })
-    );
-    self.clients.claim();
+      );
+    })
+  );
+  self.clients.claim();
 });
 
-// Intercepta tudo: Se tiver internet, baixa e salva. Se não tiver internet, mostra o salvo.
-self.addEventListener('fetch', event => {
-    // Ignora conexões externas com o Firebase para não quebrar as regras de segurança
-    if (event.request.url.includes('firestore.googleapis.com') || 
-        event.request.url.includes('securetoken.googleapis.com') ||
-        event.request.url.startsWith('chrome-extension://')) {
-        return;
-    }
+self.addEventListener('fetch', (event) => {
+  // Ignora envios de dados (POST, PUT), trata apenas carregamento de arquivos (GET)
+  if (event.request.method !== 'GET') return;
 
-    event.respondWith(
-        fetch(event.request)
-            .then(networkResponse => {
-                if (networkResponse && networkResponse.status === 200) {
-                    const responseClone = networkResponse.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, responseClone);
-                    });
-                }
-                return networkResponse;
-            })
-            .catch(() => {
-                // Se a internet cair, puxa do celular automaticamente
-                return caches.match(event.request);
-            })
-    );
+  event.respondWith(
+    // Tenta buscar da internet primeiro (Network-First)
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Se deu certo, salva uma cópia no cache para a próxima vez que ficar offline
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone);
+        });
+        return networkResponse;
+      })
+      .catch(() => {
+        // Se a internet falhou (Offline), busca o arquivo salvo no Cache
+        return caches.match(event.request);
+      })
+  );
 });
