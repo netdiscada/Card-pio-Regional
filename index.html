@@ -425,7 +425,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, setDoc, deleteDoc, updateDoc, getDocs, where, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         // Sistema de Notificações
@@ -547,13 +547,11 @@
         }
         setupPWA();
         
-        // Modal de Confirmação Otimizado (Correção do botão de exclusão de funcionário/pedido)
         function showCustomConfirm(message, onConfirm) {
             const modal = document.getElementById('custom-confirm-modal');
             document.getElementById('custom-confirm-message').textContent = message;
             modal.classList.remove('hidden');
             
-            // Atribuição direta garante que o evento sempre chame o callback da vez sem duplicar.
             document.getElementById('custom-confirm-ok-btn').onclick = () => { 
                 onConfirm(); 
                 modal.classList.add('hidden'); 
@@ -786,6 +784,34 @@
 
         async function autoTurnWeek(menuData) {
             try {
+                let isWinner = false;
+                
+                // Usamos uma transação no servidor para garantir que só 1 pessoa (ou dispositivo) consiga fazer a virada
+                await runTransaction(db, async (transaction) => {
+                    const menuServerSnap = await transaction.get(menuDocRef);
+                    if (!menuServerSnap.exists()) return;
+                    
+                    const serverData = menuServerSnap.data();
+                    
+                    // Verifica se a targetRotationDate ainda é válida no servidor.
+                    if (serverData.targetRotationDate && serverData.targetRotationDate === menuData.targetRotationDate) {
+                        transaction.set(menuDocRef, { 
+                            menuImageBase64: menuData.nextMenuImageBase64 || '', 
+                            holidays: menuData.nextHolidays || [], 
+                            nextMenuImageBase64: '', 
+                            nextHolidays: [], 
+                            targetRotationDate: null 
+                        }, { merge: true });
+                        isWinner = true; // Confirma que ESSE celular obteve sucesso em virar a semana
+                    }
+                });
+
+                // Se outro dispositivo já fez o trabalho, paramos aqui
+                if (!isWinner) {
+                    console.log("A virada de semana já foi processada por outro cliente ou pelo servidor.");
+                    return;
+                }
+
                 const batch = writeBatch(db);
                 const ordersSnap = await getDocs(collection(db, "pedidosDaSemana"));
                 ordersSnap.forEach(d => {
@@ -793,7 +819,6 @@
                     if (orderData.isNextWeek === true) batch.update(d.ref, { isNextWeek: false }); 
                     else batch.delete(d.ref); 
                 });
-                batch.set(menuDocRef, { menuImageBase64: menuData.nextMenuImageBase64, holidays: menuData.nextHolidays || [], nextMenuImageBase64: '', nextHolidays: [], targetRotationDate: null }, { merge: true });
                 await batch.commit();
                 showToast("A semana virou automaticamente!", "success");
             } catch (error) { console.warn("Automação em pausa.", error); }
@@ -820,9 +845,18 @@
                 }
 
                 if (currentMenuData.targetRotationDate && Date.now() >= currentMenuData.targetRotationDate) {
-                    if (!isRotatingWeekLock) {
-                        isRotatingWeekLock = true; 
-                        autoTurnWeek(currentMenuData).finally(() => { isRotatingWeekLock = false; });
+                    // NOVA TRAVA: Só executa a virada automática se realmente houver um cardápio da próxima semana
+                    if (!currentMenuData.nextMenuImageBase64) {
+                        console.log("Virada cancelada: Não há imagem/cardápio da próxima semana programado.");
+                        return;
+                    }
+
+                    // Checagem segura contra condição de corrida e cache offline destrutivo
+                    if (!docSnap.metadata.fromCache && navigator.onLine) {
+                        if (!isRotatingWeekLock) {
+                            isRotatingWeekLock = true; 
+                            autoTurnWeek(currentMenuData).finally(() => { isRotatingWeekLock = false; });
+                        }
                     }
                     return; 
                 }
