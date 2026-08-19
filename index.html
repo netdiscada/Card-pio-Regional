@@ -1201,81 +1201,101 @@
 
             try {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+                let doc;
+                let fontSize = 9.5;
+                let cellPadding = 2;
+                let titleFontSize = 18;
+                let spaceBetweenTables = 4;
                 
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(18);
-                doc.setTextColor(0, 0, 0);
-                doc.text("Regional Quatinga", 105, 15, null, null, "center");
-                
-                let currentY = 20; 
-                const printHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
-                const pageWidth = doc.internal.pageSize.width;
-                const margin = 10;
-                const tableWidth = pageWidth - (margin * 2); 
-                
-                weekDays.forEach(day => {
-                    const dayId = getDayId(day);
-                    if (printHolidays.includes(dayId)) return;
+                // Loop inteligente para escalonar os dados até caberem em exatamente 1 página
+                while (fontSize >= 5) {
+                    doc = new jsPDF();
                     
-                    const dailyOrders = allOrders
-                        .filter(orderDoc => { const orderData = orderDoc.data(); return orderData[dayId] && orderData[dayId] !== 'FERIADO'; })
-                        .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(titleFontSize);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text("Regional Quatinga", 105, 15, null, null, "center");
                     
-                    if (dailyOrders.length === 0) return;
+                    let currentY = 20; 
+                    const printHolidays = adminViewingNextWeek ? (currentMenuData.nextHolidays || []) : (currentMenuData.holidays || []);
+                    const pageWidth = doc.internal.pageSize.width;
+                    const margin = 10;
+                    const tableWidth = pageWidth - (margin * 2); 
                     
-                    const tableData = dailyOrders.map(orderDoc => {
-                        const order = orderDoc.data();
-                        let choice = (order[dayId] || '').toUpperCase();
-                        const notes = order[`${dayId}_notes`];
-                        let choiceHTML = choice;
-                        if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
-                        if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
-                        if (notes) choiceHTML += ` (${notes})`;
-                        return [order.employeeRGF || 'N/A', order.employeeName, choiceHTML];
-                    });
-                    
-                    const headRow = [
-                         { content: 'RGF', styles: { fontStyle: 'bold' } },
-                         { content: 'NOME', styles: { fontStyle: 'bold' } },
-                         { content: day, styles: { fontStyle: 'bold' } } 
-                    ];
+                    weekDays.forEach(day => {
+                        const dayId = getDayId(day);
+                        if (printHolidays.includes(dayId)) return;
+                        
+                        const dailyOrders = allOrders
+                            .filter(orderDoc => { const orderData = orderDoc.data(); return orderData[dayId] && orderData[dayId] !== 'FERIADO'; })
+                            .sort((a,b) => a.data().employeeName.localeCompare(b.data().employeeName));
+                        
+                        if (dailyOrders.length === 0) return;
+                        
+                        const tableData = dailyOrders.map(orderDoc => {
+                            const order = orderDoc.data();
+                            let choice = (order[dayId] || '').toUpperCase();
+                            const notes = order[`${dayId}_notes`];
+                            let choiceHTML = choice;
+                            if (choice === 'PRATO PRINCIPAL') choiceHTML = 'PRATO';
+                            if (choice === 'OPÇÃO') choiceHTML = 'OPÇÃO';
+                            if (notes) choiceHTML += ` (${notes})`;
+                            return [order.employeeRGF || 'N/A', order.employeeName, choiceHTML];
+                        });
+                        
+                        const headRow = [
+                             { content: 'RGF', styles: { fontStyle: 'bold' } },
+                             { content: 'NOME', styles: { fontStyle: 'bold' } },
+                             { content: day, styles: { fontStyle: 'bold' } } 
+                        ];
 
-                    doc.autoTable({
-                        startY: currentY,
-                        head: [headRow],
-                        body: tableData,
-                        theme: 'plain', 
-                        headStyles: { 
-                            fillColor: [255, 255, 255], // FUNDO 100% BRANCO - SEM AZUL 
-                            textColor: [0, 0, 0], 
-                            lineColor: [153, 153, 153], // CINZA #999 DO ORIGINAL
-                            lineWidth: 0.2
-                        },
-                        bodyStyles: {
-                            fillColor: [255, 255, 255], 
-                            textColor: [0, 0, 0], 
-                            fontStyle: 'normal', // NEGRITO RETIRADO NAS OPÇÕES
-                            lineColor: [153, 153, 153],
-                            lineWidth: 0.2
-                        },
-                        styles: { 
-                            fontSize: 9.5, // FONTE GRANDE VOLTOU
-                            cellPadding: 2,
-                            font: 'helvetica'
-                        },
-                        columnStyles: {
-                            0: { cellWidth: tableWidth * 0.15 }, 
-                            1: { cellWidth: tableWidth * 0.60 }, 
-                            2: { cellWidth: tableWidth * 0.25 }  
-                        },
-                        margin: { left: margin, right: margin },
-                        tableWidth: 'wrap', // FORÇA LARGURA 100% PARA ALINHAMENTO EXATO SEM DESALINHAR
-                        pageBreak: 'auto'
+                        doc.autoTable({
+                            startY: currentY,
+                            head: [headRow],
+                            body: tableData,
+                            theme: 'plain', 
+                            headStyles: { 
+                                fillColor: [255, 255, 255], 
+                                textColor: [0, 0, 0], 
+                                lineColor: [153, 153, 153], 
+                                lineWidth: 0.2
+                            },
+                            bodyStyles: {
+                                fillColor: [255, 255, 255], 
+                                textColor: [0, 0, 0], 
+                                fontStyle: 'normal', 
+                                lineColor: [153, 153, 153],
+                                lineWidth: 0.2
+                            },
+                            styles: { 
+                                fontSize: fontSize,
+                                cellPadding: cellPadding,
+                                font: 'helvetica'
+                            },
+                            columnStyles: {
+                                0: { cellWidth: tableWidth * 0.15 }, 
+                                1: { cellWidth: tableWidth * 0.60 }, 
+                                2: { cellWidth: tableWidth * 0.25 }  
+                            },
+                            margin: { left: margin, right: margin },
+                            tableWidth: 'wrap', 
+                            pageBreak: 'auto'
+                        });
+                        
+                        currentY = doc.lastAutoTable.finalY + spaceBetweenTables; 
                     });
-                    
-                    currentY = doc.lastAutoTable.finalY + 4; // VOLTOU PRA 4 PRA CABER EM 1 PÁGINA
-                });
+
+                    // Se o PDF gerado tem apenas 1 página, encontramos o tamanho ideal! Saímos do loop.
+                    if (doc.internal.getNumberOfPages() === 1) {
+                        break;
+                    }
+
+                    // Se passou para a página 2, reduzimos ligeiramente os tamanhos e testamos novamente.
+                    fontSize -= 0.5;
+                    cellPadding = Math.max(0.5, cellPadding - 0.2);
+                    titleFontSize = Math.max(14, titleFontSize - 1);
+                    spaceBetweenTables = Math.max(1.5, spaceBetweenTables - 0.5);
+                }
 
                 const fileName = 'Cardápio Quatinga.pdf';
                 const pdfBlob = doc.output('blob');
